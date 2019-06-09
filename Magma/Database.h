@@ -5,4 +5,6 @@
 }
 + (instancetype)sharedInstance;
 - (BOOL)isLoaded;
+- (void)startLoadingDataIfNeeded;
++ (void)setWorkingDirectory:(NSString *)newLocation;
 @end

@@ -94,7 +94,7 @@
 }
 
 - (void)didReceiveDatabaseNotification:(NSNotification *)notification {
-	if ([notification.name isEqualToString:@"com.pixelomer.magma/DatabaseDidLoad"] && !_databaseDidLoad) {
+	if ([notification.name isEqualToString:DatabaseDidLoadNotification] && !_databaseDidLoad) {
 		[self databaseDidLoad:notification.object];
 	}
 }
