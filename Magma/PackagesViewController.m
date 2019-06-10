@@ -4,7 +4,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.title = @"Installed Packages";
+	self.title = @"Installed";
 }
 
 - (void)databaseDidLoad:(Database *)database {

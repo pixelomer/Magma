@@ -2,6 +2,7 @@
 #import "Database.h"
 
 @interface MGViewController : UIViewController {
+	@private
 	BOOL _databaseDidLoad;
 	UIActivityIndicatorView *activityIndicator;
 	UILabel *loadingLabel;

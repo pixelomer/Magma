@@ -1,4 +1,9 @@
 #import "MGViewController.h"
 
-@interface SourcesViewController : MGViewController
+@class Source;
+
+@interface SourcesViewController : MGViewController<UITableViewDataSource, UITableViewDelegate> {
+	UITableView *sourcesTableView;
+	NSArray<Source *> *sources;
+}
 @end

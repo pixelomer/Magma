@@ -2,6 +2,7 @@
 #import "HomeViewController.h"
 #import "PackagesViewController.h"
 #import "SourcesViewController.h"
+#import "PackageSearchViewController.h"
 #import "MGViewController.h"
 
 @implementation AppDelegate
@@ -9,14 +10,16 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	NSArray *tabs = @[
-		@[@(UITabBarSystemItemFeatured), @"Magma", @NO],
-		@[@(UITabBarSystemItemBookmarks), @"Sources", @YES],
-		@[@(UITabBarSystemItemDownloads), @"Installed", @YES]
+		@[@(UITabBarSystemItemFeatured),  @"Magma",     @NO],
+		@[@(UITabBarSystemItemBookmarks), @"Sources",   @YES],
+		@[@(UITabBarSystemItemDownloads), @"Installed", @YES],
+		@[@(UITabBarSystemItemSearch),    @"Search",    @YES]
 	];
 	NSMutableArray *viewControllers = @[
 		[HomeViewController alloc],
 		[SourcesViewController alloc],
-		[PackagesViewController alloc]
+		[PackagesViewController alloc],
+		[PackageSearchViewController alloc]
 	].mutableCopy;
 	for (NSInteger i = 0; i < tabs.count; i++) {
 		__kindof MGViewController *rootViewController = viewControllers[i];

@@ -95,7 +95,9 @@
 
 - (void)didReceiveDatabaseNotification:(NSNotification *)notification {
 	if ([notification.name isEqualToString:DatabaseDidLoadNotification] && !_databaseDidLoad) {
-		[self databaseDidLoad:notification.object];
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self databaseDidLoad:notification.object];
+		});
 	}
 }
 
