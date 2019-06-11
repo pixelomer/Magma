@@ -1,5 +1,7 @@
 #import "MGViewController.h"
 
+@class Source;
+
 @implementation MGViewController
 
 - (void)viewDidLoad {
@@ -99,6 +101,15 @@
 			[self databaseDidLoad:notification.object];
 		});
 	}
+	else if ([notification.name isEqualToString:DatabaseDidAddSourceNotification]) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self database:notification.object didAddSource:notification.userInfo[@"source"]];
+		});
+	}
+}
+
+- (void)database:(Database *)database didAddSource:(Source *)source {
+
 }
 
 - (void)databaseDidLoad:(Database *)database {

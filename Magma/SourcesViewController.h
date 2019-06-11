@@ -6,5 +6,6 @@
 	UITableView *sourcesTableView;
 	NSMutableArray<Source *> *sources;
 	BOOL isEditing;
+	NSArray<UITextField *> *alertTextFields;
 }
 @end

@@ -1,6 +1,7 @@
 #import "SourcesViewController.h"
 #import "SourceCell.h"
 #import "Source.h"
+#import <objc/runtime.h>
 
 @implementation SourcesViewController
 
@@ -16,8 +17,57 @@
 }
 
 - (void)showAddSourceAlert {
-	//UIAlertController *alertController = [[UIAlertController alloc] init];
-	//[alertController addTextFieldWithConfigurationHandler:]
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter Source Info" message:nil preferredStyle:UIAlertControllerStyleAlert];
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"Cancel"
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"Add Source"
+		style:UIAlertActionStyleDefault
+		handler:^(UIAlertAction *action){
+			NSString *baseURL, *dist;
+			NSString *components = dist = baseURL = nil;
+			for (UITextField *textField in alertTextFields) {
+				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, @selector(alertFieldIdentifier));
+#define trim(string) [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
+				if ([alertFieldIdentifier isEqual:@0]) baseURL = trim(textField.text);
+				if ([alertFieldIdentifier isEqual:@1]) dist = trim(textField.text);
+				if ([alertFieldIdentifier isEqual:@2]) components = trim(textField.text);
+#undef trim
+			}
+			if (components.length <= 0 || dist.length <= 0) {
+				[Database.sharedInstance addSourceWithURL:baseURL];
+			}
+			else {
+				[Database.sharedInstance addSourceWithBaseURL:baseURL distribution:dist components:components];
+			}
+			alertTextFields = nil;
+		}
+	]];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Base URL";
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Distribution (optional)";
+		textField.text = @"./";
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @1, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Components (optional)";
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
+	for (UITextField *textField in alertController.textFields) {
+		textField.keyboardType = UIKeyboardTypeDefault;
+	}
+	alertTextFields = alertController.textFields.copy;
+	[self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)database:(Database *)database didAddSource:(Source *)source {
+	[self reloadData];
 }
 
 - (void)startRefreshing {

@@ -6,7 +6,7 @@
 #define hasWhitespacePrefix(var) ([var hasPrefix:@" "] || [var hasPrefix:@"\t"])
 #define isWhitespace(c) (c == ' ' || c == '\t')
 #define fail(errCode, message) { \
-	if (errorPt) *errorPt = [NSError errorWithDomain:@"com.pixelomer.obsidian.file-parse-failure" code:errCode userInfo:@{ \
+	if (errorPt) *errorPt = [NSError errorWithDomain:@"com.pixelomer.DPKGParser.file-parse-failure" code:errCode userInfo:@{ \
 		NSLocalizedDescriptionKey : message \
 	}]; \
 	return nil; \

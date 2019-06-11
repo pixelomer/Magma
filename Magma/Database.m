@@ -32,7 +32,7 @@ static NSString *workingDirectory;
 	if (![NSFileManager.defaultManager fileExistsAtPath:newLocation isDirectory:&isDir] || !isDir) {
 		@throw [NSException
 			exceptionWithName:NSInvalidArgumentException
-			reason:@"The specified directory doesn't exist."
+			reason:@"The specified working directory doesn't exist."
 			userInfo:nil
 		];
 	}
@@ -116,12 +116,13 @@ static NSString *workingDirectory;
 + (int)nextIdentifierForTable:(NSString *)tableName inSQLiteDatabase:(sqlite3 *)db {
 	sqlite3_stmt *statement;
 	int nextID = 0;
-	if (sqlite3_prepare_v2(db, [NSString stringWithFormat:@"SELECT * FROM MAX(`%@`.`id`)", tableName].UTF8String, -1, &statement, NULL) == SQLITE_OK) {
+	if (sqlite3_prepare_v2(db, [NSString stringWithFormat:@"SELECT MAX(`id`) FROM `%@`", tableName].UTF8String, -1, &statement, NULL) == SQLITE_OK) {
 		if (sqlite3_step(statement) == SQLITE_ROW) {
 			nextID = sqlite3_column_int(statement, 0) + 1;
 		}
 		sqlite3_finalize(statement);
 	}
+	else NSLog(@"%s", sqlite3_errmsg(magma_db));
 	return nextID;
 }
 
@@ -253,6 +254,13 @@ static NSString *workingDirectory;
 				}
 			}
 			sources[[source sourcesListEntryWithComponents:NO]] = source;
+			if (!repoID) {
+				[NSNotificationCenter.defaultCenter
+					postNotificationName:DatabaseDidAddSourceNotification
+					object:self
+					userInfo:@{ @"source" : source }
+				];
+			}
 			return source;
 		}
 	}
