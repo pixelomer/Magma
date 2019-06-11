@@ -37,62 +37,66 @@ static NSString *workingDirectory;
 		];
 	}
 	if (sqlite3_open([newLocation stringByAppendingPathComponent:@"magma.db"].UTF8String, &magma_db) == SQLITE_OK) {
+		int nextRepoID = [self nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
 		NSArray *queries = @[
 #			if DEBUG
 			@"DROP TABLE IF EXISTS `repositories`",
+			@"DROP TABLE IF EXISTS `packages`",
 #			endif
 			@"CREATE TABLE IF NOT EXISTS `repositories` ("
-			"	`id` INTEGER NOT NULL UNIQUE,"
-			"	`base_url` TEXT NOT NULL,"
-			"	`dist` TEXT NOT NULL,"
-			"	`components` TEXT NOT NULL DEFAULT '',"
-			"	`Release` TEXT NULL,"
-			"	`last_refresh` DATETIME NULL,"
-			"	PRIMARY KEY(`base_url`, `dist`, `components`)"
+			"  `id` INTEGER NOT NULL UNIQUE,"
+			"  `base_url` TEXT NOT NULL,"
+			"  `dist` TEXT NOT NULL,"
+			"  `components` TEXT NOT NULL DEFAULT '',"
+			"  `Release` TEXT NULL,"
+			"  `last_refresh` REAL NULL,"
+			"  PRIMARY KEY(`base_url`, `dist`, `components`)"
 			")",
 			@"CREATE TABLE IF NOT EXISTS `packages` ("
-			"	`id` INTEGER NOT NULL UNIQUE,"
-			"	`repo_id` INT NOT NULL,"
-			"	`ignore_updates` INT NOT NULL DEFAULT 0,"
-			"	`package` TEXT NOT NULL,"
-			"	`version` TEXT NOT NULL,"
-			"	`control` TEXT NOT NULL,"
-			"	PRIMARY KEY(`repo_id`, `package`, `version`),"
-			"	CONSTRAINT FK_repository FOREIGN KEY(`repo_id`) REFERENCES repositories(`id`) ON DELETE CASCADE"
+			"  `id` INTEGER NOT NULL UNIQUE,"
+			"  `repo_id` INT NOT NULL,"
+			"  `ignore_updates` INT NOT NULL DEFAULT 0,"
+			"  `package` TEXT NOT NULL,"
+			"  `version` TEXT NOT NULL,"
+			"  `control` TEXT NOT NULL,"
+			"  `first_discovery` REAL NOT NULL,"
+			"  PRIMARY KEY(`repo_id`, `package`, `version`),"
+			"  CONSTRAINT FK_repository FOREIGN KEY(`repo_id`) REFERENCES repositories(`id`) ON DELETE CASCADE"
+			")",
+			@"INSERT OR REPLACE INTO `repositories` ("
+			"  `id`,"
+			"  `base_url`,"
+			"  `dist`"
+			")"
+			"VALUES ("
+			"  -1," // Repositories with negative IDs are unremovable.
+			"  'https://repo.pixelomer.com',"
+			"  './'"
 			")",
 #			if DEBUG
 			@"INSERT OR REPLACE INTO `repositories` ("
-			"	`id`,"
-			"	`base_url`,"
-			"	`dist`"
+			"  `id`,"
+			"  `base_url`,"
+			"  `dist`"
 			")"
 			"VALUES ("
-			"	RANDOM(),"
-			"	'https://repo.pixelomer.com',"
-			"	'./'"
-			")",
-			@"INSERT OR REPLACE INTO `repositories` ("
-			"	`id`,"
-			"	`base_url`,"
-			"	`dist`"
-			")"
-			"VALUES ("
-			"	RANDOM(),"
-			"	'https://repo.nepeta.me',"
-			"	'./'"
+			"  ?,"
+			"  'https://repo.nepeta.me',"
+			"  './'"
 			")"
 #			endif
 		];
 		for (NSString *query in queries) {
 			char *errorMessage;
 			NSLog(@"%@", query);
-			if (sqlite3_exec(magma_db, query.UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) {
+			if (sqlite3_exec(magma_db, ([query containsString:@"?"] ? [query stringByReplacingOccurrencesOfString:@"?" withString:[NSString stringWithFormat:@"%d", nextRepoID++]] : query).UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) {
 				@throw [NSException
 					exceptionWithName:NSInternalInconsistencyException
 					reason:[NSString stringWithFormat:@"sqlite3 Error: %s", errorMessage]
 					userInfo:nil
 				];
 			}
+			else NSLog(@"QUERY OK");
 		}
 	}
 	else {
@@ -107,6 +111,18 @@ static NSString *workingDirectory;
 
 + (NSString *)workingDirectory {
 	return workingDirectory;
+}
+
++ (int)nextIdentifierForTable:(NSString *)tableName inSQLiteDatabase:(sqlite3 *)db {
+	sqlite3_stmt *statement;
+	int nextID = 0;
+	if (sqlite3_prepare_v2(db, [NSString stringWithFormat:@"SELECT * FROM MAX(`%@`.`id`)", tableName].UTF8String, -1, &statement, NULL) == SQLITE_OK) {
+		if (sqlite3_step(statement) == SQLITE_ROW) {
+			nextID = sqlite3_column_int(statement, 0) + 1;
+		}
+		sqlite3_finalize(statement);
+	}
+	return nextID;
 }
 
 - (BOOL)isLoaded {
@@ -128,8 +144,8 @@ static NSString *workingDirectory;
 			sqlite3_stmt *statement;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
-#define PrepareOrFail(query) (success = (sqlite3_prepare_v2(magma_db, query, -1, &statement, NULL) == SQLITE_OK))
-			if (PrepareOrFail("SELECT * FROM `repositories`")) {
+			if (success = (sqlite3_prepare_v2(magma_db, "SELECT * FROM `repositories`", -1, &statement, NULL) == SQLITE_OK)) {
+				NSMutableArray *rows = [NSMutableArray new];
 				while (sqlite3_step(statement) == SQLITE_ROW) {
 					int            repo_id = sqlite3_column_int(statement, 0);  // Unique
 					const char   *base_url = sqlite3_column_text(statement, 1); // Composite Primary
@@ -138,20 +154,25 @@ static NSString *workingDirectory;
 					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
 					BOOL       isBasicRepo = (!components || !*components);
 					NSLog(@"Repo id: %d\nBase: %s\nDist: %s\nComponents: %s\nRelease: %s\nIs basic: %d", repo_id, base_url, dist, components, Release, isBasicRepo);
-					Source *source;
-					if (isBasicRepo) {
-						source = [self addSourceWithURL:@(base_url) ID:@(repo_id)];
-					}
-					else {
-						source = [self addSourceWithBaseURL:@(base_url) distribution:@(dist) components:@(components) ID:@(repo_id)];
-					}
-					if (source) {
-						if (Release) source.rawReleaseFile = @(Release);
-					}
+					//                 0           1            2        3            4                                     5
+					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo)]];
 				}
 				sqlite3_finalize(statement);
+				for (NSArray *row in rows) {
+					Source *source;
+					if ([(NSNumber *)row[5] boolValue]) {
+						source = [self addSourceWithURL:row[1] ID:row[0]];
+					}
+					else {
+						source = [self addSourceWithBaseURL:row[1] distribution:row[2] components:row[3] ID:row[0]];
+					}
+					if (source) {
+						if ([row[4] isKindOfClass:[NSString class]]) {
+							source.rawReleaseFile = row[4];
+						}
+					}
+				}
 			}
-#undef PrepareOrFail
 #pragma GCC diagnostic pop
 			_isLoaded = YES;
 			[NSNotificationCenter.defaultCenter
@@ -167,6 +188,30 @@ static NSString *workingDirectory;
 	return (id)[sources allValues];
 }
 
+- (void)removeSource:(Source *)source {
+	sqlite3_stmt *statement;
+	BOOL isSourceKnown = NO;
+	NSArray<NSString *> *keys = sources.allKeys.copy;
+	for (NSString *knownSourceIdentifier in keys) {
+		Source *knownSource = sources[knownSourceIdentifier];
+		if (knownSource == source) {
+			[sources removeObjectForKey:knownSourceIdentifier];
+			isSourceKnown = YES;
+		}
+	}
+	BOOL success = YES;
+	if (isSourceKnown && (success = (sqlite3_prepare_v2(magma_db, "DELETE FROM `repositories` WHERE `id`=?", -1, &statement, NULL) == SQLITE_OK))) {
+		sqlite3_bind_int(statement, 1, source.databaseID);
+		success = (sqlite3_step(statement) == SQLITE_DONE);
+		sqlite3_finalize(statement);
+	}
+	if (!success) @throw [NSException
+		exceptionWithName:NSInternalInconsistencyException
+		reason:[NSString stringWithFormat:@"Failed to prepare the SQLite query to remove the specified source. This can cause the application to behave unexpectedly.\nSQLite Error: %s", sqlite3_errmsg(magma_db)]
+		userInfo:nil
+	];
+}
+
 - (Source *)addSourceWithURL:(NSString *)baseURL {
 	return [self addSourceWithBaseURL:baseURL distribution:@"./" components:nil];
 }
@@ -180,13 +225,33 @@ static NSString *workingDirectory;
 }
 
 - (Source *)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components ID:(NSNumber *)repoID {
-	NSLog(@"call. repoID: %@, _isLoaded: %d", repoID, _isLoaded);
 	if (!sources) sources = [NSMutableDictionary new];
 	Source *source = [[Source alloc] initWithBaseURL:baseURL distribution:dist components:components];
 	if (source) {
 		if (!sources[[source sourcesListEntryWithComponents:NO]]) {
-			NSLog(@"FIXME: A new row should be inserted here if _isLoaded is YES");
-			source.databaseID = repoID.intValue;
+			if (repoID) {
+				// A repository ID was specified. The repository entry already exists in the database.
+				source.databaseID = repoID.intValue;
+			}
+			else {
+				// A repository ID wasn't specified. We need to add the repository entry ourselves.
+				BOOL success = YES;
+				int databaseID = [self.class nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
+				source.databaseID = databaseID;
+				sqlite3_stmt *statement;
+				if (success = (sqlite3_prepare_v2(magma_db, "INSERT OR REPLACE INTO `repositories` (`id`, `base_url`, `dist`, `components`) VALUES (?, ?, ?, ?)", -1, &statement, NULL) == SQLITE_OK)) {
+					sqlite3_bind_int(statement, 1, databaseID);
+					sqlite3_bind_text(statement, 2, source.baseURL.absoluteString.UTF8String);
+					sqlite3_bind_text(statement, 3, source.distribution.UTF8String);
+					sqlite3_bind_text(statement, 4, components.UTF8String ?: "");
+					success = (sqlite3_step(statement) == SQLITE_DONE);
+					sqlite3_finalize(statement);
+				}
+				if (!success) {
+					NSLog(@"An SQLite error occurred while adding the source: %s", sqlite3_errmsg(magma_db));
+					return nil;
+				}
+			}
 			sources[[source sourcesListEntryWithComponents:NO]] = source;
 			return source;
 		}

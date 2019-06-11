@@ -20,4 +20,5 @@
 - (BOOL)isLoaded;
 - (void)startLoadingDataIfNeeded;
 - (NSArray *)sources;
+- (void)removeSource:(Source *)source;
 @end

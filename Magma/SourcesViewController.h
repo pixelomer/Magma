@@ -4,6 +4,7 @@
 
 @interface SourcesViewController : MGViewController<UITableViewDataSource, UITableViewDelegate> {
 	UITableView *sourcesTableView;
-	NSArray<Source *> *sources;
+	NSMutableArray<Source *> *sources;
+	BOOL isEditing;
 }
 @end
