@@ -43,6 +43,7 @@ static NSString *workingDirectory;
 			@"DROP TABLE IF EXISTS `repositories`",
 			@"DROP TABLE IF EXISTS `packages`",
 #			endif
+			@"PRAGMA foreign_keys = ON",
 			@"CREATE TABLE IF NOT EXISTS `repositories` ("
 			"  `id` INTEGER NOT NULL UNIQUE,"
 			"  `base_url` TEXT NOT NULL,"
@@ -154,7 +155,6 @@ static NSString *workingDirectory;
 					const char *components = sqlite3_column_text(statement, 3); // Composite Primary (can be an empty string)
 					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
 					BOOL       isBasicRepo = (!components || !*components);
-					NSLog(@"Repo id: %d\nBase: %s\nDist: %s\nComponents: %s\nRelease: %s\nIs basic: %d", repo_id, base_url, dist, components, Release, isBasicRepo);
 					//                 0           1            2        3            4                                     5
 					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo)]];
 				}
@@ -237,6 +237,9 @@ static NSString *workingDirectory;
 }
 
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {
+	NSString *notificationName = DatabaseDidAddSourceNotification;
+	NSDictionary *userInfo = @{ @"source" : source };
+	id returnValue = source;
 	if (!sources[[source sourcesListEntryWithComponents:NO]]) {
 		if (repoID) {
 			// A repository ID was specified. The repository entry already exists in the database.
@@ -257,21 +260,26 @@ static NSString *workingDirectory;
 				sqlite3_finalize(statement);
 			}
 			if (!success) {
-				NSLog(@"An SQLite error occurred while adding the source: %s", sqlite3_errmsg(magma_db));
-				return nil;
+				notificationName = DatabaseDidEncounterAnError;
+				userInfo = @{@"error" : [NSString stringWithFormat:@"An SQLite error occurred while adding the source: %s", sqlite3_errmsg(magma_db)]};
+				returnValue = nil;
 			}
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
-		if (!repoID) {
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidAddSourceNotification
-				object:self
-				userInfo:@{ @"source" : source }
-			];
-		}
-		return source;
 	}
-	return nil;
+	else {
+		notificationName = DatabaseDidEncounterAnError;
+		userInfo = @{@"error" : @"The new source cannot be added because it already exists."};
+		returnValue = nil;
+	}
+	if (!repoID) {
+		[NSNotificationCenter.defaultCenter
+			postNotificationName:notificationName
+			object:self
+			userInfo:userInfo
+		];
+	}
+	return returnValue;
 }
 
 - (Source *)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components ID:(NSNumber *)_repoID {

@@ -115,6 +115,7 @@
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Base URL";
+		textField.text = @"https://";
 		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){

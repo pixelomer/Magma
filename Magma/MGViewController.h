@@ -12,4 +12,5 @@
 - (void)viewDidLoad;
 - (void)databaseDidLoad:(Database *)database;
 - (void)setWaitForDatabase:(NSNumber *)waitForDatabase;
+- (void)didReceiveDatabaseNotification:(NSNotification *)notification;
 @end

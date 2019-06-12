@@ -96,21 +96,17 @@
 }
 
 - (void)didReceiveDatabaseNotification:(NSNotification *)notification {
-	if ([notification.name isEqualToString:DatabaseDidLoadNotification] && !_databaseDidLoad) {
-		dispatch_async(dispatch_get_main_queue(), ^{
+	dispatch_async(dispatch_get_main_queue(), ^{
+		if ([notification.name isEqualToString:DatabaseDidLoadNotification] && !_databaseDidLoad) {
 			[self databaseDidLoad:notification.object];
-		});
-	}
-	else if ([notification.name isEqualToString:DatabaseDidAddSourceNotification]) {
-		dispatch_async(dispatch_get_main_queue(), ^{
+		}
+		else if ([notification.name isEqualToString:DatabaseDidAddSourceNotification]) {
 			[self database:notification.object didAddSource:notification.userInfo[@"source"]];
-		});
-	}
-	else if ([notification.name isEqualToString:DatabaseDidRemoveSourceNotification]) {
-		dispatch_async(dispatch_get_main_queue(), ^{
+		}
+		else if ([notification.name isEqualToString:DatabaseDidRemoveSourceNotification]) {
 			[self database:notification.object didRemoveSource:notification.userInfo[@"source"]];
-		});
-	}
+		}
+	});
 }
 
 - (void)database:(Database *)database didAddSource:(Source *)source {}

@@ -8,6 +8,7 @@
 #define DatabaseDidRemoveSourceNotification @"com.pixelomer.magma/DatabaseDidRemoveSource"
 #define DatabaseDidAddSourceNotification @"com.pixelomer.magma/DatabaseDidAddSource"
 #define DatabaseDidLoadNotification @"com.pixelomer.magma/DatabaseDidLoad"
+#define DatabaseDidEncounterAnError @"com.pixelomer.magma/DatabaseDidEncounterAnError"
 
 // Unused
 #define DatabaseFailedToLoadNotification @"com.pixelomer.magma/DatabaseFailedToLoad"
