@@ -106,11 +106,15 @@
 			[self database:notification.object didAddSource:notification.userInfo[@"source"]];
 		});
 	}
+	else if ([notification.name isEqualToString:DatabaseDidRemoveSourceNotification]) {
+		dispatch_async(dispatch_get_main_queue(), ^{
+			[self database:notification.object didRemoveSource:notification.userInfo[@"source"]];
+		});
+	}
 }
 
-- (void)database:(Database *)database didAddSource:(Source *)source {
-
-}
+- (void)database:(Database *)database didAddSource:(Source *)source {}
+- (void)database:(Database *)database didRemoveSource:(Source *)source {}
 
 - (void)databaseDidLoad:(Database *)database {
 	if (!_databaseDidLoad) {

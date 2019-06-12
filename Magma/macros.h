@@ -5,6 +5,7 @@
 #define sqlite3_bind_text(stmt, index, text) sqlite3_bind_text(stmt, index, text, strlen(text), SQLITE_STATIC)
 
 // Used to communicate with MGViewControllers
+#define DatabaseDidRemoveSourceNotification @"com.pixelomer.magma/DatabaseDidRemoveSource"
 #define DatabaseDidAddSourceNotification @"com.pixelomer.magma/DatabaseDidAddSource"
 #define DatabaseDidLoadNotification @"com.pixelomer.magma/DatabaseDidLoad"
 

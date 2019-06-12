@@ -21,6 +21,6 @@
 - (void)startLoadingDataIfNeeded;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
-- (Source *)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components;
-- (Source *)addSourceWithURL:(NSString *)baseURL;
+- (void)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components;
+- (void)addSourceWithURL:(NSString *)baseURL;
 @end
