@@ -98,11 +98,12 @@
 			NSString *components = dist = baseURL = nil;
 			for (UITextField *textField in alertTextFields) {
 				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, @selector(alertFieldIdentifier));
-#define trim(string) [string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]
-				if ([alertFieldIdentifier isEqual:@0]) baseURL = trim(textField.text);
-				if ([alertFieldIdentifier isEqual:@1]) dist = trim(textField.text);
-				if ([alertFieldIdentifier isEqual:@2]) components = trim(textField.text);
-#undef trim
+				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				switch (alertFieldIdentifier.shortValue) {
+					case 0:    baseURL = value; break;
+					case 1:       dist = value; break;
+					case 2: components = value; break;
+				}
 			}
 			if (components.length <= 0 || dist.length <= 0) {
 				[Database.sharedInstance addSourceWithURL:baseURL];
@@ -127,6 +128,7 @@
 		textField.placeholder = @"Components (optional)";
 		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
+	// TODO: Another field for the architecture maybe?
 	for (UITextField *textField in alertController.textFields) {
 		textField.keyboardType = UIKeyboardTypeDefault;
 	}
@@ -142,7 +144,7 @@
 	NSInteger index;
 	if ((index = [sources indexOfObject:source]) != NSNotFound) {
 		[sources removeObjectAtIndex:index];
-		[sourcesTableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+		[sourcesTableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationFade];
 	}
 }
 
@@ -156,28 +158,52 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return sources.count * !section;
+	return (section == 0) ? 1 : sources.count;
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	SourceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"] ?: [[SourceCell alloc] initWithReuseIdentifier:@"cell"];
-	cell.source = sources[indexPath.row];
-	cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
-	return cell;
+	if (indexPath.section == 0) {
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"all"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"all"];
+		cell.textLabel.text = @"All packages";
+		return cell;
+	}
+	else {
+		SourceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"] ?: [[SourceCell alloc] initWithReuseIdentifier:@"source"];
+		cell.source = sources[indexPath.row];
+		cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+		return cell;
+	}
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
-	if (editingStyle == UITableViewCellEditingStyleDelete) {
+	if ((indexPath.section == 1) && (editingStyle == UITableViewCellEditingStyleDelete)) {
 		[Database.sharedInstance removeSource:sources[indexPath.row]];
 	}
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	if (!indexPath.section && !indexPath.row) {
+		// Handle "All Packages"
+	}
+	else {
+		// Handle individual source
+	}
+}
+
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-	return sources[indexPath.row].databaseID >= 0;
+	return (indexPath.section == 1) && (sources[indexPath.row].databaseID >= 0);
 }
 
 - (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath{
     return UITableViewCellEditingStyleDelete;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+	return (section == 1) ? @"Invidiual Sources" : nil;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+	return 2;
 }
 
 @end
