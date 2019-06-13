@@ -9,7 +9,7 @@
 	self.view.backgroundColor = [UIColor whiteColor];
 	[NSNotificationCenter.defaultCenter
 		addObserver:self
-		selector:@selector(didReceiveDatabaseNotification:)
+		selector:@selector(_didReceiveDatabaseNotification:)
 		name:nil
 		object:Database.sharedInstance
 	];
@@ -35,41 +35,43 @@
 			metrics:nil
 			views:views
 		]];
-		[containerView addConstraint:[NSLayoutConstraint
-			constraintWithItem:loadingLabel
-			attribute:NSLayoutAttributeCenterX
-			relatedBy:NSLayoutRelationEqual
-			toItem:containerView
-			attribute:NSLayoutAttributeCenterX
-			multiplier:1.0
-			constant:0.0
-		]];
-		[containerView addConstraint:[NSLayoutConstraint
-			constraintWithItem:loadingLabel
-			attribute:NSLayoutAttributeWidth
-			relatedBy:NSLayoutRelationLessThanOrEqual
-			toItem:containerView
-			attribute:NSLayoutAttributeWidth
-			multiplier:1.0
-			constant:-30.0
-		]];
-		[containerView addConstraint:[NSLayoutConstraint
-			constraintWithItem:activityIndicator
-			attribute:NSLayoutAttributeWidth
-			relatedBy:NSLayoutRelationEqual
-			toItem:nil
-			attribute:0
-			multiplier:1.0
-			constant:30.0
-		]];
-		[containerView addConstraint:[NSLayoutConstraint
-			constraintWithItem:loadingLabel
-			attribute:NSLayoutAttributeWidth
-			relatedBy:NSLayoutRelationGreaterThanOrEqual
-			toItem:nil
-			attribute:0
-			multiplier:0.0
-			constant:0.0
+		[containerView addConstraints:@[
+			[NSLayoutConstraint
+				constraintWithItem:loadingLabel
+				attribute:NSLayoutAttributeCenterX
+				relatedBy:NSLayoutRelationEqual
+				toItem:containerView
+				attribute:NSLayoutAttributeCenterX
+				multiplier:1.0
+				constant:0.0
+			],
+			[NSLayoutConstraint
+				constraintWithItem:loadingLabel
+				attribute:NSLayoutAttributeWidth
+				relatedBy:NSLayoutRelationLessThanOrEqual
+				toItem:containerView
+				attribute:NSLayoutAttributeWidth
+				multiplier:1.0
+				constant:-30.0
+			],
+			[NSLayoutConstraint
+				constraintWithItem:activityIndicator
+				attribute:NSLayoutAttributeWidth
+				relatedBy:NSLayoutRelationEqual
+				toItem:nil
+				attribute:0
+				multiplier:1.0
+				constant:30.0
+			],
+			[NSLayoutConstraint
+				constraintWithItem:loadingLabel
+				attribute:NSLayoutAttributeWidth
+				relatedBy:NSLayoutRelationGreaterThanOrEqual
+				toItem:nil
+				attribute:0
+				multiplier:0.0
+				constant:0.0
+			]
 		]];
 		[self.view addSubview:containerView];
 		views = @{ @"container" : containerView };
@@ -95,20 +97,38 @@
 	}
 }
 
-- (void)didReceiveDatabaseNotification:(NSNotification *)notification {
+- (void)_didReceiveDatabaseNotification:(NSNotification *)_notification {
+	__block NSNotification *notification = _notification;
 	dispatch_async(dispatch_get_main_queue(), ^{
-		if ([notification.name isEqualToString:DatabaseDidLoadNotification] && !_databaseDidLoad) {
-			[self databaseDidLoad:notification.object];
-		}
-		else if ([notification.name isEqualToString:DatabaseDidAddSourceNotification]) {
-			[self database:notification.object didAddSource:notification.userInfo[@"source"]];
-		}
-		else if ([notification.name isEqualToString:DatabaseDidRemoveSourceNotification]) {
-			[self database:notification.object didRemoveSource:notification.userInfo[@"source"]];
-		}
+		[self didReceiveDatabaseNotification:notification];
+		notification = nil;
 	});
 }
 
+- (void)didReceiveDatabaseNotification:(NSNotification *)notification {
+	if ([notification.name isEqualToString:DatabaseDidLoad] && !_databaseDidLoad) {
+		[self databaseDidLoad:notification.object];
+	}
+	else if ([notification.name isEqualToString:DatabaseDidAddSource]) {
+		[self database:notification.object didAddSource:notification.userInfo[@"source"]];
+	}
+	else if ([notification.name isEqualToString:DatabaseDidRemoveSource]) {
+		[self database:notification.object didRemoveSource:notification.userInfo[@"source"]];
+	}
+	else if ([notification.name isEqualToString:SourceDidStartRefreshing]) {
+		[self sourceDidStartRefreshing:notification.userInfo[@"source"]];
+	}
+	else if ([notification.name isEqualToString:SourceDidStopRefreshing]) {
+		[self sourceDidStopRefreshing:notification.userInfo[@"source"] reason:notification.userInfo[@"reason"]];
+	}
+	else if ([notification.name isEqualToString:DatabaseDidFinishRefreshingSources]) {
+		[self databaseDidFinishRefreshingSources:notification.object];
+	}
+}
+
+- (void)databaseDidFinishRefreshingSources:(Database *)database {}
+- (void)sourceDidStartRefreshing:(Source *)source {}
+- (void)sourceDidStopRefreshing:(Source *)source reason:(NSString *)reason {}
 - (void)database:(Database *)database didAddSource:(Source *)source {}
 - (void)database:(Database *)database didRemoveSource:(Source *)source {}
 

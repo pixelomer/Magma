@@ -22,6 +22,14 @@
 	];
 }
 
+- (BOOL)isRefreshing {
+	return _isRefreshing;
+}
+
+- (void)setIsRefreshing:(BOOL)isRefreshing {
+	_isRefreshing = isRefreshing;
+}
+
 - (void)setRawReleaseFile:(NSString *)rawReleaseFile {
 	NSDictionary *parsedReleaseFile = [DPKGParser parsePackageEntry:rawReleaseFile error:nil];
 	if (parsedReleaseFile) {

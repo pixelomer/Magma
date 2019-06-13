@@ -2,6 +2,10 @@
 #import <sqlite3.h>
 #import "Source.h"
 
+@interface Source(Private)
+- (void)setIsRefreshing:(BOOL)isRefreshing;
+@end
+
 @implementation Database
 
 static sqlite3 *magma_db;
@@ -177,7 +181,7 @@ static NSString *workingDirectory;
 #pragma GCC diagnostic pop
 			_isLoaded = YES;
 			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidLoadNotification
+				postNotificationName:DatabaseDidLoad
 				object:self
 				userInfo:nil
 			];
@@ -191,6 +195,13 @@ static NSString *workingDirectory;
 
 - (void)removeSource:(Source *)source {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		if (_isRefreshing) {
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidEncounterAnError
+				object:self
+				userInfo:@{ @"error" : @"It is not possible to remove a source while refreshing." }
+			];
+		}
 		sqlite3_stmt *statement;
 		BOOL isSourceKnown = NO;
 		NSArray<NSString *> *keys = sources.allKeys.copy;
@@ -209,7 +220,7 @@ static NSString *workingDirectory;
 		}
 		if (success) {
 			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidRemoveSourceNotification
+				postNotificationName:DatabaseDidRemoveSource
 				object:self
 				userInfo:@{ @"source" : source }
 			];
@@ -233,11 +244,20 @@ static NSString *workingDirectory;
 }
 
 - (void)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components {
+	if (_isRefreshing) {
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidEncounterAnError
+				object:self
+				userInfo:@{ @"error" : @"It is not possible to add a source while refreshing." }
+			];
+		});
+	}
 	[self addSourceWithBaseURL:baseURL distribution:dist components:components ID:nil];
 }
 
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {
-	NSString *notificationName = DatabaseDidAddSourceNotification;
+	NSString *notificationName = DatabaseDidAddSource;
 	NSDictionary *userInfo = @{ @"source" : source };
 	id returnValue = source;
 	if (!sources[[source sourcesListEntryWithComponents:NO]]) {
@@ -298,6 +318,58 @@ static NSString *workingDirectory;
 		}
 	}
 	else return nil;
+}
+
+- (void)waitForSourcesToRefresh {
+	[_refreshQueue waitUntilAllOperationsAreFinished];
+	NSLog(@"All of the sources refreshed.");
+	_isRefreshing = NO;
+	[NSNotificationCenter.defaultCenter
+		postNotificationName:DatabaseDidFinishRefreshingSources
+		object:self
+		userInfo:nil
+	];
+}
+
+- (void)refreshSource:(Source *)source {
+	source.isRefreshing = YES;
+	[NSNotificationCenter.defaultCenter
+		postNotificationName:SourceDidStartRefreshing
+		object:self
+		userInfo:@{ @"source" : source }
+	];
+	sleep(1);
+	NSLog(@"OwO: %@", source);
+	source.isRefreshing = NO;
+	[NSNotificationCenter.defaultCenter
+		postNotificationName:SourceDidStopRefreshing
+		object:self
+		userInfo:@{
+			@"source" : source,
+			@"reason" : @"Operation completed succesfully",
+			@"code"   : @0
+		}
+	];
+}
+
+- (void)startRefreshingSources {
+	_isRefreshing = YES;
+	_refreshQueue.suspended = YES;
+	_refreshQueue = [NSOperationQueue new];
+	_refreshQueue.underlyingQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+	for (NSString *sourceEntry in sources) {
+		Source *source = sources[sourceEntry];
+		[_refreshQueue addOperation:[[NSInvocationOperation alloc]
+			initWithTarget:self
+			selector:@selector(refreshSource:)
+			object:source
+		]];
+	}
+	[NSThread
+		detachNewThreadSelector:@selector(waitForSourcesToRefresh)
+		toTarget:self
+		withObject:nil
+	];
 }
 
 @end

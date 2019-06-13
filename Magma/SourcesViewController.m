@@ -5,11 +5,24 @@
 
 @implementation SourcesViewController
 
+- (void)resetMainButtons {
+	self.navigationItem.leftBarButtonItem.title = @"Refresh";
+	self.navigationItem.rightBarButtonItem.title = @"Edit";
+	self.navigationItem.leftBarButtonItem.style = self.navigationItem.rightBarButtonItem.style = UIBarButtonItemStylePlain;
+	self.navigationItem.rightBarButtonItem.tintColor = self.navigationItem.leftBarButtonItem.tintColor = (!Database.sharedInstance.isRefreshing ? self.view.tintColor : UIColor.grayColor);
+}
+
 - (void)switchEditMode {
+	if (Database.sharedInstance.isRefreshing) return;
 	[sourcesTableView setEditing:!sourcesTableView.isEditing animated:YES];
-	[self.navigationItem.leftBarButtonItem setTitle:(sourcesTableView.isEditing ? @"Add" : @"Refresh")];
-	[self.navigationItem.rightBarButtonItem setTitle:(sourcesTableView.isEditing ? @"Done" : @"Edit")];
-	[self.navigationItem.rightBarButtonItem setStyle:(sourcesTableView.isEditing ? UIBarButtonItemStyleDone : UIBarButtonItemStylePlain)];
+	if (!sourcesTableView.isEditing) {
+		[self resetMainButtons];
+	}
+	else {
+		self.navigationItem.leftBarButtonItem.title = @"Add";
+		self.navigationItem.rightBarButtonItem.title = @"Done";
+		self.navigationItem.rightBarButtonItem.style = (sourcesTableView.isEditing ? UIBarButtonItemStyleDone : UIBarButtonItemStylePlain);
+	}
 }
 
 - (void)databaseDidLoad:(Database *)database {
@@ -80,7 +93,7 @@
 
 - (void)handleLeftBarButton {
 	if (sourcesTableView.isEditing) [self showAddSourceAlert];
-	else [self startRefreshing];
+	else if (!Database.sharedInstance.isRefreshing)         [self startRefreshing];
 }
 
 - (void)showAddSourceAlert {
@@ -148,8 +161,28 @@
 	}
 }
 
-- (void)startRefreshing {
+- (void)sourceDidStartRefreshing:(Source *)source {
+	NSInteger index;
+	if ((index = [sources indexOfObject:source]) != NSNotFound) {
+		[sourcesTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
+	}
+}
 
+- (void)sourceDidStopRefreshing:(Source *)source reason:(NSString *)reason {
+	NSInteger index;
+	if ((index = [sources indexOfObject:source]) != NSNotFound) {
+		[sourcesTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
+	}
+}
+
+- (void)databaseDidFinishRefreshingSources:(Database *)database {
+	[self resetMainButtons];
+}
+
+- (void)startRefreshing {
+	if (sourcesTableView.isEditing) [self switchEditMode];
+	[Database.sharedInstance startRefreshingSources];
+	[self resetMainButtons];
 }
 
 - (void)reloadData {
@@ -191,7 +224,7 @@
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-	return (indexPath.section == 1) && (sources[indexPath.row].databaseID >= 0);
+	return tableView.isEditing && !Database.sharedInstance.isRefreshing && (indexPath.section == 1) && (sources[indexPath.row].databaseID >= 0);
 }
 
 - (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath{

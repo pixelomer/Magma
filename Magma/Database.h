@@ -7,6 +7,7 @@
 	int highestRepoID;
 	NSMutableDictionary<NSString *, Source *> *sources;
 }
+
 // Configuration:
 // Use these methods to configure how the database will be loaded. These methods can only be called before calling +[Database sharedInstance].
 + (void)setWorkingDirectory:(NSString *)newLocation;
@@ -17,10 +18,14 @@
 
 // Usage:
 // Use these methods to access/modify information in the database.
+@property (nonatomic, readonly, assign) BOOL isRefreshing;
+@property (nonatomic, readonly, strong) NSOperationQueue *refreshQueue;
 - (BOOL)isLoaded;
 - (void)startLoadingDataIfNeeded;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
 - (void)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components;
 - (void)addSourceWithURL:(NSString *)baseURL;
+- (void)startRefreshingSources;
+
 @end
