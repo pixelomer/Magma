@@ -88,7 +88,19 @@ static NSString *workingDirectory;
 			"  ?,"
 			"  'https://repo.nepeta.me',"
 			"  './'"
+			")",
+			@"INSERT OR REPLACE INTO `repositories` ("
+			"  `id`,"
+			"  `base_url`,"
+			"  `dist`,"
+			"  `components`"
 			")"
+			"VALUES ("
+			"  ?,"
+			"  'http://apt.thebigboss.org/repofiles/cydia',"
+			"  'stable',"
+			"  'main'"
+			")",
 #			endif
 		];
 		for (NSString *query in queries) {
@@ -331,25 +343,67 @@ static NSString *workingDirectory;
 	];
 }
 
++ (NSData *)requestDataFromURL:(NSURL *)url withRepositoryHeaders:(BOOL)includeRepositoryHeaders response:(NSHTTPURLResponse **)response timeoutInterval:(NSTimeInterval)timeoutInterval error:(NSError **)error {
+	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:timeoutInterval];
+	return [NSURLConnection sendSynchronousRequest:request returningResponse:(id *)response error:error];
+}
+
++ (NSData *)requestDataFromURL:(NSURL *)url response:(NSHTTPURLResponse **)response timeoutInterval:(NSTimeInterval)timeoutInterval error:(NSError **)error {
+	return [self requestDataFromURL:url withRepositoryHeaders:YES response:response timeoutInterval:timeoutInterval error:error];
+}
+
++ (NSData *)requestDataFromURL:(NSURL *)url response:(NSHTTPURLResponse **)response error:(NSError **)error {
+	return [self requestDataFromURL:url response:response timeoutInterval:30 error:error];
+}
+
++ (NSData *)requestDataFromURL:(NSURL *)url error:(NSError **)error {
+	return [self requestDataFromURL:url response:nil timeoutInterval:30 error:error];
+}
+
 - (void)refreshSource:(Source *)source {
+	// Notify observers about the refresh operation
 	source.isRefreshing = YES;
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:SourceDidStartRefreshing
 		object:self
 		userInfo:@{ @"source" : source }
 	];
-	sleep(1);
-	NSLog(@"OwO: %@", source);
+	NSLog(@"Refreshing: %@", source);
+	NSMutableDictionary *userInfo = @{
+		@"source"    : source,
+		@"reason"    : @"Operation completed succesfully",
+		@"errorCode" : NSNull.null // NSNull = success, NSNumber = failure
+	}.mutableCopy;
+
+	// Refresh
+	NSURL *releaseFileURL = source.releaseFileURL;
+	__unused NSURL *packagesFileURL = source.packagesFileURL;
+	NSHTTPURLResponse *response = nil;
+	NSData *data = [self.class requestDataFromURL:releaseFileURL response:&response error:nil];
+	NSString *non200ResponseFormat = @"Server returned a status code other than 200 for the following URL: %@";
+	NSString *parseFailureFormat = @"Client failed to parse the file from the following URL: %@";
+	if (response && response.statusCode == 200) {
+		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+		source.rawReleaseFile = encodedFile;
+		if (!source.rawReleaseFile) {
+			userInfo[@"reason"] = [NSString stringWithFormat:parseFailureFormat, releaseFileURL];
+			userInfo[@"errorCode"] = @(-1);
+		}
+	}
+	else {
+		userInfo[@"reason"] = [NSString stringWithFormat:non200ResponseFormat, releaseFileURL];
+		userInfo[@"errorCode"] = @(response.statusCode);
+	}
+	NSLog(@"[Refresh Result] %@", userInfo);
+
+	// Notify observers about the completion of the operation
 	source.isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:SourceDidStopRefreshing
 		object:self
-		userInfo:@{
-			@"source" : source,
-			@"reason" : @"Operation completed succesfully",
-			@"code"   : @0
-		}
+		userInfo:userInfo.copy
 	];
+	userInfo = nil;
 }
 
 - (void)startRefreshingSources {

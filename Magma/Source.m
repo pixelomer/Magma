@@ -11,6 +11,7 @@
 	_baseURL = baseURL;
 	_distribution = distribution ?: @"./";
 	_components = [components componentsSeparatedByString:@" "];
+	if (_components.count == 0) _components = nil;
 	return self;
 }
 
@@ -20,6 +21,10 @@
 		_distribution,
 		includeComponents ? ([_components componentsJoinedByString:@" "] ?: @"") : @""
 	];
+}
+
+- (NSString *)description {
+	return [NSString stringWithFormat:@"<%@ \"%@\">", NSStringFromClass(self.class), [self sourcesListEntryWithComponents:YES]];
 }
 
 - (BOOL)isRefreshing {
@@ -32,10 +37,28 @@
 
 - (void)setRawReleaseFile:(NSString *)rawReleaseFile {
 	NSDictionary *parsedReleaseFile = [DPKGParser parsePackageEntry:rawReleaseFile error:nil];
-	if (parsedReleaseFile) {
-		_rawReleaseFile = rawReleaseFile;
-		_parsedReleaseFile = parsedReleaseFile;
+	_rawReleaseFile = (parsedReleaseFile ? rawReleaseFile : nil);
+	_parsedReleaseFile = parsedReleaseFile;
+}
+
+- (NSURL *)repoFilesURL {
+	NSURL *repoFilesURL = _baseURL.copy;
+	if (_components) {
+		// Do some weird stuff
 	}
+	return repoFilesURL;
+}
+
+- (NSURL *)releaseFileURL {
+	return [self.repoFilesURL URLByAppendingPathComponent:@"Release"];
+}
+
+- (NSURL *)packagesFileURL {
+	return [self.repoFilesURL URLByAppendingPathComponent:@"Packages"];
+}
+
+- (NSURL *)iconURL {
+	return [_baseURL URLByAppendingPathComponent:@"CydiaIcon.png"];
 }
 
 @end
