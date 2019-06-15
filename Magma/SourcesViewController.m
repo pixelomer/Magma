@@ -176,6 +176,7 @@
 }
 
 - (void)databaseDidFinishRefreshingSources:(Database *)database {
+	UIApplication.sharedApplication.networkActivityIndicatorVisible = NO;
 	[self resetMainButtons];
 }
 
@@ -183,6 +184,7 @@
 	if (sourcesTableView.isEditing) [self switchEditMode];
 	[Database.sharedInstance startRefreshingSources];
 	[self resetMainButtons];
+	UIApplication.sharedApplication.networkActivityIndicatorVisible = YES;
 }
 
 - (void)reloadData {
@@ -232,7 +234,7 @@
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	return (section == 1) ? @"Invidiual Sources" : nil;
+	return (section == 1) ? @"Individual Sources" : nil;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {

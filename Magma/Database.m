@@ -4,6 +4,7 @@
 
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
+- (void)setLastRefresh:(NSDate *)lastRefresh;
 @end
 
 @implementation Database
@@ -44,7 +45,6 @@ static NSString *workingDirectory;
 		int nextRepoID = [self nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
 		NSArray *queries = @[
 #			if DEBUG
-			@"DROP TABLE IF EXISTS `repositories`",
 			@"DROP TABLE IF EXISTS `packages`",
 #			endif
 			@"PRAGMA foreign_keys = ON",
@@ -68,45 +68,21 @@ static NSString *workingDirectory;
 			"  PRIMARY KEY(`repo_id`, `package`, `version`),"
 			"  CONSTRAINT FK_repository FOREIGN KEY(`repo_id`) REFERENCES repositories(`id`) ON DELETE CASCADE"
 			")",
-			@"INSERT OR REPLACE INTO `repositories` ("
+			@"INSERT INTO `repositories` ("
 			"  `id`,"
 			"  `base_url`,"
 			"  `dist`"
 			")"
 			"VALUES ("
-			"  -1," // Repositories with negative IDs are unremovable.
+			"  ?,"
 			"  'https://repo.pixelomer.com',"
 			"  './'"
-			")",
-#			if DEBUG
-			@"INSERT OR REPLACE INTO `repositories` ("
-			"  `id`,"
-			"  `base_url`,"
-			"  `dist`"
 			")"
-			"VALUES ("
-			"  ?,"
-			"  'https://repo.nepeta.me',"
-			"  './'"
-			")",
-			@"INSERT OR REPLACE INTO `repositories` ("
-			"  `id`,"
-			"  `base_url`,"
-			"  `dist`,"
-			"  `components`"
-			")"
-			"VALUES ("
-			"  ?,"
-			"  'http://apt.thebigboss.org/repofiles/cydia',"
-			"  'stable',"
-			"  'main'"
-			")",
-#			endif
 		];
 		for (NSString *query in queries) {
 			char *errorMessage;
 			NSLog(@"%@", query);
-			if (sqlite3_exec(magma_db, ([query containsString:@"?"] ? [query stringByReplacingOccurrencesOfString:@"?" withString:[NSString stringWithFormat:@"%d", nextRepoID++]] : query).UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) {
+			if ((sqlite3_exec(magma_db, ([query containsString:@"?"] ? [query stringByReplacingOccurrencesOfString:@"?" withString:[NSString stringWithFormat:@"%d", nextRepoID++]] : query).UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) && ![query hasPrefix:@"INSERT"]) {
 				@throw [NSException
 					exceptionWithName:NSInternalInconsistencyException
 					reason:[NSString stringWithFormat:@"sqlite3 Error: %s", errorMessage]
@@ -170,9 +146,10 @@ static NSString *workingDirectory;
 					const char       *dist = sqlite3_column_text(statement, 2); // Composite Primary
 					const char *components = sqlite3_column_text(statement, 3); // Composite Primary (can be an empty string)
 					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
+					NSTimeInterval lastRefreshInterval = sqlite3_column_double(statement, 5);
 					BOOL       isBasicRepo = (!components || !*components);
 					//                 0           1            2        3            4                                     5
-					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo)]];
+					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
 				}
 				sqlite3_finalize(statement);
 				for (NSArray *row in rows) {
@@ -186,6 +163,10 @@ static NSString *workingDirectory;
 					if (source) {
 						if ([row[4] isKindOfClass:[NSString class]]) {
 							source.rawReleaseFile = row[4];
+						}
+						NSTimeInterval lastRefresh = [(NSNumber *)row[5] doubleValue];
+						if (lastRefresh != 0.0) {
+							source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
 						}
 					}
 				}
@@ -334,6 +315,30 @@ static NSString *workingDirectory;
 
 - (void)waitForSourcesToRefresh {
 	[_refreshQueue waitUntilAllOperationsAreFinished];
+	NSDate *lastRefresh = NSDate.date;
+	NSTimeInterval lastRefreshInterval = lastRefresh.timeIntervalSince1970;
+	for (NSString *sourceEntry in sources) {
+		Source *source = sources[sourceEntry];
+		sqlite3_stmt *statement;
+		if (sqlite3_prepare_v2(magma_db, "UPDATE `repositories` SET `Release`=?, `last_refresh`=? WHERE `id`=?", -1, &statement, NULL) == SQLITE_OK) {
+			if (source.rawReleaseFile) {
+				sqlite3_bind_text(statement, 1, source.rawReleaseFile.UTF8String);
+				sqlite3_bind_double(statement, 2, lastRefreshInterval);
+				source.lastRefresh = lastRefresh;
+			}
+			else {
+				sqlite3_bind_null(statement, 1);
+				sqlite3_bind_null(statement, 2);
+				source.lastRefresh = nil;
+			}
+			sqlite3_bind_int(statement, 3, source.databaseID);
+			BOOL success = (sqlite3_step(statement) == SQLITE_DONE);
+			sqlite3_finalize(statement);
+			if (success) {
+				// Write all of the packages to the DB
+			}
+		}
+	}
 	NSLog(@"All of the sources refreshed.");
 	_isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
@@ -403,6 +408,13 @@ static NSString *workingDirectory;
 		object:self
 		userInfo:userInfo.copy
 	];
+	if (![userInfo[@"errorCode"] isKindOfClass:[NSNull class]]) {
+		[NSNotificationCenter.defaultCenter
+			postNotificationName:DatabaseDidEncounterAnError
+			object:self
+			userInfo:@{ @"error" : userInfo[@"reason"] }
+		];
+	}
 	userInfo = nil;
 }
 

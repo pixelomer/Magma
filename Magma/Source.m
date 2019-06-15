@@ -27,8 +27,8 @@
 	return [NSString stringWithFormat:@"<%@ \"%@\">", NSStringFromClass(self.class), [self sourcesListEntryWithComponents:YES]];
 }
 
-- (BOOL)isRefreshing {
-	return _isRefreshing;
+- (void)setLastRefresh:(NSDate *)lastRefresh {
+	_lastRefresh = lastRefresh;
 }
 
 - (void)setIsRefreshing:(BOOL)isRefreshing {
@@ -41,20 +41,26 @@
 	_parsedReleaseFile = parsedReleaseFile;
 }
 
-- (NSURL *)repoFilesURL {
-	NSURL *repoFilesURL = _baseURL.copy;
+// Example URL: http://apt.thebigboss.org/repofiles/cydia/dists/stable/main/binary-iphoneos-arm
+- (NSURL *)filesURL {
+	NSURL *repoFilesURL = _baseURL;
 	if (_components) {
-		// Do some weird stuff
+		repoFilesURL = [[repoFilesURL URLByAppendingPathComponent:@"dists"] URLByAppendingPathComponent:_distribution];
 	}
 	return repoFilesURL;
 }
 
 - (NSURL *)releaseFileURL {
-	return [self.repoFilesURL URLByAppendingPathComponent:@"Release"];
+	NSURL *releaseFileURL = [self.filesURL URLByAppendingPathComponent:@"Release"];
+	return releaseFileURL;
 }
 
 - (NSURL *)packagesFileURL {
-	return [self.repoFilesURL URLByAppendingPathComponent:@"Packages"];
+	NSURL *packagesFileURLParent = self.filesURL;
+	if (_components) {
+		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:@"binary-iphoneos-arm"];
+	}
+	return [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"];
 }
 
 - (NSURL *)iconURL {
