@@ -1,4 +1,6 @@
 #import "MGViewController.h"
 
-@interface PackageSearchViewController : MGViewController
+@interface PackageSearchViewController : MGViewController {
+    UISearchBar *searchBar;
+}
 @end
