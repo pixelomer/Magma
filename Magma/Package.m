@@ -27,9 +27,12 @@
 	}
 }
 
-// TODO: Fix
 - (BOOL)isInstalled {
 	return [Database.sharedInstance.sortedLocalPackages containsObject:self];
+}
+
+- (BOOL)isEqual:(Package *)object {
+	return [object isKindOfClass:[Package class]] && ([object compare:self] == NSOrderedSame);
 }
 
 + (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSDictionary<NSString *, NSString *> *> *)array source:(Source *)source {
@@ -41,7 +44,7 @@
 }
 
 - (NSComparisonResult)compare:(Package *)package {
-#define IDForPackage(p) [NSString stringWithFormat:@"%@ %@", (p.name ?: p.package), p.version]
+#define IDForPackage(p) (p.name ?: p.package)
 	NSString *packageID1 = IDForPackage(self);
 	NSString *packageID2 = IDForPackage(package);
 	return [packageID1 compare:packageID2];
