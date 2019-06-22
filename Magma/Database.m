@@ -1,6 +1,9 @@
 #import "Database.h"
 #import <sqlite3.h>
+#import <BZipCompression/BZipCompression.h>
 #import "Source.h"
+#import "DPKGParser.h"
+#import "Package.h"
 
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
@@ -148,7 +151,7 @@ static NSString *workingDirectory;
 					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
 					NSTimeInterval lastRefreshInterval = sqlite3_column_double(statement, 5);
 					BOOL       isBasicRepo = (!components || !*components);
-					//                 0           1            2        3            4                                     5
+					//                 0           1            2        3                        4                          5
 					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
 				}
 				sqlite3_finalize(statement);
@@ -382,25 +385,50 @@ static NSString *workingDirectory;
 
 	// Refresh
 	NSURL *releaseFileURL = source.releaseFileURL;
-	__unused NSURL *packagesFileURL = source.packagesFileURL;
+	NSURL *packagesFileURL = source.packagesFileURL;
 	NSHTTPURLResponse *response = nil;
+	NSError *error = nil;
 	NSData *data = [self.class requestDataFromURL:releaseFileURL response:&response error:nil];
-	NSString *non200ResponseFormat = @"Server returned a status code other than 200 for the following URL: %@";
-	NSString *parseFailureFormat = @"Client failed to parse the file from the following URL: %@";
-	if (response && response.statusCode == 200) {
+	NSURL *lastURL = nil;
+#define parseFailure() { \
+	userInfo[@"reason"] = [NSString stringWithFormat:@"Client failed to parse the file from the following URL: %@", lastURL]; \
+	userInfo[@"errorCode"] = @(-1); \
+}
+#define fetch(url, block...) \
+lastURL = url; \
+response = (id)(data = nil); \
+data = [self.class requestDataFromURL:url response:&response error:nil]; \
+if (!response || response.statusCode != 200) { \
+	userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url]; \
+	userInfo[@"errorCode"] = @(response.statusCode); \
+} else block
+	fetch(releaseFileURL, {
 		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		source.rawReleaseFile = encodedFile;
-		if (!source.rawReleaseFile) {
-			userInfo[@"reason"] = [NSString stringWithFormat:parseFailureFormat, releaseFileURL];
-			userInfo[@"errorCode"] = @(-1);
-		}
-	}
-	else {
-		userInfo[@"reason"] = [NSString stringWithFormat:non200ResponseFormat, releaseFileURL];
-		userInfo[@"errorCode"] = @(response.statusCode);
-	}
+		if (!source.rawReleaseFile) parseFailure();
+		fetch(packagesFileURL, {
+			data = [BZipCompression decompressedDataWithData:data error:&error];
+			if (!error && data) {
+				NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+				NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
+				if (!error || parsedFile) {
+					NSMutableArray<Package *> *packages = [NSMutableArray new];
+					for (NSDictionary *packageInfo in parsedFile) {
+						NSLog(@"Package: %@", packageInfo);
+						Package *package = [[Package alloc] initWithDictionary:packageInfo source:source];
+						NSLog(@"Object: %@", package);
+						NSLog(@"");
+						if (package) [packages addObject:package];
+					}
+				}
+				else parseFailure();
+			}
+			else parseFailure();
+		});
+	});
 	NSLog(@"[Refresh Result] %@", userInfo);
-
+#undef fetch
+#undef parseFailure
 	// Notify observers about the completion of the operation
 	source.isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
@@ -408,6 +436,7 @@ static NSString *workingDirectory;
 		object:self
 		userInfo:userInfo.copy
 	];
+#if DEBUG
 	if (![userInfo[@"errorCode"] isKindOfClass:[NSNull class]]) {
 		[NSNotificationCenter.defaultCenter
 			postNotificationName:DatabaseDidEncounterAnError
@@ -415,6 +444,7 @@ static NSString *workingDirectory;
 			userInfo:@{ @"error" : userInfo[@"reason"] }
 		];
 	}
+#endif
 	userInfo = nil;
 }
 

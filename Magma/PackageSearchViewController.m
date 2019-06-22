@@ -8,6 +8,7 @@
 }
 
 - (void)databaseDidLoad:(Database *)database {
+	[super databaseDidLoad:database];
     searchBar = [UISearchBar new];
 }
 
