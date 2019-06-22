@@ -16,6 +16,7 @@
 			@"version",
 			@"filename",
 			@"architecture",
+			@"name",
 			@"section",
 			@"sha512"
 		];
@@ -24,6 +25,27 @@
 			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(package)), "@:");
 		}
 	}
+}
+
+// TODO: Fix
+- (BOOL)isInstalled {
+	return [Database.sharedInstance.sortedLocalPackages containsObject:self];
+}
+
++ (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSDictionary<NSString *, NSString *> *> *)array source:(Source *)source {
+	NSMutableArray *packages = [NSMutableArray new];
+	for (NSDictionary *dict in array) {
+		[packages addObject:[[Package alloc] initWithDictionary:dict source:source]];
+	}
+	return packages.copy;
+}
+
+- (NSComparisonResult)compare:(Package *)package {
+#define IDForPackage(p) [NSString stringWithFormat:@"%@ %@", (p.name ?: p.package), p.version]
+	NSString *packageID1 = IDForPackage(self);
+	NSString *packageID2 = IDForPackage(package);
+	return [packageID1 compare:packageID2];
+#undef IDForPackage
 }
 
 - (NSString *)package {
@@ -43,7 +65,7 @@
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source *)source {
-	if (source && dict && (self = [super init])) {
+	if (dict && (self = [super init])) {
 		_source = source;
 		_rawPackage = dict;
 		_dependencies = [dict[@"depends"] componentsSeparatedByString:@", "];

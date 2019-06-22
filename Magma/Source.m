@@ -23,6 +23,11 @@
 	];
 }
 
+- (void)setPackages:(NSArray<Package *> *)packages {
+	// TODO: Extra operations to set the first discovery date on package
+	_packages = packages;
+}
+
 - (NSString *)description {
 	return [NSString stringWithFormat:@"<%@ \"%@\">", NSStringFromClass(self.class), [self sourcesListEntryWithComponents:YES]];
 }

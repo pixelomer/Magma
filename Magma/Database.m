@@ -8,6 +8,7 @@
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
+- (void)setPackages:(NSArray<Package *> *)packages;
 @end
 
 @implementation Database
@@ -126,6 +127,14 @@ static NSString *workingDirectory;
 	return _isLoaded;
 }
 
+- (instancetype)init {
+	if (self = [super init]) {
+		_sortedLocalPackages = @[];
+		_sortedRemotePackages = @[];
+	}
+	return self;
+}
+
 - (void)startLoadingDataIfNeeded {
 	if (!_isLoaded) {
 		if (!magma_db) {
@@ -141,6 +150,8 @@ static NSString *workingDirectory;
 			sqlite3_stmt *statement;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpointer-sign"
+
+			// Load repositories from database
 			if (success = (sqlite3_prepare_v2(magma_db, "SELECT * FROM `repositories`", -1, &statement, NULL) == SQLITE_OK)) {
 				NSMutableArray *rows = [NSMutableArray new];
 				while (sqlite3_step(statement) == SQLITE_ROW) {
@@ -174,6 +185,10 @@ static NSString *workingDirectory;
 					}
 				}
 			}
+
+			// Load local packages from /var/lib/dpkg
+			[self reloadLocalPackages];
+
 #pragma GCC diagnostic pop
 			_isLoaded = YES;
 			[NSNotificationCenter.defaultCenter
@@ -320,8 +335,8 @@ static NSString *workingDirectory;
 	[_refreshQueue waitUntilAllOperationsAreFinished];
 	NSDate *lastRefresh = NSDate.date;
 	NSTimeInterval lastRefreshInterval = lastRefresh.timeIntervalSince1970;
-	for (NSString *sourceEntry in sources) {
-		Source *source = sources[sourceEntry];
+	[self reloadRemotePackages];
+	for (Source *source in sources.allValues) {
 		sqlite3_stmt *statement;
 		if (sqlite3_prepare_v2(magma_db, "UPDATE `repositories` SET `Release`=?, `last_refresh`=? WHERE `id`=?", -1, &statement, NULL) == SQLITE_OK) {
 			if (source.rawReleaseFile) {
@@ -405,26 +420,21 @@ if (!response || response.statusCode != 200) { \
 	fetch(releaseFileURL, {
 		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		source.rawReleaseFile = encodedFile;
-		if (!source.rawReleaseFile) parseFailure();
-		fetch(packagesFileURL, {
-			data = [BZipCompression decompressedDataWithData:data error:&error];
-			if (!error && data) {
-				NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-				NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
-				if (!error || parsedFile) {
-					NSMutableArray<Package *> *packages = [NSMutableArray new];
-					for (NSDictionary *packageInfo in parsedFile) {
-						NSLog(@"Package: %@", packageInfo);
-						Package *package = [[Package alloc] initWithDictionary:packageInfo source:source];
-						NSLog(@"Object: %@", package);
-						NSLog(@"");
-						if (package) [packages addObject:package];
+		if (source.rawReleaseFile) {
+			fetch(packagesFileURL, {
+				data = [BZipCompression decompressedDataWithData:data error:&error];
+				if (!error && data) {
+					NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
+					if (!error || parsedFile) {
+						source.packages = [Package createPackagesUsingArray:parsedFile source:source];
 					}
+					else parseFailure();
 				}
 				else parseFailure();
-			}
-			else parseFailure();
-		});
+			});
+		}
+		else parseFailure();
 	});
 	NSLog(@"[Refresh Result] %@", userInfo);
 #undef fetch
@@ -448,13 +458,76 @@ if (!response || response.statusCode != 200) { \
 	userInfo = nil;
 }
 
+- (void)_reloadLocalPackages {
+	NSArray *newlySortedLocalPackageDicts = [DPKGParser parseFileAtPath:@"/var/lib/dpkg/status" error:nil];
+	if (!newlySortedLocalPackageDicts) _sortedLocalPackages = @[];
+	else {
+		NSMutableArray *newlySortedLocalPackages = [Package createPackagesUsingArray:newlySortedLocalPackageDicts source:nil].mutableCopy;
+		[newlySortedLocalPackages sortUsingSelector:@selector(compare:)];
+		_sortedLocalPackages = newlySortedLocalPackages;
+	}
+}
+
+- (void)_reloadRemotePackages {
+	NSMutableArray *remotePackages = [NSMutableArray new];
+	for (Source *source in sources.allValues) {
+		[remotePackages addObjectsFromArray:source.packages];
+	}
+	[remotePackages sortUsingSelector:@selector(compare:)];
+	_sortedRemotePackages = remotePackages;
+}
+
+- (void)reloadLocalPackages {
+	[self reloadLocalPackagesAsynchronously:NO];
+}
+
+- (void)reloadRemotePackages {
+	[self reloadRemotePackagesAsynchronously:NO];
+}
+
+- (void)reloadRemotePackagesAsynchronously:(BOOL)async {
+	if (async) {
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+			[self _reloadRemotePackages];
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidFinishReloadingRemotePackages
+				object:self
+				userInfo:nil
+			];
+		});
+	}
+	else {
+		[self _reloadRemotePackages];
+	}
+}
+
+- (void)reloadLocalPackagesAsynchronously:(BOOL)async {
+	if (async) {
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+			[self _reloadLocalPackages];
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidFinishReloadingLocalPackages
+				object:self
+				userInfo:nil
+			];
+		});
+	}
+	else {
+		[self _reloadLocalPackages];
+	}
+}
+
+// UNTESTED
+- (Package *)packageWithIdentifier:(NSString *)identifier {
+	return identifier ? ([_sortedRemotePackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"package == %@", identifier]].lastObject ?: [_sortedLocalPackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"package == %@", identifier]].lastObject) : nil;
+}
+
 - (void)startRefreshingSources {
 	_isRefreshing = YES;
 	_refreshQueue.suspended = YES;
 	_refreshQueue = [NSOperationQueue new];
 	_refreshQueue.underlyingQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-	for (NSString *sourceEntry in sources) {
-		Source *source = sources[sourceEntry];
+	for (Source *source in sources.allValues) {
 		[_refreshQueue addOperation:[[NSInvocationOperation alloc]
 			initWithTarget:self
 			selector:@selector(refreshSource:)
