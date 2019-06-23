@@ -1,9 +1,8 @@
-#import "MGViewController.h"
+#import "MGTableViewController.h"
 
 @class Source;
 
-@interface SourcesViewController : MGViewController<UITableViewDataSource, UITableViewDelegate> {
-	UITableView *sourcesTableView;
+@interface SourcesViewController : MGTableViewController {
 	NSMutableArray<Source *> *sources;
 	NSArray<UITextField *> *alertTextFields;
 	BOOL isRefreshing;

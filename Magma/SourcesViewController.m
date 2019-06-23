@@ -2,6 +2,7 @@
 #import "SourceCell.h"
 #import "Source.h"
 #import <objc/runtime.h>
+#import "SectionsController.h"
 
 @implementation SourcesViewController
 
@@ -14,23 +15,20 @@
 
 - (void)switchEditMode {
 	if (Database.sharedInstance.isRefreshing) return;
-	[sourcesTableView setEditing:!sourcesTableView.isEditing animated:YES];
-	if (!sourcesTableView.isEditing) {
+	[self.tableView setEditing:!self.tableView.isEditing animated:YES];
+	if (!self.tableView.isEditing) {
 		[self resetMainButtons];
 	}
 	else {
 		self.navigationItem.leftBarButtonItem.title = @"Add";
 		self.navigationItem.rightBarButtonItem.title = @"Done";
-		self.navigationItem.rightBarButtonItem.style = (sourcesTableView.isEditing ? UIBarButtonItemStyleDone : UIBarButtonItemStylePlain);
+		self.navigationItem.rightBarButtonItem.style = (self.tableView.isEditing ? UIBarButtonItemStyleDone : UIBarButtonItemStylePlain);
 	}
 }
 
 - (void)databaseDidLoad:(Database *)database {
 	[super databaseDidLoad:database];
-	sourcesTableView = [UITableView new];
-	sourcesTableView.dataSource = self;
-	sourcesTableView.delegate = self;
-	sourcesTableView.translatesAutoresizingMaskIntoConstraints = NO;
+	self.tableView.translatesAutoresizingMaskIntoConstraints = NO;
 	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]
 		initWithTitle:@"Edit"
 		style:UIBarButtonItemStylePlain
@@ -43,45 +41,6 @@
 		target:self
 		action:@selector(handleLeftBarButton)
 	];
-	[self.view addSubview:sourcesTableView];
-	[self.view addConstraints:@[
-		[NSLayoutConstraint
-			constraintWithItem:sourcesTableView
-			attribute:NSLayoutAttributeLeft
-			relatedBy:NSLayoutRelationEqual
-			toItem:self.view
-			attribute:NSLayoutAttributeLeft
-			multiplier:1.0
-			constant:0.0
-		],
-		[NSLayoutConstraint
-			constraintWithItem:sourcesTableView
-			attribute:NSLayoutAttributeRight
-			relatedBy:NSLayoutRelationEqual
-			toItem:self.view
-			attribute:NSLayoutAttributeRight
-			multiplier:1.0
-			constant:0.0
-		],
-		[NSLayoutConstraint
-			constraintWithItem:sourcesTableView
-			attribute:NSLayoutAttributeTop
-			relatedBy:NSLayoutRelationEqual
-			toItem:self.view
-			attribute:NSLayoutAttributeTop
-			multiplier:1.0
-			constant:0.0
-		],
-		[NSLayoutConstraint
-			constraintWithItem:sourcesTableView
-			attribute:NSLayoutAttributeBottom
-			relatedBy:NSLayoutRelationEqual
-			toItem:self.view
-			attribute:NSLayoutAttributeBottom
-			multiplier:1.0
-			constant:0.0
-		]
-	]];
 	[self reloadData];
 }
 
@@ -92,8 +51,8 @@
 }
 
 - (void)handleLeftBarButton {
-	if (sourcesTableView.isEditing) [self showAddSourceAlert];
-	else if (!Database.sharedInstance.isRefreshing)         [self startRefreshing];
+	if (self.tableView.isEditing) [self showAddSourceAlert];
+	else if (!Database.sharedInstance.isRefreshing) [self startRefreshing];
 }
 
 - (void)showAddSourceAlert {
@@ -157,21 +116,21 @@
 	NSInteger index;
 	if ((index = [sources indexOfObject:source]) != NSNotFound) {
 		[sources removeObjectAtIndex:index];
-		[sourcesTableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationFade];
+		[self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationFade];
 	}
 }
 
 - (void)sourceDidStartRefreshing:(Source *)source {
 	NSInteger index;
 	if ((index = [sources indexOfObject:source]) != NSNotFound) {
-		[sourcesTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
+		[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
 	}
 }
 
 - (void)sourceDidStopRefreshing:(Source *)source reason:(NSString *)reason {
 	NSInteger index;
 	if ((index = [sources indexOfObject:source]) != NSNotFound) {
-		[sourcesTableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
+		[self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
 	}
 }
 
@@ -181,7 +140,7 @@
 }
 
 - (void)startRefreshing {
-	if (sourcesTableView.isEditing) [self switchEditMode];
+	if (self.tableView.isEditing) [self switchEditMode];
 	[Database.sharedInstance startRefreshingSources];
 	[self resetMainButtons];
 	UIApplication.sharedApplication.networkActivityIndicatorVisible = YES;
@@ -189,7 +148,7 @@
 
 - (void)reloadData {
 	sources = Database.sharedInstance.sources.mutableCopy;
-	[sourcesTableView reloadData];
+	[self.tableView reloadData];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
@@ -221,7 +180,14 @@
 		// Handle "All Packages"
 	}
 	else {
-		// Handle individual source
+		Source *source = sources[indexPath.row];
+		SectionsController *vc = [[SectionsController alloc] initWithSource:source];
+		if (vc) {
+			[self.navigationController pushViewController:vc animated:YES];
+		}
+		else {
+			[tableView deselectRowAtIndexPath:indexPath animated:YES];
+		}
 	}
 }
 
