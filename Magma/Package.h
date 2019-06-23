@@ -5,13 +5,18 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface Package : NSObject
+@interface Package : NSObject {
+    NSString *_rawPackagesEntry;
+}
 @property (nonatomic, readonly, weak) Source * _Nullable source;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> *rawPackage;
 @property (nonatomic, readonly, copy) NSArray<NSString *> * _Nullable dependencies;
 @property (nonatomic, readonly, copy) NSArray<NSString *> * _Nullable conflicts;
 @property (nonatomic, readonly, copy) NSString * _Nullable shortDescription;
 @property (nonatomic, readonly, copy) NSString * _Nullable longDescription;
+@property (nonatomic, readonly, copy) NSDate * _Nullable firstDiscovery;
+@property (nonatomic, readonly, assign) BOOL ignoresUpdates;
+- (NSString *)rawPackagesEntry;
 - (Database *)database;
 - (NSString * _Nullable)getField:(NSString *)field;
 - (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source * _Nullable)source;

@@ -11,6 +11,11 @@
 - (void)setPackages:(NSArray<Package *> *)packages;
 @end
 
+@interface Package(Private)
+- (void)setFirstDiscovery:(NSDate *)firstDiscovery;
+- (void)setIgnoresUpdates:(BOOL)doesIt;
+@end
+
 @implementation Database
 
 static sqlite3 *magma_db;
@@ -48,9 +53,6 @@ static NSString *workingDirectory;
 	if (sqlite3_open([newLocation stringByAppendingPathComponent:@"magma.db"].UTF8String, &magma_db) == SQLITE_OK) {
 		int nextRepoID = [self nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
 		NSArray *queries = @[
-#			if DEBUG
-			@"DROP TABLE IF EXISTS `packages`",
-#			endif
 			@"PRAGMA foreign_keys = ON",
 			@"CREATE TABLE IF NOT EXISTS `repositories` ("
 			"  `id` INTEGER NOT NULL UNIQUE,"
@@ -182,12 +184,34 @@ static NSString *workingDirectory;
 						if (lastRefresh != 0.0) {
 							source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
 						}
+						NSMutableArray *packages = [NSMutableArray new];
+						if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `control`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
+							sqlite3_bind_int(statement, 1, source.databaseID);
+							while (sqlite3_step(statement) == SQLITE_ROW) {
+								BOOL ignoresUpdates = sqlite3_column_int(statement, 0);
+								NSString *control = @((const char *)sqlite3_column_text(statement, 1));
+								NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 2)];
+								NSDictionary *dict = [DPKGParser parsePackageEntry:control error:nil];
+								NSLog(@"dict: %@", dict);
+								if (dict) {
+									Package *package = [[Package alloc] initWithDictionary:dict source:source];
+									package.firstDiscovery = firstDiscovery;
+									package.ignoresUpdates = ignoresUpdates;
+									if (package) [packages addObject:package];
+								}
+							}
+							sqlite3_finalize(statement);
+						}
+						source.packages = packages.copy;
 					}
 				}
 			}
 
 			// Load local packages from /var/lib/dpkg
 			[self reloadLocalPackages];
+			
+			// Put packages from all of the sources into one sorted array
+			[self reloadRemotePackages];
 
 #pragma GCC diagnostic pop
 			_isLoaded = YES;
@@ -353,7 +377,51 @@ static NSString *workingDirectory;
 			BOOL success = (sqlite3_step(statement) == SQLITE_DONE);
 			sqlite3_finalize(statement);
 			if (success) {
-				// Write all of the packages to the DB
+				NSMutableDictionary *oldPackagesDictionary = [NSMutableDictionary new];
+				if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `package`, `version`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
+					sqlite3_bind_int(statement, 1, source.databaseID);
+					while (sqlite3_step(statement) == SQLITE_ROW) {
+						NSNumber *ignoreUpdates = @(sqlite3_column_int(statement, 0));
+						NSString *packageID = @((const char *)sqlite3_column_text(statement, 1));
+						NSString *version = @((const char *)sqlite3_column_text(statement, 2));
+						NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 3)];
+						NSString *key = [NSString stringWithFormat:@"%@ %@", packageID, version];
+						NSLog(@"Key: %@, exists in dictionary: %i", key, !!oldPackagesDictionary[key]);
+						oldPackagesDictionary[key] = @[ignoreUpdates, firstDiscovery];
+					}
+					sqlite3_finalize(statement);
+					if (sqlite3_prepare_v2(magma_db, "DELETE FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
+						sqlite3_bind_int(statement, 1, source.databaseID);
+						success = (sqlite3_step(statement) == SQLITE_DONE);
+						sqlite3_finalize(statement);
+						if (success) {
+							int nextID = [self.class nextIdentifierForTable:@"packages" inSQLiteDatabase:magma_db];
+							for (Package *newPackage in source.packages) {
+								NSString *key = [NSString stringWithFormat:@"%@ %@", newPackage.package, newPackage.version];
+								NSArray *oldInfo = oldPackagesDictionary[key];
+								if (oldInfo) {
+									newPackage.ignoresUpdates = [(NSNumber *)oldInfo[0] boolValue];
+									newPackage.firstDiscovery = oldInfo[1];
+								}
+								else {
+									newPackage.ignoresUpdates = NO;
+									newPackage.firstDiscovery = lastRefresh;
+								}
+								if (sqlite3_prepare_v2(magma_db, "INSERT INTO `packages` VALUES (?, ?, ?, ?, ?, ?, ?)", -1, &statement, NULL) == SQLITE_OK) {
+									sqlite3_bind_int(statement, 1, nextID++);
+									sqlite3_bind_int(statement, 2, source.databaseID);
+									sqlite3_bind_int(statement, 3, !!newPackage.ignoresUpdates);
+									sqlite3_bind_text(statement, 4, newPackage.package.UTF8String);
+									sqlite3_bind_text(statement, 5, newPackage.version.UTF8String);
+									sqlite3_bind_text(statement, 6, newPackage.rawPackagesEntry.UTF8String);
+									sqlite3_bind_double(statement, 7, newPackage.firstDiscovery.timeIntervalSince1970);
+									sqlite3_step(statement);
+									sqlite3_finalize(statement);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -394,7 +462,7 @@ static NSString *workingDirectory;
 	NSLog(@"Refreshing: %@", source);
 	NSMutableDictionary *userInfo = @{
 		@"source"    : source,
-		@"reason"    : @"Operation completed succesfully",
+		@"reason"    : @"Operation completed successfully",
 		@"errorCode" : NSNull.null // NSNull = success, NSNumber = failure
 	}.mutableCopy;
 
@@ -408,6 +476,7 @@ static NSString *workingDirectory;
 #define parseFailure() { \
 	userInfo[@"reason"] = [NSString stringWithFormat:@"Client failed to parse the file from the following URL: %@", lastURL]; \
 	userInfo[@"errorCode"] = @(-1); \
+	NSLog(@"Error: %@", error); \
 }
 #define fetch(url, block...) \
 lastURL = url; \
@@ -425,6 +494,7 @@ if (!response || response.statusCode != 200) { \
 				data = [BZipCompression decompressedDataWithData:data error:&error];
 				if (!error && data) {
 					NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+					NSLog(@"%@", fullPackages);
 					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
 					if (!error || parsedFile) {
 						source.packages = [Package createPackagesUsingArray:parsedFile source:source];

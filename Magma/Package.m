@@ -1,6 +1,7 @@
 #import "Package.h"
 #import "Database.h"
 #import <objc/runtime.h>
+#import "Source.h"
 
 @implementation Package
 
@@ -28,6 +29,13 @@
 }
 
 - (BOOL)isInstalled {
+	for (Package *package in Database.sharedInstance.sortedLocalPackages.copy) {
+		if ([package.package isEqualToString:self.package]) return YES;
+	}
+	return NO;
+}
+
+- (BOOL)isVersionInstalled {
 	return [Database.sharedInstance.sortedLocalPackages containsObject:self];
 }
 
@@ -44,7 +52,7 @@
 }
 
 - (NSComparisonResult)compare:(Package *)package {
-#define IDForPackage(p) (p.name ?: p.package)
+#define IDForPackage(p) [NSString stringWithFormat:@"%@ %@", (p.name ?: p.package), p.version]
 	NSString *packageID1 = IDForPackage(self);
 	NSString *packageID2 = IDForPackage(package);
 	return [packageID1 compare:packageID2];
@@ -65,6 +73,14 @@
 
 - (NSString *)description {
 	return [NSString stringWithFormat:@"<%@: %@ (%@)>", NSStringFromClass(self.class), self.package, self.version];
+}
+
+- (void)setIgnoresUpdates:(BOOL)doesIt {
+	_ignoresUpdates = doesIt;
+}
+
+- (void)setFirstDiscovery:(NSDate *)firstDiscovery {
+	_firstDiscovery = firstDiscovery;
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source *)source {
@@ -89,6 +105,16 @@
 		return self;
 	}
 	return nil;
+}
+
+- (NSString *)rawPackagesEntry {
+	if (_rawPackagesEntry) return _rawPackagesEntry;
+	NSMutableString *string = [NSMutableString new];
+	for (NSString *key in _rawPackage) {
+		NSString *value = _rawPackage[key];
+		[string appendFormat:@"%@: %@\n", key, [value stringByReplacingOccurrencesOfString:@"\n" withString:@"\n  "]];
+	}
+	return _rawPackagesEntry = [string copy];
 }
 
 @end

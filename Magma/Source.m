@@ -19,7 +19,7 @@
 	return [NSString stringWithFormat:@"deb %@ %@%@",
 		[_baseURL absoluteString],
 		_distribution,
-		includeComponents ? ([_components componentsJoinedByString:@" "] ?: @"") : @""
+		includeComponents ? ([@" " stringByAppendingString:([_components componentsJoinedByString:@" "] ?: @"")]) : @""
 	];
 }
 
