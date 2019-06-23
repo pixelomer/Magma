@@ -51,7 +51,6 @@ static NSString *workingDirectory;
 		];
 	}
 	if (sqlite3_open([newLocation stringByAppendingPathComponent:@"magma.db"].UTF8String, &magma_db) == SQLITE_OK) {
-		int nextRepoID = [self nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
 		NSArray *queries = @[
 			@"PRAGMA foreign_keys = ON",
 			@"CREATE TABLE IF NOT EXISTS `repositories` ("
@@ -80,7 +79,7 @@ static NSString *workingDirectory;
 			"  `dist`"
 			")"
 			"VALUES ("
-			"  ?,"
+			"  -1,"
 			"  'https://repo.pixelomer.com',"
 			"  './'"
 			")"
@@ -88,7 +87,7 @@ static NSString *workingDirectory;
 		for (NSString *query in queries) {
 			char *errorMessage;
 			NSLog(@"%@", query);
-			if ((sqlite3_exec(magma_db, ([query containsString:@"?"] ? [query stringByReplacingOccurrencesOfString:@"?" withString:[NSString stringWithFormat:@"%d", nextRepoID++]] : query).UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) && ![query hasPrefix:@"INSERT"]) {
+			if ((sqlite3_exec(magma_db, query.UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) && ![query hasPrefix:@"INSERT"]) {
 				@throw [NSException
 					exceptionWithName:NSInternalInconsistencyException
 					reason:[NSString stringWithFormat:@"sqlite3 Error: %s", errorMessage]
@@ -163,8 +162,9 @@ static NSString *workingDirectory;
 					const char *components = sqlite3_column_text(statement, 3); // Composite Primary (can be an empty string)
 					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
 					NSTimeInterval lastRefreshInterval = sqlite3_column_double(statement, 5);
+					NSLog(@"%f", lastRefreshInterval);
 					BOOL       isBasicRepo = (!components || !*components);
-					//                 0           1            2        3                        4                          5
+					//                 0           1            2        3                        4                          5               6
 					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
 				}
 				sqlite3_finalize(statement);
@@ -180,10 +180,8 @@ static NSString *workingDirectory;
 						if ([row[4] isKindOfClass:[NSString class]]) {
 							source.rawReleaseFile = row[4];
 						}
-						NSTimeInterval lastRefresh = [(NSNumber *)row[5] doubleValue];
-						if (lastRefresh != 0.0) {
-							source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
-						}
+						NSTimeInterval lastRefresh = [(NSNumber *)row[6] doubleValue];
+						source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
 						NSMutableArray *packages = [NSMutableArray new];
 						if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `control`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
 							sqlite3_bind_int(statement, 1, source.databaseID);
@@ -244,6 +242,7 @@ static NSString *workingDirectory;
 			Source *knownSource = sources[knownSourceIdentifier];
 			if (knownSource == source) {
 				[sources removeObjectForKey:knownSourceIdentifier];
+				[self reloadRemotePackages];
 				isSourceKnown = YES;
 			}
 		}
@@ -319,6 +318,11 @@ static NSString *workingDirectory;
 				userInfo = @{@"error" : [NSString stringWithFormat:@"An SQLite error occurred while adding the source: %s", sqlite3_errmsg(magma_db)]};
 				returnValue = nil;
 			}
+			else if (sqlite3_prepare_v2(magma_db, "DELETE FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
+				sqlite3_bind_int(statement, 1, databaseID);
+				sqlite3_step(statement);
+				sqlite3_finalize(statement);
+			}
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
 	}
@@ -386,7 +390,6 @@ static NSString *workingDirectory;
 						NSString *version = @((const char *)sqlite3_column_text(statement, 2));
 						NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 3)];
 						NSString *key = [NSString stringWithFormat:@"%@ %@", packageID, version];
-						NSLog(@"Key: %@, exists in dictionary: %i", key, !!oldPackagesDictionary[key]);
 						oldPackagesDictionary[key] = @[ignoreUpdates, firstDiscovery];
 					}
 					sqlite3_finalize(statement);
@@ -494,9 +497,8 @@ if (!response || response.statusCode != 200) { \
 				data = [BZipCompression decompressedDataWithData:data error:&error];
 				if (!error && data) {
 					NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-					NSLog(@"%@", fullPackages);
 					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
-					if (!error || parsedFile) {
+					if (!error && parsedFile && fullPackages) {
 						source.packages = [Package createPackagesUsingArray:parsedFile source:source];
 					}
 					else parseFailure();
