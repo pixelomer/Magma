@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #import "HomeViewController.h"
-#import "PackagesViewController.h"
+#import "InstalledPackagesController.h"
 #import "SourcesViewController.h"
 #import "PackageSearchViewController.h"
 #import "MGViewController.h"
@@ -18,7 +18,7 @@
 	NSMutableArray *viewControllers = @[
 		[HomeViewController alloc],
 		[SourcesViewController alloc],
-		[PackagesViewController alloc],
+		[InstalledPackagesController alloc],
 		[PackageSearchViewController alloc]
 	].mutableCopy;
 	for (NSInteger i = 0; i < tabs.count; i++) {

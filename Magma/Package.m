@@ -51,6 +51,10 @@
 	return packages.copy;
 }
 
+- (NSArray *)tags {
+	return [[self getField:@"tag"] componentsSeparatedByString:@" "];
+}
+
 - (NSComparisonResult)compare:(Package *)package {
 #define IDForPackage(p) [NSString stringWithFormat:@"%@ %@", (p.name ?: p.package), p.version]
 	NSString *packageID1 = IDForPackage(self);

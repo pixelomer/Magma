@@ -1,5 +1,6 @@
 #import "SectionsController.h"
 #import "PackageCell.h"
+#import "SectionPackagesController.h"
 #import "Source.h"
 
 @implementation SectionsController
@@ -22,6 +23,16 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	return sections.count;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	SectionPackagesController *vc = [[SectionPackagesController alloc] initWithSection:sections[indexPath.row] inSource:_source];
+	if (vc) {
+		[self.navigationController pushViewController:vc animated:YES];
+	}
+	else {
+		[tableView deselectRowAtIndexPath:indexPath animated:YES];
+	}
 }
 
 @end
