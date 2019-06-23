@@ -18,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, assign) BOOL ignoresUpdates;
 - (NSString *)rawPackagesEntry;
 - (Database *)database;
+- (NSString * _Nullable)objectForKeyedSubscript:(NSString *)key; // package[@"abc"] = package.rawPackage[@"abc"]
 - (NSString * _Nullable)getField:(NSString *)field;
 - (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source * _Nullable)source;
 + (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSDictionary<NSString *, NSString *> *> *)array source:(Source * _Nullable)source;

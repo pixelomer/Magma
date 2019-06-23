@@ -1,5 +1,6 @@
 #import "Source.h"
 #import "DPKGParser.h"
+#import "Package.h"
 
 @implementation Source
 
@@ -24,8 +25,23 @@
 }
 
 - (void)setPackages:(NSArray<Package *> *)packages {
-	// TODO: Extra operations to set the first discovery date on package
-	_packages = packages;
+	if (packages) {
+		_packages = packages;
+		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
+		for (Package *package in packages) {
+			NSString *section = package.section ?: @"Other";
+			if (sections[section]) {
+				[sections[section] addObject:package];
+			}
+			else {
+				sections[section] = @[package].mutableCopy;
+			}
+		}
+		for (NSString *key in sections.allKeys.copy) {
+			sections[key] = sections[key].copy;
+		}
+		_sections = sections.copy;
+	}
 }
 
 - (NSString *)description {

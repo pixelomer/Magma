@@ -107,6 +107,10 @@
 	return nil;
 }
 
+- (NSString *)objectForKeyedSubscript:(NSString *)key {
+	return _rawPackage[key.lowercaseString];
+}
+
 - (NSString *)rawPackagesEntry {
 	if (_rawPackagesEntry) return _rawPackagesEntry;
 	NSMutableString *string = [NSMutableString new];

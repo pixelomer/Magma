@@ -11,6 +11,7 @@
 @property (nonatomic, assign) int databaseID;
 @property (nonatomic, readonly, strong) NSDate *lastRefresh;
 @property (nonatomic, readonly, assign) BOOL isRefreshing;
+@property (nonatomic, readonly, copy) NSDictionary<NSString *, NSArray<Package *> *> *sections;
 @property (nonatomic, readonly, copy) NSArray<Package *> *packages;
 - (instancetype)initWithBaseURL:(NSString *)baseURL distribution:(NSString *)distribution components:(NSString *)components;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
