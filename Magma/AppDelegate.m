@@ -25,7 +25,9 @@
 		__kindof MGViewController *rootViewController = viewControllers[i];
 		NSArray *itemInfo = tabs[i];
 		rootViewController.tabBarItem = [[UITabBarItem alloc] initWithTabBarSystemItem:[(NSNumber *)itemInfo[0] integerValue] tag:i];
-		[rootViewController.tabBarItem setValue:itemInfo[1] forKey:@"internalTitle"];
+#if !DEBUG
+		[rootViewController.tabBarItem setValue:itemInfo[1] forKey:@"internalTitle"]; // PRIVATE API, NEEDS TO BE REPLACED
+#endif
 		rootViewController.waitForDatabase = itemInfo[2];
 		viewControllers[i] = [[UINavigationController alloc] initWithRootViewController:[rootViewController init]];
 	}

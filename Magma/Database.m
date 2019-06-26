@@ -1,5 +1,6 @@
+// TODO: Completely get rid of out-of-sandbox access and switch to using a bunch of plists from using sqlite3
+
 #import "Database.h"
-#import <sqlite3.h>
 #import <BZipCompression/BZipCompression.h>
 #import "Source.h"
 #import "DPKGParser.h"
@@ -43,64 +44,10 @@ static NSString *workingDirectory;
 
 + (void)setWorkingDirectory:(NSString *)newLocation {
 	BOOL isDir;
-	if (![NSFileManager.defaultManager fileExistsAtPath:newLocation isDirectory:&isDir] || !isDir) {
-		@throw [NSException
-			exceptionWithName:NSInvalidArgumentException
-			reason:@"The specified working directory doesn't exist."
-			userInfo:nil
-		];
-	}
-	if (sqlite3_open([newLocation stringByAppendingPathComponent:@"magma.db"].UTF8String, &magma_db) == SQLITE_OK) {
-		NSArray *queries = @[
-			@"PRAGMA foreign_keys = ON",
-			@"CREATE TABLE IF NOT EXISTS `repositories` ("
-			"  `id` INTEGER NOT NULL UNIQUE,"
-			"  `base_url` TEXT NOT NULL,"
-			"  `dist` TEXT NOT NULL,"
-			"  `components` TEXT NOT NULL DEFAULT '',"
-			"  `Release` TEXT NULL,"
-			"  `last_refresh` REAL NULL,"
-			"  PRIMARY KEY(`base_url`, `dist`, `components`)"
-			")",
-			@"CREATE TABLE IF NOT EXISTS `packages` ("
-			"  `id` INTEGER NOT NULL UNIQUE,"
-			"  `repo_id` INT NOT NULL,"
-			"  `ignore_updates` INT NOT NULL DEFAULT 0,"
-			"  `package` TEXT NOT NULL,"
-			"  `version` TEXT NOT NULL,"
-			"  `control` TEXT NOT NULL,"
-			"  `first_discovery` REAL NOT NULL,"
-			"  PRIMARY KEY(`repo_id`, `package`, `version`),"
-			"  CONSTRAINT FK_repository FOREIGN KEY(`repo_id`) REFERENCES repositories(`id`) ON DELETE CASCADE"
-			")",
-			@"INSERT INTO `repositories` ("
-			"  `id`,"
-			"  `base_url`,"
-			"  `dist`"
-			")"
-			"VALUES ("
-			"  -1,"
-			"  'https://repo.pixelomer.com',"
-			"  './'"
-			")"
-		];
-		for (NSString *query in queries) {
-			char *errorMessage;
-			NSLog(@"%@", query);
-			if ((sqlite3_exec(magma_db, query.UTF8String, NULL, NULL, &errorMessage) != SQLITE_OK) && ![query hasPrefix:@"INSERT"]) {
-				@throw [NSException
-					exceptionWithName:NSInternalInconsistencyException
-					reason:[NSString stringWithFormat:@"sqlite3 Error: %s", errorMessage]
-					userInfo:nil
-				];
-			}
-			else NSLog(@"QUERY OK");
-		}
-	}
-	else {
+	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@{} writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
 		@throw [NSException
 			exceptionWithName:NSInternalInconsistencyException
-			reason:@"Failed to open/create the sqlite3 database."
+			reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
 			userInfo:nil
 		];
 	}
