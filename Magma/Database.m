@@ -19,9 +19,9 @@
 
 @implementation Database
 
-static sqlite3 *magma_db;
 static Database *sharedInstance;
 static NSString *workingDirectory;
+static NSArray *paths;
 
 + (instancetype)alloc {
 	return sharedInstance ? nil : [super alloc];
@@ -29,7 +29,7 @@ static NSString *workingDirectory;
 
 + (instancetype)sharedInstance {
 	if (!sharedInstance) {
-		if (!magma_db) {
+		if (!workingDirectory) {
 			@throw [NSException
 				exceptionWithName:NSGenericException
 				reason:@"The working directory must be set before calling +[Database sharedInstance]."
@@ -44,7 +44,7 @@ static NSString *workingDirectory;
 
 + (void)setWorkingDirectory:(NSString *)newLocation {
 	BOOL isDir;
-	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@{} writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
+	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@[] writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
 		@throw [NSException
 			exceptionWithName:NSInternalInconsistencyException
 			reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
@@ -52,23 +52,22 @@ static NSString *workingDirectory;
 		];
 	}
 	workingDirectory = newLocation.copy;
+	paths = @[
+		[workingDirectory stringByAppendingPathComponent:@"sources.plist"],
+		[workingDirectory stringByAppendingPathComponent:@"lists"]
+	];
+}
+
++ (NSString *)sourcesPlistPath {
+	return paths.firstObject;
+}
+
++ (NSString *)listsDirectoryPath {
+	return paths.lastObject;
 }
 
 + (NSString *)workingDirectory {
 	return workingDirectory;
-}
-
-+ (int)nextIdentifierForTable:(NSString *)tableName inSQLiteDatabase:(sqlite3 *)db {
-	sqlite3_stmt *statement;
-	int nextID = 0;
-	if (sqlite3_prepare_v2(db, [NSString stringWithFormat:@"SELECT MAX(`id`) FROM `%@`", tableName].UTF8String, -1, &statement, NULL) == SQLITE_OK) {
-		if (sqlite3_step(statement) == SQLITE_ROW) {
-			nextID = sqlite3_column_int(statement, 0) + 1;
-		}
-		sqlite3_finalize(statement);
-	}
-	else NSLog(@"%s", sqlite3_errmsg(magma_db));
-	return nextID;
 }
 
 - (BOOL)isLoaded {
@@ -83,72 +82,67 @@ static NSString *workingDirectory;
 	return self;
 }
 
+- (void)syncFiles {
+
+}
+
 - (void)startLoadingDataIfNeeded {
 	if (!_isLoaded) {
-		if (!magma_db) {
+		if (!workingDirectory) {
 			@throw [NSException
 				exceptionWithName:NSInternalInconsistencyException
-				reason:@"The sqlite3 database has to be opened before calling this method. Call +[Database setWorkingDirectory:] in order to do so."
+				reason:@"The working directory has to be set before calling this method. Call +[Database setWorkingDirectory:] in order to do so."
 				userInfo:nil
 			];
 		}
 		// Load data from the filesystem
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
 			BOOL success = YES;
-			sqlite3_stmt *statement;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpointer-sign"
-
-			// Load repositories from database
-			if (success = (sqlite3_prepare_v2(magma_db, "SELECT * FROM `repositories`", -1, &statement, NULL) == SQLITE_OK)) {
-				NSMutableArray *rows = [NSMutableArray new];
-				while (sqlite3_step(statement) == SQLITE_ROW) {
-					int            repo_id = sqlite3_column_int(statement, 0);  // Unique
-					const char   *base_url = sqlite3_column_text(statement, 1); // Composite Primary
-					const char       *dist = sqlite3_column_text(statement, 2); // Composite Primary
-					const char *components = sqlite3_column_text(statement, 3); // Composite Primary (can be an empty string)
-					const char    *Release = sqlite3_column_text(statement, 4); // Full Release file, can be null
-					NSTimeInterval lastRefreshInterval = sqlite3_column_double(statement, 5);
-					NSLog(@"%f", lastRefreshInterval);
-					BOOL       isBasicRepo = (!components || !*components);
-					//                 0           1            2        3                        4                          5               6
-					[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
+			// Load repositories
+			NSDictionary<NSNumber *, NSDictionary *> *sourcesPlist = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
+/*
+BOOL       isBasicRepo = (!components || !*components);
+//                 0           1            2        3                        4                          5               6
+[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
+*/
+			for (NSNumber *_sourceID in sourcesPlist) {
+				Source *source;
+				int sourceID = _sourceID.intValue;
+				NSDictionary<NSString *, id> *sourceDict = sourcesPlist[_sourceID];
+				NSURL *baseURL = [NSURL URLWithString:sourceDict[@"baseURL"]];
+				if (sourceDict[@"components"]) {
+					source = [self addSourceWithURL:baseURL ID:sourceID];
 				}
-				sqlite3_finalize(statement);
-				for (NSArray *row in rows) {
-					Source *source;
-					if ([(NSNumber *)row[5] boolValue]) {
-						source = [self addSourceWithURL:row[1] ID:row[0]];
+				else {
+					source = [self addSourceWithBaseURL:baseURL distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:sourceID];
+				}
+				if (source) {
+// HEY FUTURE PIXELOMER CONTINUE FROM HERE
+					// FIXME: Load data from a separate file
+					if ([row[4] isKindOfClass:[NSString class]]) {
+						source.rawReleaseFile = row[4];
 					}
-					else {
-						source = [self addSourceWithBaseURL:row[1] distribution:row[2] components:row[3] ID:row[0]];
-					}
-					if (source) {
-						if ([row[4] isKindOfClass:[NSString class]]) {
-							source.rawReleaseFile = row[4];
-						}
-						NSTimeInterval lastRefresh = [(NSNumber *)row[6] doubleValue];
-						source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
-						NSMutableArray *packages = [NSMutableArray new];
-						if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `control`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
-							sqlite3_bind_int(statement, 1, source.databaseID);
-							while (sqlite3_step(statement) == SQLITE_ROW) {
-								BOOL ignoresUpdates = sqlite3_column_int(statement, 0);
-								NSString *control = @((const char *)sqlite3_column_text(statement, 1));
-								NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 2)];
-								NSDictionary *dict = [DPKGParser parsePackageEntry:control error:nil];
-								NSLog(@"dict: %@", dict);
-								if (dict) {
-									Package *package = [[Package alloc] initWithDictionary:dict source:source];
-									package.firstDiscovery = firstDiscovery;
-									package.ignoresUpdates = ignoresUpdates;
-									if (package) [packages addObject:package];
-								}
+					NSTimeInterval lastRefresh = [(NSNumber *)row[6] doubleValue];
+					source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
+					NSMutableArray *packages = [NSMutableArray new];
+					if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `control`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
+						sqlite3_bind_int(statement, 1, source.databaseID);
+						while (sqlite3_step(statement) == SQLITE_ROW) {
+							BOOL ignoresUpdates = sqlite3_column_int(statement, 0);
+							NSString *control = @((const char *)sqlite3_column_text(statement, 1));
+							NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 2)];
+							NSDictionary *dict = [DPKGParser parsePackageEntry:control error:nil];
+							NSLog(@"dict: %@", dict);
+							if (dict) {
+								Package *package = [[Package alloc] initWithDictionary:dict source:source];
+								package.firstDiscovery = firstDiscovery;
+								package.ignoresUpdates = ignoresUpdates;
+								if (package) [packages addObject:package];
 							}
-							sqlite3_finalize(statement);
 						}
-						source.packages = packages.copy;
+						sqlite3_finalize(statement);
 					}
+					source.packages = packages.copy;
 				}
 			}
 

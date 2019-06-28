@@ -31,6 +31,8 @@
 // Configuration:
 // Use these methods to configure how the database will be loaded. These methods can only be called before calling +[Database sharedInstance].
 + (void)setWorkingDirectory:(NSString *)newLocation;
++ (NSString *)sourcesPlistPath;
++ (NSString *)listsDirectoryPath;
 
 // Initialization:
 // Calling +[Database sharedInstance] for the first time will initialize the singleton Database object.
