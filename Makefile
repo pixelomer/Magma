@@ -1,5 +1,4 @@
-TARGET = ::11.0
-ARCHS = arm64 arm64e
+TARGET = ::9.0
 
 include $(THEOS)/makefiles/common.mk
 
