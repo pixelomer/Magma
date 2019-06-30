@@ -1,0 +1,18 @@
+sources = {
+	id = {
+		"baseURL" = string
+		"components" = string
+		"dist" = string
+		"lastRefresh" = date
+	}
+}
+packages = (
+	(
+		{
+			"firstDiscovery" = date
+		},
+		{
+			parsed control file
+		}
+	)
+)

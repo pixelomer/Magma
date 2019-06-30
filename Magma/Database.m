@@ -43,8 +43,7 @@ static NSArray *paths;
 }
 
 + (void)setWorkingDirectory:(NSString *)newLocation {
-	BOOL isDir;
-	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@[] writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
+	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@{} writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
 		@throw [NSException
 			exceptionWithName:NSInternalInconsistencyException
 			reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
@@ -82,8 +81,68 @@ static NSArray *paths;
 	return self;
 }
 
-- (void)syncFiles {
+- (void)syncFilesForSource:(Source *)source {
+	if ([sources.allValues indexOfObjectIdenticalTo:source] != NSNotFound) {
+		[source.parsedReleaseFile writeToFile:[self.class releaseFilePathForSource:source] atomically:YES];
+		if (source.packages) {
+			NSLog(@"if check succeeded.");
+			NSMutableDictionary *oldPackagesDictionary = [NSMutableDictionary new];
+			NSArray *detailedPackages = [self.class packagesFileForSourceFromDisk:source];
+			for (NSArray<NSDictionary *> *packageDetails in detailedPackages) {
+				NSString *packageID = packageDetails[1][@"package"];
+				NSString *version = packageDetails[1][@"version"];
+				NSDate *firstDiscovery = packageDetails[0][@"firstDiscovery"];
+				NSString *key = [NSString stringWithFormat:@"%@ %@", packageID, version];
+				oldPackagesDictionary[key] = firstDiscovery;
+			}
+			NSMutableArray *newPackagesFile = [NSMutableArray new];
+			NSDate *date = NSDate.date;
+			for (Package *newPackage in source.packages) {
+				NSString *key = [NSString stringWithFormat:@"%@ %@", newPackage.package, newPackage.version];
+				[newPackagesFile addObject:@[
+					@{
+						@"firstDiscovery" : (oldPackagesDictionary[key] ?: date)
+					},
+					newPackage.rawPackage
+				]];
+			}
+			NSLog(@"%@", newPackagesFile);
+			[newPackagesFile writeToFile:[self.class packagesFilePathForSource:source] atomically:YES];
+		}
+	}
+	else {
+		[NSFileManager.defaultManager removeItemAtPath:[self.class releaseFilePathForSource:source] error:nil];
+		[NSFileManager.defaultManager removeItemAtPath:[self.class packagesFilePathForSource:source] error:nil];
+		[sourcesPlist removeObjectForKey:@(source.databaseID)];
+	}
+	NSMutableDictionary *serializableSourcesPlist = [NSMutableDictionary new];
+	for (NSNumber *NSID in sourcesPlist) {
+		NSString *ID = [NSID stringValue];
+		serializableSourcesPlist[ID] = sourcesPlist[NSID];
+	}
+	[serializableSourcesPlist writeToFile:self.class.sourcesPlistPath atomically:YES];
+}
 
+- (void)syncFiles {
+	for (Source *source in sources.allValues) {
+		[self syncFilesForSource:source];
+	}
+}
+
++ (NSString *)releaseFilePathForSource:(Source *)source {
+	return [self.listsDirectoryPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%i_Release.plist", source.databaseID]];
+}
+
++ (NSString *)packagesFilePathForSource:(Source *)source {
+	return [self.listsDirectoryPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%i_Packages.plist", source.databaseID]];
+}
+
++ (NSDictionary *)releaseFileForSourceFromDisk:(Source *)source {
+	return [NSDictionary dictionaryWithContentsOfFile:[self releaseFilePathForSource:source]];
+}
+
++ (NSArray<NSArray<NSDictionary *> *> *)packagesFileForSourceFromDisk:(Source *)source {
+	return [NSArray arrayWithContentsOfFile:[self packagesFilePathForSource:source]];
 }
 
 - (void)startLoadingDataIfNeeded {
@@ -97,62 +156,43 @@ static NSArray *paths;
 		}
 		// Load data from the filesystem
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-			BOOL success = YES;
 			// Load repositories
-			NSDictionary<NSNumber *, NSDictionary *> *sourcesPlist = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
-/*
-BOOL       isBasicRepo = (!components || !*components);
-//                 0           1            2        3                        4                          5               6
-[rows addObject:@[@(repo_id), @(base_url), @(dist), @(components), Release ? @(Release) : NSNull.null, @(isBasicRepo), @(lastRefreshInterval)]];
-*/
-			for (NSNumber *_sourceID in sourcesPlist) {
+			sourcesPlist = [NSMutableDictionary new];
+			NSDictionary<NSString *, NSDictionary *> *storedFile = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
+			for (NSString *ID in storedFile) {
+				NSNumber *NSID = @([ID intValue]);
+				sourcesPlist[NSID] = storedFile[ID].mutableCopy;
+			}
+			for (NSNumber *_sourceID in sourcesPlist.allKeys.copy) {
 				Source *source;
-				int sourceID = _sourceID.intValue;
 				NSDictionary<NSString *, id> *sourceDict = sourcesPlist[_sourceID];
-				NSURL *baseURL = [NSURL URLWithString:sourceDict[@"baseURL"]];
-				if (sourceDict[@"components"]) {
-					source = [self addSourceWithURL:baseURL ID:sourceID];
+				if ([(NSString *)sourceDict[@"components"] length] > 0) {
+					source = [self addSourceWithURL:sourceDict[@"baseURL"] ID:_sourceID];
 				}
 				else {
-					source = [self addSourceWithBaseURL:baseURL distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:sourceID];
+					source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
 				}
 				if (source) {
-// HEY FUTURE PIXELOMER CONTINUE FROM HERE
-					// FIXME: Load data from a separate file
-					if ([row[4] isKindOfClass:[NSString class]]) {
-						source.rawReleaseFile = row[4];
-					}
-					NSTimeInterval lastRefresh = [(NSNumber *)row[6] doubleValue];
-					source.lastRefresh = [NSDate dateWithTimeIntervalSince1970:lastRefresh];
+					source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
+					source.lastRefresh = sourceDict[@"lastRefresh"];
 					NSMutableArray *packages = [NSMutableArray new];
-					if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `control`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
-						sqlite3_bind_int(statement, 1, source.databaseID);
-						while (sqlite3_step(statement) == SQLITE_ROW) {
-							BOOL ignoresUpdates = sqlite3_column_int(statement, 0);
-							NSString *control = @((const char *)sqlite3_column_text(statement, 1));
-							NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 2)];
-							NSDictionary *dict = [DPKGParser parsePackageEntry:control error:nil];
-							NSLog(@"dict: %@", dict);
-							if (dict) {
-								Package *package = [[Package alloc] initWithDictionary:dict source:source];
-								package.firstDiscovery = firstDiscovery;
-								package.ignoresUpdates = ignoresUpdates;
-								if (package) [packages addObject:package];
-							}
-						}
-						sqlite3_finalize(statement);
+					NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
+					for (NSArray *packageInfo in rawPackagesFile) {
+						if (packageInfo.count < 2) continue;
+						NSDictionary *packageConfiguration = packageInfo[0];
+						NSDictionary *parsedControl = packageInfo[1];
+						NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
+						Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
+						package.firstDiscovery = firstDiscovery;
+						if (package) [packages addObject:package];
 					}
 					source.packages = packages.copy;
 				}
 			}
-
-			// Load local packages from /var/lib/dpkg
-			[self reloadLocalPackages];
 			
 			// Put packages from all of the sources into one sorted array
 			[self reloadRemotePackages];
 
-#pragma GCC diagnostic pop
 			_isLoaded = YES;
 			[NSNotificationCenter.defaultCenter
 				postNotificationName:DatabaseDidLoad
@@ -176,37 +216,21 @@ BOOL       isBasicRepo = (!components || !*components);
 				userInfo:@{ @"error" : @"It is not possible to remove a source while refreshing." }
 			];
 		}
-		sqlite3_stmt *statement;
 		BOOL isSourceKnown = NO;
 		NSArray<NSString *> *keys = sources.allKeys.copy;
 		for (NSString *knownSourceIdentifier in keys) {
 			Source *knownSource = sources[knownSourceIdentifier];
 			if (knownSource == source) {
 				[sources removeObjectForKey:knownSourceIdentifier];
-				[self reloadRemotePackages];
 				isSourceKnown = YES;
 			}
 		}
-		BOOL success = YES;
-		if (isSourceKnown && (success = (sqlite3_prepare_v2(magma_db, "DELETE FROM `repositories` WHERE `id`=?", -1, &statement, NULL) == SQLITE_OK))) {
-			sqlite3_bind_int(statement, 1, source.databaseID);
-			success = (sqlite3_step(statement) == SQLITE_DONE);
-			sqlite3_finalize(statement);
-		}
-		if (success) {
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidRemoveSource
-				object:self
-				userInfo:@{ @"source" : source }
-			];
-		}
-		else {
-			@throw [NSException
-				exceptionWithName:NSInternalInconsistencyException
-				reason:[NSString stringWithFormat:@"Failed to prepare the SQLite query to remove the specified source. This can cause the application to behave unexpectedly.\nSQLite Error: %s", sqlite3_errmsg(magma_db)]
-				userInfo:nil
-			];
-		}
+		if (isSourceKnown) [self syncFilesForSource:source];
+		[NSNotificationCenter.defaultCenter
+			postNotificationName:DatabaseDidRemoveSource
+			object:self
+			userInfo:@{ @"source" : source }
+		];
 	});
 }
 
@@ -242,30 +266,18 @@ BOOL       isBasicRepo = (!components || !*components);
 		}
 		else {
 			// A repository ID wasn't specified. We need to add the repository entry ourselves.
-			BOOL success = YES;
-			int databaseID = [self.class nextIdentifierForTable:@"repositories" inSQLiteDatabase:magma_db];
+			int databaseID = (sourcesPlist.count > 0) ? ([(NSNumber *)[sourcesPlist.allKeys valueForKeyPath:@"@max.self"] intValue] + 1) : 0;
 			source.databaseID = databaseID;
-			sqlite3_stmt *statement;
-			if (success = (sqlite3_prepare_v2(magma_db, "INSERT OR REPLACE INTO `repositories` (`id`, `base_url`, `dist`, `components`) VALUES (?, ?, ?, ?)", -1, &statement, NULL) == SQLITE_OK)) {
-				sqlite3_bind_int(statement, 1, databaseID);
-				sqlite3_bind_text(statement, 2, source.baseURL.absoluteString.UTF8String);
-				sqlite3_bind_text(statement, 3, source.distribution.UTF8String);
-				sqlite3_bind_text(statement, 4, [source.components componentsJoinedByString:@" "].UTF8String ?: "");
-				success = (sqlite3_step(statement) == SQLITE_DONE);
-				sqlite3_finalize(statement);
-			}
-			if (!success) {
-				notificationName = DatabaseDidEncounterAnError;
-				userInfo = @{@"error" : [NSString stringWithFormat:@"An SQLite error occurred while adding the source: %s", sqlite3_errmsg(magma_db)]};
-				returnValue = nil;
-			}
-			else if (sqlite3_prepare_v2(magma_db, "DELETE FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
-				sqlite3_bind_int(statement, 1, databaseID);
-				sqlite3_step(statement);
-				sqlite3_finalize(statement);
-			}
+			[self syncFilesForSource:source]; // Delete old entries with the same ID.
+			sourcesPlist[@(databaseID)] = [@{
+				@"baseURL" : source.baseURL.absoluteString,
+				@"components" : ([source.components componentsJoinedByString:@" "] ?: @""),
+				@"dist" : source.distribution,
+				@"lastRefresh" : [[NSDate alloc] initWithTimeIntervalSince1970:0]
+			} mutableCopy];
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
+		[self syncFilesForSource:source]; // Add the new source to the sources.plist file.
 	}
 	else {
 		notificationName = DatabaseDidEncounterAnError;
@@ -302,73 +314,8 @@ BOOL       isBasicRepo = (!components || !*components);
 
 - (void)waitForSourcesToRefresh {
 	[_refreshQueue waitUntilAllOperationsAreFinished];
-	NSDate *lastRefresh = NSDate.date;
-	NSTimeInterval lastRefreshInterval = lastRefresh.timeIntervalSince1970;
 	[self reloadRemotePackages];
-	for (Source *source in sources.allValues) {
-		sqlite3_stmt *statement;
-		if (sqlite3_prepare_v2(magma_db, "UPDATE `repositories` SET `Release`=?, `last_refresh`=? WHERE `id`=?", -1, &statement, NULL) == SQLITE_OK) {
-			if (source.rawReleaseFile) {
-				sqlite3_bind_text(statement, 1, source.rawReleaseFile.UTF8String);
-				sqlite3_bind_double(statement, 2, lastRefreshInterval);
-				source.lastRefresh = lastRefresh;
-			}
-			else {
-				sqlite3_bind_null(statement, 1);
-				sqlite3_bind_null(statement, 2);
-				source.lastRefresh = nil;
-			}
-			sqlite3_bind_int(statement, 3, source.databaseID);
-			BOOL success = (sqlite3_step(statement) == SQLITE_DONE);
-			sqlite3_finalize(statement);
-			if (success) {
-				NSMutableDictionary *oldPackagesDictionary = [NSMutableDictionary new];
-				if (sqlite3_prepare_v2(magma_db, "SELECT `ignore_updates`, `package`, `version`, `first_discovery` FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
-					sqlite3_bind_int(statement, 1, source.databaseID);
-					while (sqlite3_step(statement) == SQLITE_ROW) {
-						NSNumber *ignoreUpdates = @(sqlite3_column_int(statement, 0));
-						NSString *packageID = @((const char *)sqlite3_column_text(statement, 1));
-						NSString *version = @((const char *)sqlite3_column_text(statement, 2));
-						NSDate *firstDiscovery = [NSDate dateWithTimeIntervalSince1970:sqlite3_column_double(statement, 3)];
-						NSString *key = [NSString stringWithFormat:@"%@ %@", packageID, version];
-						oldPackagesDictionary[key] = @[ignoreUpdates, firstDiscovery];
-					}
-					sqlite3_finalize(statement);
-					if (sqlite3_prepare_v2(magma_db, "DELETE FROM `packages` WHERE `repo_id`=?", -1, &statement, NULL) == SQLITE_OK) {
-						sqlite3_bind_int(statement, 1, source.databaseID);
-						success = (sqlite3_step(statement) == SQLITE_DONE);
-						sqlite3_finalize(statement);
-						if (success) {
-							int nextID = [self.class nextIdentifierForTable:@"packages" inSQLiteDatabase:magma_db];
-							for (Package *newPackage in source.packages) {
-								NSString *key = [NSString stringWithFormat:@"%@ %@", newPackage.package, newPackage.version];
-								NSArray *oldInfo = oldPackagesDictionary[key];
-								if (oldInfo) {
-									newPackage.ignoresUpdates = [(NSNumber *)oldInfo[0] boolValue];
-									newPackage.firstDiscovery = oldInfo[1];
-								}
-								else {
-									newPackage.ignoresUpdates = NO;
-									newPackage.firstDiscovery = lastRefresh;
-								}
-								if (sqlite3_prepare_v2(magma_db, "INSERT INTO `packages` VALUES (?, ?, ?, ?, ?, ?, ?)", -1, &statement, NULL) == SQLITE_OK) {
-									sqlite3_bind_int(statement, 1, nextID++);
-									sqlite3_bind_int(statement, 2, source.databaseID);
-									sqlite3_bind_int(statement, 3, !!newPackage.ignoresUpdates);
-									sqlite3_bind_text(statement, 4, newPackage.package.UTF8String);
-									sqlite3_bind_text(statement, 5, newPackage.version.UTF8String);
-									sqlite3_bind_text(statement, 6, newPackage.rawPackagesEntry.UTF8String);
-									sqlite3_bind_double(statement, 7, newPackage.firstDiscovery.timeIntervalSince1970);
-									sqlite3_step(statement);
-									sqlite3_finalize(statement);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	[self syncFiles];
 	NSLog(@"All of the sources refreshed.");
 	_isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
@@ -441,6 +388,7 @@ if (!response || response.statusCode != 200) { \
 					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
 					if (!error && parsedFile && fullPackages) {
 						source.packages = [Package createPackagesUsingArray:parsedFile source:source];
+						sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
 					}
 					else parseFailure();
 				}
@@ -450,6 +398,7 @@ if (!response || response.statusCode != 200) { \
 		else parseFailure();
 	});
 	NSLog(@"[Refresh Result] %@", userInfo);
+	NSLog(@"plist: %@", sourcesPlist);
 #undef fetch
 #undef parseFailure
 	// Notify observers about the completion of the operation
@@ -471,16 +420,6 @@ if (!response || response.statusCode != 200) { \
 	userInfo = nil;
 }
 
-- (void)_reloadLocalPackages {
-	NSArray *newlySortedLocalPackageDicts = [DPKGParser parseFileAtPath:@"/var/lib/dpkg/status" error:nil];
-	if (!newlySortedLocalPackageDicts) _sortedLocalPackages = @[];
-	else {
-		NSMutableArray *newlySortedLocalPackages = [Package createPackagesUsingArray:newlySortedLocalPackageDicts source:nil].mutableCopy;
-		[newlySortedLocalPackages sortUsingSelector:@selector(compare:)];
-		_sortedLocalPackages = newlySortedLocalPackages;
-	}
-}
-
 - (void)_reloadRemotePackages {
 	NSMutableArray *remotePackages = [NSMutableArray new];
 	for (Source *source in sources.allValues) {
@@ -488,10 +427,6 @@ if (!response || response.statusCode != 200) { \
 	}
 	[remotePackages sortUsingSelector:@selector(compare:)];
 	_sortedRemotePackages = remotePackages;
-}
-
-- (void)reloadLocalPackages {
-	[self reloadLocalPackagesAsynchronously:NO];
 }
 
 - (void)reloadRemotePackages {
@@ -511,22 +446,6 @@ if (!response || response.statusCode != 200) { \
 	}
 	else {
 		[self _reloadRemotePackages];
-	}
-}
-
-- (void)reloadLocalPackagesAsynchronously:(BOOL)async {
-	if (async) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-			[self _reloadLocalPackages];
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidFinishReloadingLocalPackages
-				object:self
-				userInfo:nil
-			];
-		});
-	}
-	else {
-		[self _reloadLocalPackages];
 	}
 }
 

@@ -11,7 +11,7 @@
 	self = [super init];
 	_baseURL = baseURL;
 	_distribution = distribution ?: @"./";
-	_components = [components componentsSeparatedByString:@" "];
+	_components = (components.length > 0) ? [components componentsSeparatedByString:@" "] : nil;
 	if (_components.count == 0) _components = nil;
 	return self;
 }
@@ -22,6 +22,22 @@
 		_distribution,
 		includeComponents ? ([@" " stringByAppendingString:([_components componentsJoinedByString:@" "] ?: @"")]) : @""
 	];
+}
+
+- (void)setParsedReleaseFile:(NSDictionary *)parsedReleaseFile {
+	if (!parsedReleaseFile) {
+		_rawReleaseFile = nil;
+		_parsedReleaseFile = nil;
+	}
+	else {
+		NSMutableArray *reversedReleaseFileComponents = [NSMutableArray new];
+		for (NSString *field in parsedReleaseFile) {
+			NSString *value = parsedReleaseFile[field];
+			[reversedReleaseFileComponents addObject:[NSString stringWithFormat:@"%@: %@", field, [value stringByReplacingOccurrencesOfString:@"\n" withString:@"\n  "]]];
+		}
+		_rawReleaseFile = [reversedReleaseFileComponents componentsJoinedByString:@"\n"];
+		_parsedReleaseFile = parsedReleaseFile;
+	}
 }
 
 - (void)setPackages:(NSArray<Package *> *)packages {

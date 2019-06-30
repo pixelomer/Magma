@@ -26,6 +26,7 @@
 	BOOL _isLoaded;
 	int highestRepoID;
 	NSMutableDictionary<NSString *, Source *> *sources;
+	NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, id> *> *sourcesPlist;
 }
 
 // Configuration:
