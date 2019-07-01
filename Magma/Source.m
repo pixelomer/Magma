@@ -1,6 +1,7 @@
 #import "Source.h"
 #import "DPKGParser.h"
 #import "Package.h"
+#import <Compression/Compression.h>
 
 @implementation Source
 
@@ -92,12 +93,29 @@
 	return releaseFileURL;
 }
 
-- (NSURL *)packagesFileURL {
++ (NSString *)extractPackagesFileData:(NSData *)data usingAlgorithm:(PackagesAlgorithm)algorithm {
+	if ([algorithm isEqualToString:PackagesAlgorithmBZip2]) {
+		return [[NSString alloc] initWithData:[BZipCompression decompressedDataWithData:data error:nil] encoding:NSUTF8StringEncoding];
+	}
+	else if ([algorithm isEqualToString:PackagesAlgorithmGZ]) {
+		return [[NSString alloc] initWithData:[data gunzippedData] encoding:NSUTF8StringEncoding];
+	}
+	else if ([algorithm isEqualToString:PackagesAlgorithmXZ]) {
+		// FIX ME
+	}
+	return nil;
+}
+
+- (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs {
 	NSURL *packagesFileURLParent = self.filesURL;
 	if (_components) {
-		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:@"binary-iphoneos-arm"];
+		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:@"binary-amd64"];
 	}
-	return [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"];
+	return @{
+		PackagesAlgorithmBZip2 : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"],
+		PackagesAlgorithmGZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.gz"],
+		PackagesAlgorithmXZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.xz"]
+	};
 }
 
 - (NSURL *)iconURL {

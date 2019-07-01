@@ -1,7 +1,6 @@
 // TODO: Completely get rid of out-of-sandbox access and switch to using a bunch of plists from using sqlite3
 
 #import "Database.h"
-#import <BZipCompression/BZipCompression.h>
 #import "Source.h"
 #import "DPKGParser.h"
 #import "Package.h"
@@ -10,6 +9,7 @@
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
 - (void)setPackages:(NSArray<Package *> *)packages;
+- (void)setArchitecture:(NSString *)architecture;
 @end
 
 @interface Package(Private)
@@ -85,7 +85,6 @@ static NSArray *paths;
 	if ([sources.allValues indexOfObjectIdenticalTo:source] != NSNotFound) {
 		[source.parsedReleaseFile writeToFile:[self.class releaseFilePathForSource:source] atomically:YES];
 		if (source.packages) {
-			NSLog(@"if check succeeded.");
 			NSMutableDictionary *oldPackagesDictionary = [NSMutableDictionary new];
 			NSArray *detailedPackages = [self.class packagesFileForSourceFromDisk:source];
 			for (NSArray<NSDictionary *> *packageDetails in detailedPackages) {
@@ -166,7 +165,7 @@ static NSArray *paths;
 			for (NSNumber *_sourceID in sourcesPlist.allKeys.copy) {
 				Source *source;
 				NSDictionary<NSString *, id> *sourceDict = sourcesPlist[_sourceID];
-				if ([(NSString *)sourceDict[@"components"] length] > 0) {
+				if ([(NSString *)sourceDict[@"components"] length] <= 0) {
 					source = [self addSourceWithURL:sourceDict[@"baseURL"] ID:_sourceID];
 				}
 				else {
@@ -351,15 +350,16 @@ static NSArray *paths;
 		userInfo:@{ @"source" : source }
 	];
 	NSLog(@"Refreshing: %@", source);
+	NSString *successReason = @"Operation completed successfully";
+	id successCode = NSNull.null;
 	NSMutableDictionary *userInfo = @{
 		@"source"    : source,
-		@"reason"    : @"Operation completed successfully",
-		@"errorCode" : NSNull.null // NSNull = success, NSNumber = failure
+		@"reason"    : successReason,
+		@"errorCode" : successCode
 	}.mutableCopy;
 
 	// Refresh
 	NSURL *releaseFileURL = source.releaseFileURL;
-	NSURL *packagesFileURL = source.packagesFileURL;
 	NSHTTPURLResponse *response = nil;
 	NSError *error = nil;
 	NSData *data = [self.class requestDataFromURL:releaseFileURL response:&response error:nil];
@@ -376,24 +376,29 @@ data = [self.class requestDataFromURL:url response:&response error:nil]; \
 if (!response || response.statusCode != 200) { \
 	userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url]; \
 	userInfo[@"errorCode"] = @(response.statusCode); \
-} else block
+} else { \
+	userInfo[@"reason"] = successReason; \
+	userInfo[@"errorCode"] = successCode; \
+	block \
+}
 	fetch(releaseFileURL, {
 		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
-			fetch(packagesFileURL, {
-				data = [BZipCompression decompressedDataWithData:data error:&error];
-				if (!error && data) {
-					NSString *fullPackages = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+			NSDictionary *possiblePackagesFileURLs = source.possiblePackagesFileURLs;
+			for (NSString *algorithm in possiblePackagesFileURLs) {
+				NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
+				fetch(packagesFileURL, {
+					NSString *fullPackages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
 					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
 					if (!error && parsedFile && fullPackages) {
 						source.packages = [Package createPackagesUsingArray:parsedFile source:source];
 						sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
+						break;
 					}
 					else parseFailure();
-				}
-				else parseFailure();
-			});
+				});
+			}
 		}
 		else parseFailure();
 	});
