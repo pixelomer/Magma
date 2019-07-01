@@ -10,6 +10,5 @@ ifeq ($(I_MODIFIED_EVERYTHING),1)
 Magma_CFLAGS += -ferror-limit=0
 endif
 Magma_LDFLAGS = -L./lib -lbz2
-Magma_CODESIGN_FLAGS = -SMagma/Magma.entitlements
 
 include $(THEOS_MAKE_PATH)/application.mk

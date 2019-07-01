@@ -398,7 +398,6 @@ if (!response || response.statusCode != 200) { \
 		else parseFailure();
 	});
 	NSLog(@"[Refresh Result] %@", userInfo);
-	NSLog(@"plist: %@", sourcesPlist);
 #undef fetch
 #undef parseFailure
 	// Notify observers about the completion of the operation
