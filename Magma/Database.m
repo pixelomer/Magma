@@ -9,7 +9,6 @@
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
 - (void)setPackages:(NSArray<Package *> *)packages;
-- (void)setArchitecture:(NSString *)architecture;
 @end
 
 @interface Package(Private)
@@ -166,10 +165,10 @@ static NSArray *paths;
 				Source *source;
 				NSDictionary<NSString *, id> *sourceDict = sourcesPlist[_sourceID];
 				if ([(NSString *)sourceDict[@"components"] length] <= 0) {
-					source = [self addSourceWithURL:sourceDict[@"baseURL"] ID:_sourceID];
+					source = [self addSourceWithURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] ID:_sourceID];
 				}
 				else {
-					source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
+					source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
 				}
 				if (source) {
 					source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
@@ -233,15 +232,15 @@ static NSArray *paths;
 	});
 }
 
-- (void)addSourceWithURL:(NSString *)baseURL {
-	[self addSourceWithBaseURL:baseURL distribution:@"./" components:nil];
+- (void)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch {
+	[self addSourceWithBaseURL:baseURL architecture:arch distribution:@"./" components:nil];
 }
 
-- (Source *)addSourceWithURL:(NSString *)baseURL ID:(NSNumber *)repoID {
-	return [self addSourceWithBaseURL:baseURL distribution:@"./" components:nil ID:repoID];
+- (Source *)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch ID:(NSNumber *)repoID {
+	return [self addSourceWithBaseURL:baseURL architecture:arch distribution:@"./" components:nil ID:repoID];
 }
 
-- (void)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components {
+- (void)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components {
 	if (_isRefreshing) {
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			[NSNotificationCenter.defaultCenter
@@ -251,7 +250,7 @@ static NSArray *paths;
 			];
 		});
 	}
-	[self addSourceWithBaseURL:baseURL distribution:dist components:components ID:nil];
+	[self addSourceWithBaseURL:baseURL architecture:arch distribution:dist components:components ID:nil];
 }
 
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {
@@ -272,7 +271,8 @@ static NSArray *paths;
 				@"baseURL" : source.baseURL.absoluteString,
 				@"components" : ([source.components componentsJoinedByString:@" "] ?: @""),
 				@"dist" : source.distribution,
-				@"lastRefresh" : [[NSDate alloc] initWithTimeIntervalSince1970:0]
+				@"lastRefresh" : [[NSDate alloc] initWithTimeIntervalSince1970:0],
+				@"arch" : source.architecture
 			} mutableCopy];
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
@@ -293,9 +293,9 @@ static NSArray *paths;
 	return returnValue;
 }
 
-- (Source *)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components ID:(NSNumber *)_repoID {
+- (Source *)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components ID:(NSNumber *)_repoID {
 	if (!sources) sources = [NSMutableDictionary new];
-	__block Source *source = [[Source alloc] initWithBaseURL:baseURL distribution:dist components:components];
+	__block Source *source = [[Source alloc] initWithBaseURL:baseURL architecture:arch distribution:dist components:components];
 	if (source) {
 		if (_repoID) {
 			return [self addIncompleteSource:source ID:_repoID];

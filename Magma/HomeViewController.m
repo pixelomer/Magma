@@ -23,7 +23,12 @@
 		[alertController addAction:[UIAlertAction
 			actionWithTitle:@"Dismiss"
 			style:UIAlertActionStyleCancel
-			handler:^(id action){isPresentingMessage=NO;dispatch_async(dispatch_get_main_queue(),^{[self presentNextMessageIfAvailable];});}
+			handler:^(id action){
+				isPresentingMessage = NO;
+				dispatch_async(dispatch_get_main_queue(),^{
+					[self presentNextMessageIfAvailable];
+				});
+			}
 		]];
 		[self.tabBarController presentViewController:alertController animated:YES completion:nil];
 	}

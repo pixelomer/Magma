@@ -1,6 +1,6 @@
 #import "AppDelegate.h"
 #import "HomeViewController.h"
-#import "InstalledPackagesController.h"
+#import "DownloadsController.h"
 #import "SourcesViewController.h"
 #import "PackageSearchViewController.h"
 #import "MGViewController.h"
@@ -10,25 +10,27 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	NSArray *tabs = @[
-		@[@(UITabBarSystemItemFeatured),  @"Magma",     @NO],
-		@[@(UITabBarSystemItemBookmarks), @"Sources",   @YES],
-		@[@(UITabBarSystemItemDownloads), @"Installed", @YES],
-		@[@(UITabBarSystemItemSearch),    @"Search",    @YES]
+		@[@(UITabBarSystemItemRecents),   @NO],
+		@[@"Database",                    @YES],
+		@[@(UITabBarSystemItemDownloads), @YES],
+		@[@(UITabBarSystemItemSearch),    @YES]
 	];
 	NSMutableArray *viewControllers = @[
 		[HomeViewController alloc],
 		[SourcesViewController alloc],
-		[InstalledPackagesController alloc],
+		[DownloadsController alloc],
 		[PackageSearchViewController alloc]
 	].mutableCopy;
 	for (NSInteger i = 0; i < tabs.count; i++) {
 		__kindof MGViewController *rootViewController = viewControllers[i];
 		NSArray *itemInfo = tabs[i];
-		rootViewController.tabBarItem = [[UITabBarItem alloc] initWithTabBarSystemItem:[(NSNumber *)itemInfo[0] integerValue] tag:i];
-#if DEBUG
-		[rootViewController.tabBarItem setValue:itemInfo[1] forKey:@"internalTitle"]; // PRIVATE API, NEEDS TO BE REPLACED
-#endif
-		rootViewController.waitForDatabase = itemInfo[2];
+		if ([itemInfo[0] isKindOfClass:[NSNumber class]]) {
+			rootViewController.tabBarItem = [[UITabBarItem alloc] initWithTabBarSystemItem:[(NSNumber *)itemInfo[0] integerValue] tag:i];
+		}
+		else {
+			rootViewController.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:itemInfo[0]] tag:i];
+		}
+		rootViewController.waitForDatabase = itemInfo[1];
 		viewControllers[i] = [[UINavigationController alloc] initWithRootViewController:[rootViewController init]];
 	}
 	_rootViewController = [UITabBarController new];

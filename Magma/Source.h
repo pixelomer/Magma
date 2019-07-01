@@ -21,7 +21,7 @@ typedef NSString* PackagesAlgorithm;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSArray<Package *> *> *sections;
 @property (nonatomic, readonly, copy) NSArray<Package *> *packages;
 + (NSString *)extractPackagesFileData:(NSData *)data usingAlgorithm:(PackagesAlgorithm)algorithm;
-- (instancetype)initWithBaseURL:(NSString *)baseURL distribution:(NSString *)distribution components:(NSString *)components;
+- (instancetype)initWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
 - (NSURL *)releaseFileURL;
 - (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs;

@@ -6,7 +6,6 @@
 
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier {
 	self = [super initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseIdentifier];
-	self.imageView.image = [[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:@"file:///Applications/Cydia.app/Icon-60.png"]]] resizedImageOfSize:CGSizeMake(40, 40)];
 	self.separatorInset = UIEdgeInsetsZero;
 	self.detailTextLabel.numberOfLines = self.textLabel.numberOfLines = 1;
 	self.detailTextLabel.textColor = [UIColor colorWithRed:0.569 green:0.608 blue:0.635 alpha:1.0];

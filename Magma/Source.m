@@ -5,12 +5,13 @@
 
 @implementation Source
 
-- (instancetype)initWithBaseURL:(NSString *)rawBaseURL distribution:(NSString *)distribution components:(NSString *)components {
+- (instancetype)initWithBaseURL:(NSString *)rawBaseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components {
 	if (!rawBaseURL) return nil;
 	NSURL *baseURL = [NSURL URLWithString:rawBaseURL];
 	if (!baseURL) return nil;
 	self = [super init];
 	_baseURL = baseURL;
+	_architecture = arch;
 	_distribution = distribution ?: @"./";
 	_components = (components.length > 0) ? [components componentsSeparatedByString:@" "] : nil;
 	if (_components.count == 0) _components = nil;
@@ -21,7 +22,7 @@
 	return [NSString stringWithFormat:@"deb %@ %@%@",
 		[_baseURL absoluteString],
 		_distribution,
-		includeComponents ? ([@" " stringByAppendingString:([_components componentsJoinedByString:@" "] ?: @"")]) : @""
+		(includeComponents && _components) ? ([@" " stringByAppendingString:([_components componentsJoinedByString:@" "] ?: @"")]) : @""
 	];
 }
 
@@ -79,7 +80,6 @@
 	_parsedReleaseFile = parsedReleaseFile;
 }
 
-// Example URL: http://apt.thebigboss.org/repofiles/cydia/dists/stable/main/binary-iphoneos-arm
 - (NSURL *)filesURL {
 	NSURL *repoFilesURL = _baseURL;
 	if (_components) {
@@ -109,7 +109,7 @@
 - (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs {
 	NSURL *packagesFileURLParent = self.filesURL;
 	if (_components) {
-		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:@"binary-amd64"];
+		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:[@"binary-" stringByAppendingString:_architecture]];
 	}
 	return @{
 		PackagesAlgorithmBZip2 : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"],

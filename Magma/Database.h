@@ -50,8 +50,8 @@
 - (void)startLoadingDataIfNeeded;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
-- (void)addSourceWithBaseURL:(NSString *)baseURL distribution:(NSString *)dist components:(NSString *)components;
-- (void)addSourceWithURL:(NSString *)baseURL;
+- (void)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components;
+- (void)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch;
 - (void)startRefreshingSources;
 
 @end

@@ -66,41 +66,44 @@
 		actionWithTitle:@"Add Source"
 		style:UIAlertActionStyleDefault
 		handler:^(UIAlertAction *action){
-			NSString *baseURL, *dist;
-			NSString *components = dist = baseURL = nil;
+			NSString *components, *baseURL, *dist = @"./", *architecture;
 			for (UITextField *textField in alertTextFields) {
 				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, @selector(alertFieldIdentifier));
 				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 				switch (alertFieldIdentifier.shortValue) {
-					case 0:    baseURL = value; break;
-					case 1:       dist = value; break;
-					case 2: components = value; break;
+					case 0:      baseURL = value; break;
+					case 1:         dist = value; break;
+					case 2:   components = value; break;
+					case 3: architecture = value; break;
 				}
 			}
-			if (components.length <= 0 || dist.length <= 0) {
-				[Database.sharedInstance addSourceWithURL:baseURL];
+			if (!baseURL.length || !dist.length || !architecture.length);
+			else if (components.length <= 0 || dist.length <= 0) {
+				[Database.sharedInstance addSourceWithURL:baseURL architecture:architecture];
 			}
 			else {
-				[Database.sharedInstance addSourceWithBaseURL:baseURL distribution:dist components:components];
+				[Database.sharedInstance addSourceWithBaseURL:baseURL architecture:architecture distribution:dist components:components];
 			}
 			alertTextFields = nil;
 		}
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Base URL";
-		textField.text = @"https://";
 		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Distribution (optional)";
-		textField.text = @"./";
 		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @1, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Components (optional)";
 		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
-	// TODO: Another field for the architecture maybe?
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Architecture";
+		textField.text = @"amd64";
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @3, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
 	for (UITextField *textField in alertController.textFields) {
 		textField.keyboardType = UIKeyboardTypeDefault;
 	}
