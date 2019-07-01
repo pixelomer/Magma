@@ -24,7 +24,7 @@
 		loadingLabel.lineBreakMode = NSLineBreakByWordWrapping;
 		loadingLabel.numberOfLines = 0;
 		loadingLabel.textAlignment = NSTextAlignmentCenter;
-		loadingLabel.text = @"Please wait while the database is loading...";
+		loadingLabel.text = @"Loading...";
 		loadingLabel.translatesAutoresizingMaskIntoConstraints = NO;
 		[containerView addSubview:loadingLabel];
 		[containerView addSubview:activityIndicator];
