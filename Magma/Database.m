@@ -1,5 +1,3 @@
-// TODO: Completely get rid of out-of-sandbox access and switch to using a bunch of plists from using sqlite3
-
 #import "Database.h"
 #import "Source.h"
 #import "DPKGParser.h"
@@ -13,7 +11,6 @@
 
 @interface Package(Private)
 - (void)setFirstDiscovery:(NSDate *)firstDiscovery;
-- (void)setIgnoresUpdates:(BOOL)doesIt;
 @end
 
 @implementation Database
@@ -74,7 +71,6 @@ static NSArray *paths;
 
 - (instancetype)init {
 	if (self = [super init]) {
-		_sortedLocalPackages = @[];
 		_sortedRemotePackages = @[];
 	}
 	return self;
@@ -455,7 +451,7 @@ if (!response || response.statusCode != 200) { \
 
 // UNTESTED
 - (Package *)packageWithIdentifier:(NSString *)identifier {
-	return identifier ? ([_sortedRemotePackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"package == %@", identifier]].lastObject ?: [_sortedLocalPackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"package == %@", identifier]].lastObject) : nil;
+	return identifier ? [_sortedRemotePackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"package == %@", identifier]].lastObject : nil;
 }
 
 - (void)startRefreshingSources {

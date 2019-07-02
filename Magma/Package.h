@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, copy) NSString * _Nullable shortDescription;
 @property (nonatomic, readonly, copy) NSString * _Nullable longDescription;
 @property (nonatomic, readonly, copy) NSDate * _Nullable firstDiscovery;
-@property (nonatomic, readonly, assign) BOOL ignoresUpdates;
+@property (nonatomic, readonly, copy) NSURL *debURL;
 - (NSString *)rawPackagesEntry;
 - (Database *)database;
 - (NSArray * _Nullable)tags;

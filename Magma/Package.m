@@ -2,6 +2,7 @@
 #import "Database.h"
 #import <objc/runtime.h>
 #import "Source.h"
+#import <SUStandardVersionComparator/SUStandardVersionComparator.h>
 
 @implementation Package
 
@@ -28,17 +29,6 @@
 	}
 }
 
-- (BOOL)isInstalled {
-	for (Package *package in Database.sharedInstance.sortedLocalPackages.copy) {
-		if ([package.package isEqualToString:self.package]) return YES;
-	}
-	return NO;
-}
-
-- (BOOL)isVersionInstalled {
-	return [Database.sharedInstance.sortedLocalPackages containsObject:self];
-}
-
 - (BOOL)isEqual:(Package *)object {
 	return [object isKindOfClass:[Package class]] && ([object compare:self] == NSOrderedSame);
 }
@@ -55,11 +45,17 @@
 	return [[self getField:@"tag"] componentsSeparatedByString:@" "];
 }
 
+- (NSComparisonResult)compareUsingVisibleName:(Package *)package {
+	return [(self.name ?: self.package) compare:(package.name ?: package.package)];
+}
+
 - (NSComparisonResult)compare:(Package *)package {
-#define IDForPackage(p) [NSString stringWithFormat:@"%@ %@", (p.name ?: p.package), p.version]
-	NSString *packageID1 = IDForPackage(self);
-	NSString *packageID2 = IDForPackage(package);
-	return [packageID1 compare:packageID2];
+	NSComparisonResult IDComparisonResult = [self.package compare:package.package];
+	return (
+		IDComparisonResult == NSOrderedSame ?
+		[SUStandardVersionComparator compareVersion:self.version toVersion:package.version] :
+		IDComparisonResult
+	);
 #undef IDForPackage
 }
 
@@ -79,17 +75,12 @@
 	return [NSString stringWithFormat:@"<%@: %@ (%@)>", NSStringFromClass(self.class), self.package, self.version];
 }
 
-- (void)setIgnoresUpdates:(BOOL)doesIt {
-	_ignoresUpdates = doesIt;
-}
-
 - (void)setFirstDiscovery:(NSDate *)firstDiscovery {
 	_firstDiscovery = firstDiscovery;
 }
 
 - (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source *)source {
 	if (dict && (self = [super init])) {
-		_source = source;
 		_rawPackage = dict;
 		_dependencies = [dict[@"depends"] componentsSeparatedByString:@", "];
 		_conflicts = [dict[@"conflicts"] componentsSeparatedByString:@", "];
@@ -105,6 +96,9 @@
 				[descriptionLines removeObjectAtIndex:0];
 				_longDescription = [descriptionLines componentsJoinedByString:@"\n"];
 				break;
+		}
+		if ((_source = source) && dict[@"filename"]) {
+			_debURL = [source.baseURL URLByAppendingPathComponent:dict[@"filename"]];
 		}
 		return self;
 	}

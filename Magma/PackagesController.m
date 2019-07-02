@@ -19,58 +19,29 @@
 - (instancetype)initWithFilters:(NSDictionary *)customFilters {
 	if (self = [super init]) {
 		NSMutableDictionary *filters = @{
-			@"showObsoletePackages" : @NO, // Packages with cydia::obsolete tag
-			@"showSystemPackages" : @NO,   // Packages with role::cydia tag
-			@"includeRemotePackages" : @YES,
-			@"includeLocalPackages" : @NO,
 		//	@"source" : packageSource,
 		//	@"section" : @"section"
 		}.mutableCopy;
 		for (NSString *key in customFilters) filters[key] = customFilters[key];
 		NSMutableArray<Package *> *filteredPackages = [NSMutableArray new];
-		if ([(NSNumber *)filters[@"includeRemotePackages"] boolValue]) {
-			if (filters[@"source"]) {
-				if (filters[@"section"]) {
-					[filteredPackages addObjectsFromArray:[(Source *)filters[@"source"] sections][filters[@"section"]]];
-				}
-				else {
-					[filteredPackages addObjectsFromArray:[(Source *)filters[@"source"] packages]];
-				}
+		if (filters[@"source"]) {
+			if (filters[@"section"]) {
+				[filteredPackages addObjectsFromArray:[(Source *)filters[@"source"] sections][filters[@"section"]]];
 			}
 			else {
-				if (filters[@"section"]) {
-					// Logic needed
-				}
-				else {
-					[filteredPackages addObjectsFromArray:Database.sharedInstance.sortedRemotePackages];
-				}
+				[filteredPackages addObjectsFromArray:[(Source *)filters[@"source"] packages]];
 			}
 		}
-		if ([(NSNumber *)filters[@"includeLocalPackages"] boolValue]) {
+		else {
 			if (filters[@"section"]) {
-				// Logic needed
+				// UNTESTED
+				[filteredPackages addObjectsFromArray:[Database.sharedInstance.sortedRemotePackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"section == %@", filters[@"section"]]]];
 			}
 			else {
-				[filteredPackages addObjectsFromArray:Database.sharedInstance.sortedLocalPackages];
+				[filteredPackages addObjectsFromArray:Database.sharedInstance.sortedRemotePackages];
 			}
 		}
 		filteredPackages = [self.class latestSortedPackagesFromPackageArray:filteredPackages].mutableCopy;
-		if (![(NSNumber *)filters[@"showSystemPackages"] boolValue]) {
-			for (NSInteger i = filteredPackages.count-1; i >= 0; i--) {
-				Package *package = filteredPackages[i];
-				if ([package.tags containsObject:@"role::cydia"]) {
-					[filteredPackages removeObjectAtIndex:i];
-				}
-			}
-		}
-		if (![(NSNumber *)filters[@"showObsoletePackages"] boolValue]) {
-			for (NSInteger i = filteredPackages.count-1; i >= 0; i--) {
-				Package *package = filteredPackages[i];
-				if ([package.tags containsObject:@"cydia:obsolete"]) {
-					[filteredPackages removeObjectAtIndex:i];
-				}
-			}
-		}
 		_packages = filteredPackages.copy;
 		return self;
 	}
