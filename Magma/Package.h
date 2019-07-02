@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString * _Nullable)filename;
 - (NSString * _Nullable)architecture;
 - (NSString * _Nullable)section;
-- (NSString * _Nullable)sha256;
+- (NSString * _Nullable)sha512;
 @end
 
 NS_ASSUME_NONNULL_END

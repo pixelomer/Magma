@@ -23,7 +23,7 @@
 		];
 		for (NSString *selectorString in selectors) {
 			SEL selector = NSSelectorFromString(selectorString);
-			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(package)), "@:");
+			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(package)), "@@:");
 		}
 	}
 }
