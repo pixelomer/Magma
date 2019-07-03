@@ -9,8 +9,8 @@
 }
 
 - (void)setPackage:(Package *)package {
-    self.textLabel.text = package.name ?: package.package;
-    self.detailTextLabel.text = [NSString stringWithFormat:@"%@ %@", package.version, package.shortDescription];
+    self.textLabel.text = [NSString stringWithFormat:@"%@ (%@)", package.package, package.version];
+    self.detailTextLabel.text = package.shortDescription;
 }
 
 @end

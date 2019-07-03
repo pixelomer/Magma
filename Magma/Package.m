@@ -42,11 +42,7 @@
 }
 
 - (NSArray *)tags {
-	return [[self getField:@"tag"] componentsSeparatedByString:@" "];
-}
-
-- (NSComparisonResult)compareUsingVisibleName:(Package *)package {
-	return [(self.name ?: self.package) compare:(package.name ?: package.package)];
+	return [self[@"tag"] componentsSeparatedByString:@" "];
 }
 
 - (NSComparisonResult)compare:(Package *)package {
