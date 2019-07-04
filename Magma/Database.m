@@ -151,15 +151,15 @@ static NSArray *paths;
 		// Load data from the filesystem
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
 			// Load repositories
-			sourcesPlist = [NSMutableDictionary new];
+			self->sourcesPlist = [NSMutableDictionary new];
 			NSDictionary<NSString *, NSDictionary *> *storedFile = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
 			for (NSString *ID in storedFile) {
 				NSNumber *NSID = @([ID intValue]);
-				sourcesPlist[NSID] = storedFile[ID].mutableCopy;
+				self->sourcesPlist[NSID] = storedFile[ID].mutableCopy;
 			}
-			for (NSNumber *_sourceID in sourcesPlist.allKeys.copy) {
+			for (NSNumber *_sourceID in self->sourcesPlist.allKeys.copy) {
 				Source *source;
-				NSDictionary<NSString *, id> *sourceDict = sourcesPlist[_sourceID];
+				NSDictionary<NSString *, id> *sourceDict = self->sourcesPlist[_sourceID];
 				if ([(NSString *)sourceDict[@"components"] length] <= 0) {
 					source = [self addSourceWithURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] ID:_sourceID];
 				}
@@ -187,7 +187,7 @@ static NSArray *paths;
 			// Put packages from all of the sources into one sorted array
 			[self reloadRemotePackages];
 
-			_isLoaded = YES;
+			self->_isLoaded = YES;
 			[NSNotificationCenter.defaultCenter
 				postNotificationName:DatabaseDidLoad
 				object:self
@@ -203,7 +203,7 @@ static NSArray *paths;
 
 - (void)removeSource:(Source *)source {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		if (_isRefreshing) {
+		if (self->_isRefreshing) {
 			[NSNotificationCenter.defaultCenter
 				postNotificationName:DatabaseDidEncounterAnError
 				object:self
@@ -211,11 +211,11 @@ static NSArray *paths;
 			];
 		}
 		BOOL isSourceKnown = NO;
-		NSArray<NSString *> *keys = sources.allKeys.copy;
+		NSArray<NSString *> *keys = self->sources.allKeys.copy;
 		for (NSString *knownSourceIdentifier in keys) {
-			Source *knownSource = sources[knownSourceIdentifier];
+			Source *knownSource = self->sources[knownSourceIdentifier];
 			if (knownSource == source) {
-				[sources removeObjectForKey:knownSourceIdentifier];
+				[self->sources removeObjectForKey:knownSourceIdentifier];
 				isSourceKnown = YES;
 			}
 		}
