@@ -58,12 +58,11 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	if (self.waitForDatabase.boolValue) [self _setupTableView];
 }
 
 - (void)databaseDidLoad:(Database *)database {
     [super databaseDidLoad:database];
-	if (!self.waitForDatabase.boolValue) [self _setupTableView];
+    [self _setupTableView];
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

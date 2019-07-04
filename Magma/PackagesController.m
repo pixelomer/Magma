@@ -24,8 +24,8 @@
 		}.mutableCopy;
 		for (NSString *key in customFilters) filters[key] = customFilters[key];
 		NSMutableArray<Package *> *filteredPackages = [NSMutableArray new];
-		if (filters[@"source"]) {
-			if (filters[@"section"]) {
+		if ([filters[@"source"] isKindOfClass:[Source class]]) {
+			if ([filters[@"section"] isKindOfClass:[NSString class]]) {
 				[filteredPackages addObjectsFromArray:[(Source *)filters[@"source"] sections][filters[@"section"]]];
 			}
 			else {
@@ -33,7 +33,7 @@
 			}
 		}
 		else {
-			if (filters[@"section"]) {
+			if ([filters[@"section"] isKindOfClass:[NSString class]]) {
 				// UNTESTED
 				[filteredPackages addObjectsFromArray:[Database.sharedInstance.sortedRemotePackages filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"section == %@", filters[@"section"]]]];
 			}

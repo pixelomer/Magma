@@ -10,13 +10,20 @@
 	self.detailTextLabel.numberOfLines = self.textLabel.numberOfLines = 1;
 	self.detailTextLabel.textColor = [UIColor colorWithRed:0.569 green:0.608 blue:0.635 alpha:1.0];
 	self.textLabel.text = self.detailTextLabel.text = @"(Unknown)";
+	[activityIndicator setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisVertical];
 	activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 	activityIndicator.translatesAutoresizingMaskIntoConstraints = NO;
-	[self.textLabel setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal];
-	[self.detailTextLabel setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal];
-	[activityIndicator setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
 	[self.contentView addSubview:activityIndicator];
 	[self.contentView addConstraints:@[
+		[NSLayoutConstraint
+			constraintWithItem:activityIndicator
+			attribute:NSLayoutAttributeTrailing
+			relatedBy:NSLayoutRelationEqual
+			toItem:self.contentView
+			attribute:NSLayoutAttributeTrailing
+			multiplier:1.0
+			constant:0.0
+		],
 		[NSLayoutConstraint
 			constraintWithItem:activityIndicator
 			attribute:NSLayoutAttributeTrailing
@@ -32,6 +39,24 @@
 			relatedBy:NSLayoutRelationEqual
 			toItem:self.contentView
 			attribute:NSLayoutAttributeCenterY
+			multiplier:1.0
+			constant:0.0
+		],
+		[NSLayoutConstraint
+			constraintWithItem:activityIndicator
+			attribute:NSLayoutAttributeLeading
+			relatedBy:NSLayoutRelationGreaterThanOrEqual
+			toItem:self.textLabel
+			attribute:NSLayoutAttributeTrailing
+			multiplier:1.0
+			constant:0.0
+		],
+		[NSLayoutConstraint
+			constraintWithItem:activityIndicator
+			attribute:NSLayoutAttributeLeading
+			relatedBy:NSLayoutRelationGreaterThanOrEqual
+			toItem:self.detailTextLabel
+			attribute:NSLayoutAttributeTrailing
 			multiplier:1.0
 			constant:0.0
 		]

@@ -110,16 +110,38 @@
 	return nil;
 }
 
-- (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs {
-	NSURL *packagesFileURLParent = self.filesURL;
-	if (_components) {
-		packagesFileURLParent = [[packagesFileURLParent URLByAppendingPathComponent:_components[0]] URLByAppendingPathComponent:[@"binary-" stringByAppendingString:_architecture]];
+// Example:
+//   (
+//     "main" = (
+//       "bz2" = ".../main/binary-arch/Packages.bz2",
+//       "gz" = ...
+//     ),
+//     "non-free" = (
+//       "bz2" = ".../non-free/binary-arch/Packages.bz2",
+//       "gz" = ...
+//     ),
+//     ...
+//   )
+- (NSDictionary<NSString *, NSDictionary<PackagesAlgorithm, NSURL *> *> *)possiblePackagesFileURLs {
+	if (!_components) {
+		return @{
+			@"main" : @{
+				PackagesAlgorithmBZip2 : [self.filesURL URLByAppendingPathComponent:@"Packages.bz2"],
+				PackagesAlgorithmGZ : [self.filesURL URLByAppendingPathComponent:@"Packages.gz"],
+				PackagesAlgorithmXZ : [self.filesURL URLByAppendingPathComponent:@"Packages.xz"]
+			}
+		};
 	}
-	return @{
-		PackagesAlgorithmBZip2 : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"],
-		PackagesAlgorithmGZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.gz"],
-		PackagesAlgorithmXZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.xz"]
-	};
+	NSMutableDictionary *returnValue = [NSMutableDictionary new];
+	for (NSString *component in _components) {
+		NSURL *packagesFileURLParent = [[self.filesURL URLByAppendingPathComponent:component] URLByAppendingPathComponent:[@"binary-" stringByAppendingString:_architecture]];
+		returnValue[component] = @{
+			PackagesAlgorithmBZip2 : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.bz2"],
+			PackagesAlgorithmGZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.gz"],
+			PackagesAlgorithmXZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.xz"]
+		};
+	}
+	return returnValue.copy;
 }
 
 @end

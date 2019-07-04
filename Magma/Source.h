@@ -24,7 +24,7 @@ typedef NSString* PackagesAlgorithm;
 - (instancetype)initWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
 - (NSURL *)releaseFileURL;
-- (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs;
+- (NSDictionary<NSString *, NSDictionary<PackagesAlgorithm, NSURL *> *> *)possiblePackagesFileURLs;
 @end
 
 @interface Source(CommonFields)

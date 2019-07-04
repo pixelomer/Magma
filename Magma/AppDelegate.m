@@ -8,6 +8,8 @@
 @implementation AppDelegate
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
+	Database.workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+	[Database.sharedInstance startLoadingDataIfNeeded];
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	NSArray *tabs = @[
 		@[@(UITabBarSystemItemRecents),   @NO],

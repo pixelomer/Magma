@@ -210,4 +210,8 @@
 	return 2;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return indexPath.section ? 57.5 : 43.5;
+}
+
 @end

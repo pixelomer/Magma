@@ -139,6 +139,56 @@ static NSArray *paths;
 	return [NSArray arrayWithContentsOfFile:[self packagesFilePathForSource:source]];
 }
 
+- (void)_loadData {
+	// Load repositories
+	self->sourcesPlist = [NSMutableDictionary new];
+	NSDictionary<NSString *, NSDictionary *> *storedFile = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
+	for (NSString *ID in storedFile) {
+		NSNumber *NSID = @([ID intValue]);
+		self->sourcesPlist[NSID] = storedFile[ID].mutableCopy;
+	}
+	NSArray<NSNumber *> *keys = self->sourcesPlist.allKeys.copy;
+	int i = 0;
+	for (NSNumber *_sourceID in keys) {
+		i++;
+		Source *source;
+		NSDictionary<NSString *, id> *sourceDict = self->sourcesPlist[_sourceID];
+		if ([(NSString *)sourceDict[@"components"] length] <= 0) {
+			source = [self addSourceWithURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] ID:_sourceID];
+		}
+		else {
+			source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
+		}
+		if (source) {
+			source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
+			source.lastRefresh = sourceDict[@"lastRefresh"];
+			NSMutableArray *packages = [NSMutableArray new];
+			NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
+			for (NSArray *packageInfo in rawPackagesFile) {
+				if (packageInfo.count < 2) continue;
+				NSDictionary *packageConfiguration = packageInfo[0];
+				NSDictionary *parsedControl = packageInfo[1];
+				NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
+				Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
+				package.firstDiscovery = firstDiscovery;
+				if (package) [packages addObject:package];
+			}
+			source.packages = packages.copy;
+		}
+		if (i == keys.count) {
+			// Put packages from all of the sources into one sorted array
+			[self reloadRemotePackages];
+			
+			self->_isLoaded = YES;
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidLoad
+				object:self
+				userInfo:nil
+			];
+		}
+	}
+}
+
 - (void)startLoadingDataIfNeeded {
 	if (!_isLoaded) {
 		if (!workingDirectory) {
@@ -148,52 +198,7 @@ static NSArray *paths;
 				userInfo:nil
 			];
 		}
-		// Load data from the filesystem
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-			// Load repositories
-			self->sourcesPlist = [NSMutableDictionary new];
-			NSDictionary<NSString *, NSDictionary *> *storedFile = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
-			for (NSString *ID in storedFile) {
-				NSNumber *NSID = @([ID intValue]);
-				self->sourcesPlist[NSID] = storedFile[ID].mutableCopy;
-			}
-			for (NSNumber *_sourceID in self->sourcesPlist.allKeys.copy) {
-				Source *source;
-				NSDictionary<NSString *, id> *sourceDict = self->sourcesPlist[_sourceID];
-				if ([(NSString *)sourceDict[@"components"] length] <= 0) {
-					source = [self addSourceWithURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] ID:_sourceID];
-				}
-				else {
-					source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
-				}
-				if (source) {
-					source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
-					source.lastRefresh = sourceDict[@"lastRefresh"];
-					NSMutableArray *packages = [NSMutableArray new];
-					NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
-					for (NSArray *packageInfo in rawPackagesFile) {
-						if (packageInfo.count < 2) continue;
-						NSDictionary *packageConfiguration = packageInfo[0];
-						NSDictionary *parsedControl = packageInfo[1];
-						NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
-						Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
-						package.firstDiscovery = firstDiscovery;
-						if (package) [packages addObject:package];
-					}
-					source.packages = packages.copy;
-				}
-			}
-			
-			// Put packages from all of the sources into one sorted array
-			[self reloadRemotePackages];
-
-			self->_isLoaded = YES;
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidLoad
-				object:self
-				userInfo:nil
-			];
-		});
+		[NSThread detachNewThreadSelector:@selector(_loadData) toTarget:self withObject:nil];
 	}
 }
 
@@ -272,7 +277,7 @@ static NSArray *paths;
 			} mutableCopy];
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
-		[self syncFilesForSource:source]; // Add the new source to the sources.plist file.
+		if (self->_isLoaded) [self syncFilesForSource:source]; // Add the new source to the sources.plist file.
 	}
 	else {
 		notificationName = DatabaseDidEncounterAnError;
@@ -381,20 +386,27 @@ if (!response || response.statusCode != 200) { \
 		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
-			NSDictionary *possiblePackagesFileURLs = source.possiblePackagesFileURLs;
-			for (NSString *algorithm in possiblePackagesFileURLs) {
-				NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
-				fetch(packagesFileURL, {
-					NSString *fullPackages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
-					NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:fullPackages error:&error];
-					if (!error && parsedFile && fullPackages) {
-						source.packages = [Package createPackagesUsingArray:parsedFile source:source];
-						sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
-						break;
-					}
-					else parseFailure();
-				});
+			NSDictionary *packagesFileURLsForEveryComponent = source.possiblePackagesFileURLs;
+			NSMutableString *combinedPackages = [NSMutableString new];
+			for (NSDictionary *possiblePackagesFileURLs in packagesFileURLsForEveryComponent.allValues) {
+				for (NSString *algorithm in possiblePackagesFileURLs) {
+					NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
+					fetch(packagesFileURL, {
+						NSString *packages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
+						if (packages) {
+							[combinedPackages appendFormat:@"%@\n\n", packages];
+							break;
+						}
+						else parseFailure();
+					});
+				}
 			}
+			NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:combinedPackages error:&error];
+			if (!error && parsedFile) {
+				source.packages = [Package createPackagesUsingArray:parsedFile source:source];
+				sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
+			}
+			else parseFailure();
 		}
 		else parseFailure();
 	});
