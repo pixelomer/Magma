@@ -42,14 +42,14 @@ NSInteger const BZipDefaultWorkFactor = 0;
     bz_stream stream;
     bzero(&stream, sizeof(stream));
     stream.next_in = (char *)[data bytes];
-    stream.avail_in = [data length];
+    stream.avail_in = (unsigned int)[data length];
 
     NSMutableData *buffer = [NSMutableData dataWithLength:BZipCompressionBufferSize];
     stream.next_out = [buffer mutableBytes];
     stream.avail_out = BZipCompressionBufferSize;
 
     int bzret;
-    bzret = BZ2_bzCompressInit(&stream, blockSize, 0, workFactor);
+    bzret = (int)BZ2_bzCompressInit(&stream, (int)blockSize, 0, (int)workFactor);
     if (bzret != BZ_OK) {
         if (error) {
             *error = [NSError errorWithDomain:BZipErrorDomain code:bzret userInfo:@{ NSLocalizedDescriptionKey: NSLocalizedString(@"`BZ2_bzCompressInit` failed", nil) }];
@@ -90,7 +90,7 @@ NSInteger const BZipDefaultWorkFactor = 0;
     bz_stream stream;
     bzero(&stream, sizeof(stream));
     stream.next_in = (char *)[data bytes];
-    stream.avail_in = [data length];
+    stream.avail_in = (unsigned int)[data length];
 
     NSMutableData *buffer = [NSMutableData dataWithLength:BZipCompressionBufferSize];
     stream.next_out = [buffer mutableBytes];
@@ -249,7 +249,7 @@ NSInteger const BZipDefaultWorkFactor = 0;
                 totalBytesProcessed += [inputChunk length];
                 [decompressionProgress setCompletedUnitCount:totalBytesProcessed];
                 stream.next_in = (char *)[compressedDataBuffer bytes];
-                stream.avail_in = [compressedDataBuffer length];
+                stream.avail_in = (unsigned int)[compressedDataBuffer length];
                 
                 NSMutableData *decompressedDataBuffer = [NSMutableData dataWithLength:BZipCompressionBufferSize];
                 while (true) {

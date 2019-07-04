@@ -42,7 +42,7 @@
 
 - (void)setSource:(Source *)source {
 	_source = source;
-	self.textLabel.text = source.parsedReleaseFile[@"origin"] ?: source.baseURL.host;
+	self.textLabel.text = source.origin ?: source.baseURL.host;
 	self.detailTextLabel.text = source.baseURL.absoluteString;
 	if (source.isRefreshing) {
 		[activityIndicator startAnimating];
