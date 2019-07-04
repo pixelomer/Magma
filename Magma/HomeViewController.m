@@ -24,7 +24,7 @@
 			actionWithTitle:@"Dismiss"
 			style:UIAlertActionStyleCancel
 			handler:^(id action){
-				isPresentingMessage = NO;
+                self->isPresentingMessage = NO;
 				dispatch_async(dispatch_get_main_queue(),^{
 					[self presentNextMessageIfAvailable];
 				});

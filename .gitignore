@@ -1,4 +1,5 @@
 packages
 .theos
 obj
-private.sh
+build
+**/*xcuserdata
