@@ -67,8 +67,8 @@
 		style:UIAlertActionStyleDefault
 		handler:^(UIAlertAction *action){
 			NSString *components, *baseURL, *dist = @"./", *architecture;
-			for (UITextField *textField in self->alertTextFields) {
-				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, _cmd);
+			for (UITextField *textField in alertTextFields) {
+				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, @selector(alertFieldIdentifier));
 				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 				switch (alertFieldIdentifier.shortValue) {
 					case 0:      baseURL = value; break;
@@ -84,25 +84,25 @@
 			else {
 				[Database.sharedInstance addSourceWithBaseURL:baseURL architecture:architecture distribution:dist components:components];
 			}
-			self->alertTextFields = nil;
+			alertTextFields = nil;
 		}
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Base URL";
-		objc_setAssociatedObject(textField, _cmd, @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Distribution (optional)";
-		objc_setAssociatedObject(textField, _cmd, @1, OBJC_ASSOCIATION_COPY_NONATOMIC);
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @1, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Components (optional)";
-		objc_setAssociatedObject(textField, _cmd, @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Architecture";
 		textField.text = @"amd64";
-		objc_setAssociatedObject(textField, _cmd, @3, OBJC_ASSOCIATION_COPY_NONATOMIC);
+		objc_setAssociatedObject(textField, @selector(alertFieldIdentifier), @3, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	for (UITextField *textField in alertController.textFields) {
 		textField.keyboardType = UIKeyboardTypeDefault;

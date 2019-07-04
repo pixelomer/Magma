@@ -25,8 +25,5 @@ typedef NSString* PackagesAlgorithm;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
 - (NSURL *)releaseFileURL;
 - (NSDictionary<PackagesAlgorithm, NSURL *> *)possiblePackagesFileURLs;
-@end
-
-@interface Source(CommonFields)
-- (NSString *)origin;
+- (NSURL *)iconURL;
 @end

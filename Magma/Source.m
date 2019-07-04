@@ -18,10 +18,6 @@
 	return self;
 }
 
-- (NSString *)origin {
-	return _parsedReleaseFile[@"origin"];
-}
-
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents {
 	return [NSString stringWithFormat:@"deb %@ %@%@",
 		[_baseURL absoluteString],
@@ -120,6 +116,10 @@
 		PackagesAlgorithmGZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.gz"],
 		PackagesAlgorithmXZ : [packagesFileURLParent URLByAppendingPathComponent:@"Packages.xz"]
 	};
+}
+
+- (NSURL *)iconURL {
+	return [_baseURL URLByAppendingPathComponent:@"CydiaIcon.png"];
 }
 
 @end
