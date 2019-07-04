@@ -15,12 +15,12 @@
 	if (!components) fail(1, @"Failed to split the file contents.")
 	else if (components.count <= 0) fail(2, @"File doesn't contain anything.")
 	NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-	for (NSUInteger i = components.count-1; i >= 0; i--) {
+	for (int i = (int)components.count-1; i >= 0; i--) {
 		if ([components[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length <= 0) continue;
-		NSUInteger endIndex = i;
-		while (hasWhitespacePrefix(components[i])) if (--i < 0) fail(3, ([NSString stringWithFormat:@"Multi-line value doesn't belong to any key. Line: %lu", endIndex+1]))
+		int endIndex = i;
+		while (hasWhitespacePrefix(components[i])) if (--i < 0) fail(3, ([NSString stringWithFormat:@"Multi-line value doesn't belong to any key. Line: %dd", endIndex+1]))
 		NSMutableArray *fieldComponents = [[components[i] componentsSeparatedByString:@":"] mutableCopy];
-		if (fieldComponents.count <= 0) fail(4, ([NSString stringWithFormat:@"Empty line: %lu", i+1]))
+		if (fieldComponents.count <= 0) fail(4, ([NSString stringWithFormat:@"Empty line: %d", i+1]))
 		else if (fieldComponents.count == 1) [fieldComponents addObject:@""];
 		NSString *key = [(NSString *)fieldComponents[0] lowercaseString];
 		[fieldComponents removeObjectAtIndex:0];
@@ -28,7 +28,7 @@
 		while (value.length > 0 && hasWhitespacePrefix(value)) [value deleteCharactersInRange:NSMakeRange(0, 1)];
 		if (endIndex != i) {
 			unsigned int indentation = 0;
-			for (NSUInteger j=i+1; j <= endIndex; j++) {
+			for (int j=i+1; j <= endIndex; j++) {
 				NSString *indentedLine = components[j];
 				if (!indentation) while ((indentation < indentedLine.length) && isWhitespace([indentedLine characterAtIndex:indentation])) indentation++;
 				[value appendFormat:@"\n%@", [indentedLine substringWithRange:NSMakeRange(indentation, indentedLine.length - indentation)]];

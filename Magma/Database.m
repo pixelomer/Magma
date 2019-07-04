@@ -358,7 +358,7 @@ static NSArray *paths;
 	NSURL *releaseFileURL = source.releaseFileURL;
 	NSHTTPURLResponse *response = nil;
 	NSError *error = nil;
-	NSData *data = [self.class requestDataFromURL:releaseFileURL response:&response error:nil];
+	NSData *data = nil;
 	NSURL *lastURL = nil;
 #define parseFailure() { \
 	userInfo[@"reason"] = [NSString stringWithFormat:@"Client failed to parse the file from the following URL: %@", lastURL]; \

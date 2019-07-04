@@ -5,7 +5,7 @@
 - (instancetype)initWithSection:(NSString *)section inSource:(Source *)source {
 	return [self initWithFilters:@{
 		@"source" : (id)source ?: NSNull.null,
-		@"section" : section
+		@"section" : (id)section ?: NSNull.null
 	}];
 }
 
