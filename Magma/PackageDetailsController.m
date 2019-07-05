@@ -8,11 +8,16 @@
 
 #import "PackageDetailsController.h"
 #import "Package.h"
+#import <objc/runtime.h>
 
 @implementation PackageDetailsController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.title = _package.package;
+    cells = @[
+    	@[@"Packages File Entry", @"pushFieldsTableView"]
+    ];
 }
 
 - (instancetype)init {
@@ -27,36 +32,89 @@
 		_package = package;
 		NSMutableArray *mFields = [NSMutableArray new];
 		NSDictionary *rawPackage = package.rawPackage.copy;
-		for (NSString *fieldName in rawPackage) {
-			NSString *fieldValue = rawPackage[fieldName];
-			/*
-			 * Do some filtering here
-			 */
-			[mFields addObject:@[fieldName, fieldValue]];
-		}
+		for (NSString *fieldName in rawPackage) [mFields addObject:@[fieldName, rawPackage[fieldName]]];
 		fields = mFields.copy;
 	}
 	return self;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	switch (section) {
-		case 0: return @"Fields";
-		default: return nil;
+	if (tableView == self.tableView) {
+		return nil;
+	}
+	else {
+		return nil;
 	}
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue2 reuseIdentifier:@"cell"];
-	NSArray *cellContents = fields[indexPath.row];
-	cell.textLabel.text = cellContents[0];
-	cell.detailTextLabel.text = cellContents[1];
-	cell.detailTextLabel.numberOfLines = 2;
-	return cell;
+	if (tableView == self.tableView) {
+		NSArray *rowInfo = cells[indexPath.row];
+		__kindof UITableViewCell *cell;
+		if ([rowInfo[0] isKindOfClass:NSString.class]) {
+			cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
+			cell.textLabel.text = rowInfo[0];
+		}
+		else {
+			cell = rowInfo[0];
+		}
+		if (rowInfo.count > 1) {
+			if ([rowInfo[1] isKindOfClass:NSString.class]) {
+				cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+				cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+			}
+			else {
+				cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
+				cell.selectionStyle = UITableViewCellSelectionStyleNone;
+			}
+		}
+		return cell;
+	}
+	else {
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"cell"];
+		NSArray *cellContents = fields[indexPath.row];
+		cell.textLabel.text = cellContents[0];
+		cell.detailTextLabel.text = cellContents[1];
+		cell.detailTextLabel.numberOfLines = cell.textLabel.numberOfLines = 1;
+		return cell;
+	}
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return fields.count;
+	return (tableView == self.tableView) ? cells.count : fields.count;
+}
+
+- (void)pushFieldsTableView {
+	MGTableViewController *fieldsTableViewController = [MGTableViewController new];
+	fieldsTableViewController.tableView.dataSource = self;
+	fieldsTableViewController.tableView.delegate = self;
+	fieldsTableViewController.tableView.allowsSelection = NO;
+	[self.navigationController pushViewController:fieldsTableViewController animated:YES];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	if (tableView == self.tableView) {
+		NSArray *rowInfo = cells[indexPath.row];
+		if (rowInfo.count > 1 && [rowInfo[1] isKindOfClass:[NSString class]]) {
+			SEL selector = NSSelectorFromString(rowInfo[1]);
+			((void(*)(PackageDetailsController *, SEL))class_getMethodImplementation(self.class, selector))(self, selector);
+		}
+	}
+}
+
+- (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	return (tableView != self.tableView) && (action == @selector(copy:));
+}
+
+- (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
+	if ((tableView != self.tableView) && (action == @selector(copy:))){
+		UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+		[[UIPasteboard generalPasteboard] setString:cell.detailTextLabel.text];
+	}
+}
+
+- (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return (tableView != self.tableView);
 }
 
 @end

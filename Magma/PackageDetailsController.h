@@ -12,6 +12,7 @@
 
 @interface PackageDetailsController : MGTableViewController {
 	NSArray *fields;
+	NSArray<NSArray *> *cells; // [i][0] = title, [i][1] = action
 }
 @property (nonatomic, readonly, strong) Package *package;
 - (instancetype)initWithPackage:(Package *)package;
