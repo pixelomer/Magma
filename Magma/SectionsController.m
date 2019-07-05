@@ -18,7 +18,7 @@
 			NSMutableDictionary *mSections = [NSMutableDictionary new];
 			NSDictionary<NSString *, NSArray *> *sourceSections = _source.sections.copy;
 			for (NSString *sectionName in sourceSections) {
-				mSections[sectionName] = @(sourceSections[sectionName].count);
+				mSections[sectionName] = @([PackagesController latestSortedPackagesFromPackageArray:sourceSections[sectionName]].count);
 			}
 			sections = [mSections copy];
 		}
@@ -28,7 +28,7 @@
 			for (Source *sourceFromDatabase in Database.sharedInstance.sources.copy) {
 				NSDictionary<NSString *, NSArray *> *sourceSections = sourceFromDatabase.sections.copy;
 				for (NSString *section in sourceSections) {
-					mSections[section] = @(mSections[section].integerValue + sourceSections[section].count);
+					mSections[section] = @(mSections[section].integerValue + [PackagesController latestSortedPackagesFromPackageArray:sourceSections[section]].count);
 				}
 			}
 			sections = [mSections copy];

@@ -15,9 +15,14 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.title = _package.package;
-    cells = @[
-    	@[@"Packages File Entry", @"pushFieldsTableView"]
+    sections = @[
+    	@"Advanced"
     ];
+    cells = @[
+    	@[
+    		@[@"Packages File Entry", @"pushFieldsTableView"]
+		]
+	];
 }
 
 - (instancetype)init {
@@ -40,7 +45,7 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
 	if (tableView == self.tableView) {
-		return nil;
+		return sections[section];
 	}
 	else {
 		return nil;
@@ -49,7 +54,7 @@
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
-		NSArray *rowInfo = cells[indexPath.row];
+		NSArray *rowInfo = cells[indexPath.section][indexPath.row];
 		__kindof UITableViewCell *cell;
 		if ([rowInfo[0] isKindOfClass:NSString.class]) {
 			cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
@@ -81,7 +86,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return (tableView == self.tableView) ? cells.count : fields.count;
+	return (tableView == self.tableView) ? cells[section].count : fields.count;
 }
 
 - (void)pushFieldsTableView {
@@ -94,7 +99,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
-		NSArray *rowInfo = cells[indexPath.row];
+		NSArray *rowInfo = cells[indexPath.section][indexPath.row];
 		if (rowInfo.count > 1 && [rowInfo[1] isKindOfClass:[NSString class]]) {
 			SEL selector = NSSelectorFromString(rowInfo[1]);
 			((void(*)(PackageDetailsController *, SEL))class_getMethodImplementation(self.class, selector))(self, selector);

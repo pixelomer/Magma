@@ -14,7 +14,7 @@
 	NSArray *tabs = @[
 		@[@(UITabBarSystemItemRecents),   @NO],
 		@[@"Database",                    @YES],
-		@[@(UITabBarSystemItemDownloads), @YES],
+		@[@(UITabBarSystemItemDownloads), @NO],
 		@[@(UITabBarSystemItemSearch),    @YES]
 	];
 	NSMutableArray *viewControllers = @[

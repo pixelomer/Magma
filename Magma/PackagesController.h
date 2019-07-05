@@ -5,4 +5,5 @@
 @property (nonatomic, readonly, copy) NSArray *packages;
 @property (nonatomic, readonly, weak) Source *source;
 - (instancetype)initWithFilters:(NSDictionary *)customFilters;
++ (NSArray *)latestSortedPackagesFromPackageArray:(NSArray *)array;
 @end
