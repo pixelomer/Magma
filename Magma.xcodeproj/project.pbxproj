@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4430D18B22CF810E00F21B28 /* PackageDetailsController.m */; };
 		444F0AB922CDF0290029B788 /* PackageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9022CDF0250029B788 /* PackageCell.m */; };
 		444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9222CDF0250029B788 /* DPKGParser.m */; };
 		444F0ABC22CDF0290029B788 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9322CDF0250029B788 /* Assets.xcassets */; };
@@ -35,6 +36,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4430D18A22CF810E00F21B28 /* PackageDetailsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PackageDetailsController.h; sourceTree = "<group>"; };
+		4430D18B22CF810E00F21B28 /* PackageDetailsController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PackageDetailsController.m; sourceTree = "<group>"; };
 		444F0A8E22CDF0250029B788 /* PackageQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PackageQueue.h; sourceTree = "<group>"; };
 		444F0A8F22CDF0250029B788 /* PackageSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PackageSearchViewController.h; sourceTree = "<group>"; };
 		444F0A9022CDF0250029B788 /* PackageCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PackageCell.m; sourceTree = "<group>"; };
@@ -113,6 +116,7 @@
 				444F0A9222CDF0250029B788 /* DPKGParser.m */,
 				444F0AA522CDF0270029B788 /* HomeViewController.h */,
 				444F0A9822CDF0260029B788 /* HomeViewController.m */,
+				444F0AE322CDF3140029B788 /* Info.plist */,
 				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
 				444F0AA222CDF0270029B788 /* macros.h */,
 				444F0A9B22CDF0260029B788 /* main.m */,
@@ -124,6 +128,8 @@
 				444F0AB622CDF0280029B788 /* Package.m */,
 				444F0AAE22CDF0280029B788 /* PackageCell.h */,
 				444F0A9022CDF0250029B788 /* PackageCell.m */,
+				4430D18A22CF810E00F21B28 /* PackageDetailsController.h */,
+				4430D18B22CF810E00F21B28 /* PackageDetailsController.m */,
 				444F0A8E22CDF0250029B788 /* PackageQueue.h */,
 				444F0A9E22CDF0260029B788 /* PackageQueue.m */,
 				444F0AA722CDF0270029B788 /* PackagesController.h */,
@@ -142,7 +148,6 @@
 				444F0AB722CDF0290029B788 /* SourcesViewController.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				444F0AE322CDF3140029B788 /* Info.plist */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -272,6 +277,7 @@
 				444F0ACF22CDF0290029B788 /* SourcesViewController.m in Sources */,
 				444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */,
 				444F0AC722CDF0290029B788 /* SectionPackagesController.m in Sources */,
+				4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */,
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,
 				444F0ACA22CDF0290029B788 /* PackagesController.m in Sources */,
 				444F0AC322CDF0290029B788 /* PackageQueue.m in Sources */,

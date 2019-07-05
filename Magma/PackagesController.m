@@ -2,6 +2,7 @@
 #import "Source.h"
 #import "Package.h"
 #import "PackageCell.h"
+#import "PackageDetailsController.h"
 
 @implementation PackagesController
 
@@ -61,6 +62,17 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
 	return _packages.count;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	Package *package = _packages[indexPath.row];
+	PackageDetailsController *vc = [[PackageDetailsController alloc] initWithPackage:package];
+	if (vc) {
+		[self.navigationController pushViewController:vc animated:YES];
+	}
+	else {
+		[tableView deselectRowAtIndexPath:indexPath animated:YES];
+	}
 }
 
 @end

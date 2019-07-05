@@ -261,6 +261,7 @@ static NSArray *paths;
 			object:self
 			userInfo:@{ @"source" : source }
 		];
+		[self reloadRemotePackages];
 	});
 }
 
@@ -426,6 +427,7 @@ if (!response || response.statusCode != 200) { \
 						NSString *packages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
 						if (packages) {
 							[combinedPackages appendFormat:@"%@\n\n", packages];
+							packages = nil;
 							break;
 						}
 						else parseFailure();
@@ -461,6 +463,8 @@ if (!response || response.statusCode != 200) { \
 	}
 #endif
 	userInfo = nil;
+	response = nil;
+	data     = nil;
 }
 
 - (void)_reloadRemotePackages {
@@ -499,6 +503,11 @@ if (!response || response.statusCode != 200) { \
 
 - (void)startRefreshingSources {
 	_isRefreshing = YES;
+	[NSNotificationCenter.defaultCenter
+		postNotificationName:DatabaseDidStartRefreshingSources
+		object:self
+		userInfo:nil
+	];
 	_refreshQueue.suspended = YES;
 	_refreshQueue = [NSOperationQueue new];
 	_refreshQueue.underlyingQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);

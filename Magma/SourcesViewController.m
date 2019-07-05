@@ -182,8 +182,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	__kindof UIViewController *vc;
 	if (!indexPath.section && !indexPath.row) {
-		//vc = [[PackagesController alloc] init];
-		//vc.title = @"All Packages";
+		vc = [[SectionsController alloc] initWithSource:nil];
 	}
 	else {
 		Source *source = sources[indexPath.row];

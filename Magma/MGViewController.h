@@ -25,5 +25,6 @@
 - (void)database:(Database *)database didAddSource:(Source *)source;
 - (void)database:(Database *)database didRemoveSource:(Source *)source;
 - (void)databaseDidFinishRefreshingSources:(Database *)database;
+- (void)databaseDidStartRefreshingSources:(Database *)database;
 
 @end

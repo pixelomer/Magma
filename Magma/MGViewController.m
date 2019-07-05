@@ -125,8 +125,12 @@
 	else if ([notification.name isEqualToString:DatabaseDidFinishRefreshingSources]) {
 		[self databaseDidFinishRefreshingSources:notification.object];
 	}
+	else if ([notification.name isEqualToString:DatabaseDidStartRefreshingSources]) {
+		[self databaseDidStartRefreshingSources:notification.object];
+	}
 }
 
+- (void)databaseDidStartRefreshingSources:(Database *)database {}
 - (void)databaseDidFinishRefreshingSources:(Database *)database {}
 - (void)sourceDidStartRefreshing:(Source *)source {}
 - (void)sourceDidStopRefreshing:(Source *)source reason:(NSString *)reason {}
@@ -153,6 +157,10 @@
 		];
 	}
 	else _waitForDatabase = waitForDatabase;
+}
+
+- (void)dealloc {
+	[NSNotificationCenter.defaultCenter removeObserver:self];
 }
 
 @end
