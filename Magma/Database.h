@@ -23,6 +23,7 @@
 @class Package;
 
 @interface Database : NSObject {
+	BOOL _isLoading;
 	BOOL _isLoaded;
 	int highestRepoID;
 	NSMutableDictionary<NSString *, Source *> *sources;

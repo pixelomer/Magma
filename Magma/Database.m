@@ -141,6 +141,8 @@ static NSArray *paths;
 
 - (void)_loadData {
 	// Load repositories
+	if (self->_isLoading) return;
+	self->_isLoading = YES;
 	self->sourcesPlist = [NSMutableDictionary new];
 	NSDictionary<NSString *, NSDictionary *> *storedFile = [[NSDictionary alloc] initWithContentsOfFile:self.class.sourcesPlistPath];
 	for (NSString *ID in storedFile) {
@@ -148,9 +150,7 @@ static NSArray *paths;
 		self->sourcesPlist[NSID] = storedFile[ID].mutableCopy;
 	}
 	NSArray<NSNumber *> *keys = self->sourcesPlist.allKeys.copy;
-	int i = 0;
 	for (NSNumber *_sourceID in keys) {
-		i++;
 		Source *source;
 		NSDictionary<NSString *, id> *sourceDict = self->sourcesPlist[_sourceID];
 		if ([(NSString *)sourceDict[@"components"] length] <= 0) {
@@ -175,18 +175,16 @@ static NSArray *paths;
 			}
 			source.packages = packages.copy;
 		}
-		if (i == keys.count) {
-			// Put packages from all of the sources into one sorted array
-			[self reloadRemotePackages];
-			
-			self->_isLoaded = YES;
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidLoad
-				object:self
-				userInfo:nil
-			];
-		}
 	}
+	// Put packages from all of the sources into one sorted array
+	[self reloadRemotePackages];
+
+	self->_isLoaded = YES;
+	[NSNotificationCenter.defaultCenter
+		postNotificationName:DatabaseDidLoad
+		object:self
+		userInfo:nil
+	];
 }
 
 - (void)startLoadingDataIfNeeded {
