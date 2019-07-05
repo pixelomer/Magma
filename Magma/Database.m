@@ -76,7 +76,24 @@ static NSArray *paths;
 	return self;
 }
 
+- (void)syncSourcesPlist {
+	NSMutableDictionary *serializableSourcesPlist = [NSMutableDictionary new];
+	for (NSNumber *NSID in sourcesPlist) {
+		NSString *ID = [NSID stringValue];
+		serializableSourcesPlist[ID] = sourcesPlist[NSID];
+	}
+	[serializableSourcesPlist writeToFile:self.class.sourcesPlistPath atomically:YES];
+}
+
+- (void)syncFilesForSourceOnly:(Source *)source {
+	[self syncFilesForSource:source rewriteSourcesPlist:NO];
+}
+
 - (void)syncFilesForSource:(Source *)source {
+	[self syncFilesForSource:source rewriteSourcesPlist:YES];
+}
+
+- (void)syncFilesForSource:(Source *)source rewriteSourcesPlist:(BOOL)rewriteSources {
 	if ([sources.allValues indexOfObjectIdenticalTo:source] != NSNotFound) {
 		[source.parsedReleaseFile writeToFile:[self.class releaseFilePathForSource:source] atomically:YES];
 		if (source.packages) {
@@ -109,18 +126,20 @@ static NSArray *paths;
 		[NSFileManager.defaultManager removeItemAtPath:[self.class packagesFilePathForSource:source] error:nil];
 		[sourcesPlist removeObjectForKey:@(source.databaseID)];
 	}
-	NSMutableDictionary *serializableSourcesPlist = [NSMutableDictionary new];
-	for (NSNumber *NSID in sourcesPlist) {
-		NSString *ID = [NSID stringValue];
-		serializableSourcesPlist[ID] = sourcesPlist[NSID];
-	}
-	[serializableSourcesPlist writeToFile:self.class.sourcesPlistPath atomically:YES];
+	if (rewriteSources) [self syncSourcesPlist];
 }
 
 - (void)syncFiles {
+	NSOperationQueue *queue = [NSOperationQueue new];
 	for (Source *source in sources.allValues) {
-		[self syncFilesForSource:source];
+		[queue addOperation:[[NSInvocationOperation alloc]
+			initWithTarget:self
+			selector:@selector(syncFilesForSourceOnly:)
+			object:source
+		]];
 	}
+	[queue waitUntilAllOperationsAreFinished];
+	[self syncSourcesPlist];
 }
 
 + (NSString *)releaseFilePathForSource:(Source *)source {
@@ -139,6 +158,25 @@ static NSArray *paths;
 	return [NSArray arrayWithContentsOfFile:[self packagesFilePathForSource:source]];
 }
 
+- (void)_loadDataForSourceWithArray:(NSArray *)dataToProcess {
+	Source *source = dataToProcess[1];
+	NSDictionary<NSString *, id> *sourceDict = dataToProcess[0];
+	source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
+	source.lastRefresh = sourceDict[@"lastRefresh"];
+	NSMutableArray *packages = [NSMutableArray new];
+	NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
+	for (NSArray *packageInfo in rawPackagesFile) {
+		if (packageInfo.count < 2) continue;
+		NSDictionary *packageConfiguration = packageInfo[0];
+		NSDictionary *parsedControl = packageInfo[1];
+		NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
+		Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
+		package.firstDiscovery = firstDiscovery;
+		if (package) [packages addObject:package];
+	}
+	source.packages = packages.copy;
+}
+
 - (void)_loadData {
 	// Load repositories
 	if (self->_isLoading) return;
@@ -150,6 +188,7 @@ static NSArray *paths;
 		self->sourcesPlist[NSID] = storedFile[ID].mutableCopy;
 	}
 	NSArray<NSNumber *> *keys = self->sourcesPlist.allKeys.copy;
+	NSOperationQueue *queue = [NSOperationQueue new];
 	for (NSNumber *_sourceID in keys) {
 		Source *source;
 		NSDictionary<NSString *, id> *sourceDict = self->sourcesPlist[_sourceID];
@@ -160,22 +199,16 @@ static NSArray *paths;
 			source = [self addSourceWithBaseURL:sourceDict[@"baseURL"] architecture:sourceDict[@"arch"] distribution:sourceDict[@"dist"] components:sourceDict[@"components"] ID:_sourceID];
 		}
 		if (source) {
-			source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
-			source.lastRefresh = sourceDict[@"lastRefresh"];
-			NSMutableArray *packages = [NSMutableArray new];
-			NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
-			for (NSArray *packageInfo in rawPackagesFile) {
-				if (packageInfo.count < 2) continue;
-				NSDictionary *packageConfiguration = packageInfo[0];
-				NSDictionary *parsedControl = packageInfo[1];
-				NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
-				Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
-				package.firstDiscovery = firstDiscovery;
-				if (package) [packages addObject:package];
-			}
-			source.packages = packages.copy;
+			[queue addOperation:[[NSInvocationOperation alloc]
+				initWithTarget:self
+				selector:@selector(_loadDataForSourceWithArray:)
+				object:@[sourceDict, source]
+			]];
 		}
 	}
+	
+	[queue waitUntilAllOperationsAreFinished];
+	
 	// Put packages from all of the sources into one sorted array
 	[self reloadRemotePackages];
 

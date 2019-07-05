@@ -16,6 +16,10 @@
 	return [filteredPackages.allValues sortedArrayUsingSelector:@selector(compare:)];
 }
 
+- (instancetype)init {
+	return [self initWithFilters:nil];
+}
+
 - (instancetype)initWithFilters:(NSDictionary *)customFilters {
 	if (self = [super init]) {
 		NSMutableDictionary *filters = @{

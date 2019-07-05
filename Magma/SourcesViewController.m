@@ -3,6 +3,7 @@
 #import "Source.h"
 #import <objc/runtime.h>
 #import "SectionsController.h"
+#import "PackagesController.h"
 
 @implementation SourcesViewController
 
@@ -159,17 +160,17 @@
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	__kindof UITableViewCell *cell;
 	if (indexPath.section == 0) {
-		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"all"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"all"];
-		cell.textLabel.text = @"All packages";
-		return cell;
+		cell = [tableView dequeueReusableCellWithIdentifier:@"all"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"all"];
+		cell.textLabel.text = @"All Sources";
 	}
 	else {
-		SourceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"source"] ?: [[SourceCell alloc] initWithReuseIdentifier:@"source"];
-		cell.source = sources[indexPath.row];
-		cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
-		return cell;
+		cell = [tableView dequeueReusableCellWithIdentifier:@"source"] ?: [[SourceCell alloc] initWithReuseIdentifier:@"source"];
+		[(SourceCell *)cell setSource:sources[indexPath.row]];
 	}
+	cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -179,18 +180,20 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	__kindof UIViewController *vc;
 	if (!indexPath.section && !indexPath.row) {
-		// Handle "All Packages"
+		//vc = [[PackagesController alloc] init];
+		//vc.title = @"All Packages";
 	}
 	else {
 		Source *source = sources[indexPath.row];
-		SectionsController *vc = [[SectionsController alloc] initWithSource:source];
-		if (vc) {
-			[self.navigationController pushViewController:vc animated:YES];
-		}
-		else {
-			[tableView deselectRowAtIndexPath:indexPath animated:YES];
-		}
+		vc = [[SectionsController alloc] initWithSource:source];
+	}
+	if (vc) {
+		[self.navigationController pushViewController:vc animated:YES];
+	}
+	else {
+		[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	}
 }
 

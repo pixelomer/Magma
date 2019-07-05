@@ -33,6 +33,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSString *title = (indexPath.section ? sections[indexPath.row] : @"All Packages");
 	SectionPackagesController *vc = [[SectionPackagesController alloc] initWithSection:(indexPath.section ? sections[indexPath.row] : nil) inSource:_source];
+	vc.title = title;
 	if (vc) {
 		[self.navigationController pushViewController:vc animated:YES];
 	}
