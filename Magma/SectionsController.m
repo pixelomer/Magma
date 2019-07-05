@@ -15,29 +15,39 @@
 		if (source && !source.isRefreshing) {
 			_source = source;
 			self.title = source.origin;
-			sections = [_source.sections.allKeys sortedArrayUsingSelector:@selector(compare:)];
+			NSMutableDictionary *mSections = [NSMutableDictionary new];
+			NSDictionary<NSString *, NSArray *> *sourceSections = _source.sections.copy;
+			for (NSString *sectionName in sourceSections) {
+				mSections[sectionName] = @(sourceSections[sectionName].count);
+			}
+			sections = [mSections copy];
 		}
 		else if (!Database.sharedInstance.isRefreshing) {
-			NSMutableArray *mSections = [NSMutableArray new];
+			NSMutableDictionary<NSString *, NSNumber *> *mSections = [NSMutableDictionary new];
 			self.title = @"All Sections";
 			for (Source *sourceFromDatabase in Database.sharedInstance.sources.copy) {
-				for (NSString *section in sourceFromDatabase.sections.allKeys) {
-					if (![mSections containsObject:section]) {
-						[mSections addObject:section];
-					}
+				NSDictionary<NSString *, NSArray *> *sourceSections = sourceFromDatabase.sections.copy;
+				for (NSString *section in sourceSections) {
+					mSections[section] = @(mSections[section].integerValue + sourceSections[section].count);
 				}
 			}
-			sections = [mSections sortedArrayUsingSelector:@selector(compare:)];
+			sections = [mSections copy];
 		}
 		else return nil;
+		totalPackageCount = @(0);
+		for (NSNumber *packageCount in sections.allValues) {
+			totalPackageCount = @(totalPackageCount.integerValue + packageCount.integerValue);
+		}
+		sortedSections = [sections.allKeys sortedArrayUsingSelector:@selector(compare:)];
 		return self;
 	}
 	return nil;
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"section"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"section"];
-	cell.textLabel.text = indexPath.section ? sections[indexPath.row] : @"All Packages";
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"section"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"section"];
+	cell.textLabel.text = indexPath.section ? sortedSections[indexPath.row] : @"All Packages";
+	cell.detailTextLabel.text = (indexPath.section ? sections[sortedSections[indexPath.row]] : totalPackageCount).stringValue;
 	cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 	return cell;
 }
@@ -51,8 +61,8 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	NSString *title = (indexPath.section ? sections[indexPath.row] : @"All Packages");
-	SectionPackagesController *vc = [[SectionPackagesController alloc] initWithSection:(indexPath.section ? sections[indexPath.row] : nil) inSource:_source];
+	NSString *title = (indexPath.section ? sortedSections[indexPath.row] : @"All Packages");
+	SectionPackagesController *vc = [[SectionPackagesController alloc] initWithSection:(indexPath.section ? sortedSections[indexPath.row] : nil) inSource:_source];
 	vc.title = title;
 	if (vc) {
 		[self.navigationController pushViewController:vc animated:YES];
