@@ -57,7 +57,7 @@
 }
 
 - (void)showAddSourceAlert {
-	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter Source Info" message:nil preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter Source Details" message:nil preferredStyle:UIAlertControllerStyleAlert];
 	[alertController addAction:[UIAlertAction
 		actionWithTitle:@"Cancel"
 		style:UIAlertActionStyleCancel
@@ -71,11 +71,13 @@
 			for (UITextField *textField in self->alertTextFields) {
 				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, _cmd);
 				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-				switch (alertFieldIdentifier.shortValue) {
-					case 0:      baseURL = value; break;
-					case 1:         dist = value; break;
-					case 2:   components = value; break;
-					case 3: architecture = value; break;
+				if (value.length) {
+					switch (alertFieldIdentifier.shortValue) {
+						case 0:      baseURL = value; break;
+						case 1:         dist = value; break;
+						case 2:   components = value; break;
+						case 3: architecture = value; break;
+					}
 				}
 			}
 			if (!baseURL.length || !dist.length || !architecture.length);
