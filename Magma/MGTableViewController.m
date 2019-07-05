@@ -2,6 +2,15 @@
 
 @implementation MGTableViewController
 
+- (instancetype)init {
+	if (self = [super init]) {
+		_tableView = [UITableView new];
+		_tableView.dataSource = self;
+		_tableView.delegate = self;
+	}
+	return self;
+}
+
 - (void)viewDidAppear:(BOOL)animated {
 	[super viewDidAppear:animated];
 	NSIndexPath *selection = [self.tableView indexPathForSelectedRow];
@@ -11,9 +20,6 @@
 }
 
 - (void)_setupTableView {
-    _tableView = [UITableView new];
-	_tableView.dataSource = self;
-	_tableView.delegate = self;
 	_tableView.translatesAutoresizingMaskIntoConstraints = NO;
 	[self.view addSubview:_tableView];
 	[self.view addConstraints:@[
