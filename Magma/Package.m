@@ -1,15 +1,19 @@
 #import "Package.h"
 #import "Database.h"
 #import <objc/runtime.h>
+#import "DPKGParser.h"
 #import "Source.h"
 #import <SUStandardVersionComparator/SUStandardVersionComparator.h>
 
 @implementation Package
 
+- (NSString *)rawPackagesEntry {
+	return [_source.rawPackagesFile substringWithRange:_range];
+}
+
 + (void)load {
 	if ([self class] == [Package class]) {
 		NSArray *selectors = @[
-			@"author",
 			@"maintainer",
 			@"description",
 			@"md5sum",
@@ -24,7 +28,7 @@
 		];
 		for (NSString *selectorString in selectors) {
 			SEL selector = NSSelectorFromString(selectorString);
-			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(package)), "@@:");
+			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(author)), "@@:");
 		}
 	}
 }
@@ -33,10 +37,11 @@
 	return [object isKindOfClass:[Package class]] && ([object compare:self] == NSOrderedSame);
 }
 
-+ (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSDictionary<NSString *, NSString *> *> *)array source:(Source *)source {
+// FIXME: New system
++ (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSArray<NSNumber *> *> *)array source:(Source *)source {
 	NSMutableArray *packages = [NSMutableArray new];
-	for (NSDictionary *dict in array) {
-		[packages addObject:[[Package alloc] initWithDictionary:dict source:source]];
+	for (NSArray<NSNumber *> *rangeArray in array) {
+		[packages addObject:[[Package alloc] initWithRange:NSMakeRange(rangeArray[0].unsignedIntegerValue, rangeArray[1].unsignedIntegerValue) source:source]];
 	}
 	return packages.copy;
 }
@@ -55,7 +60,7 @@
 #undef IDForPackage
 }
 
-- (NSString *)package {
+- (NSString *)author {
 	return [self getField:NSStringFromSelector(_cmd)];
 }
 
@@ -75,44 +80,33 @@
 	_firstDiscovery = firstDiscovery;
 }
 
-- (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source *)source {
-	if (dict && (self = [super init])) {
-		_rawPackage = dict;
-		_dependencies = [dict[@"depends"] componentsSeparatedByString:@", "];
-		_conflicts = [dict[@"conflicts"] componentsSeparatedByString:@", "];
-		NSMutableArray<NSString *> *descriptionLines = [dict[@"description"] componentsSeparatedByString:@"\n"].mutableCopy;
-		switch (descriptionLines.count) {
-			case 0:
-				break;
-			case 1: 
-				_shortDescription = _longDescription = descriptionLines[0];
-				break;
-			default:
-				_shortDescription = descriptionLines[0];
-				[descriptionLines removeObjectAtIndex:0];
-				_longDescription = [descriptionLines componentsJoinedByString:@"\n"];
-				break;
+- (void)parse {
+	NSError *error;
+	NSString *rawPackagesEntry = self.rawPackagesEntry;
+	_rawPackage = _rawPackage ?: [DPKGParser parsePackageEntry:rawPackagesEntry error:&error];
+	NSLog(@"%@", error);
+}
+
+- (instancetype)initWithRange:(NSRange)range source:(Source *)source {
+	if ((self = [super init])) {
+		_source = source;
+		_range = range;
+		NSArray *requiredValues = [DPKGParser findFirstLinesForFields:@[@"package", @"version", @"description", @"section"] inString:source.rawPackagesFile range:range];
+		for (short i = 0; i <= 2; i++) {
+			if ([requiredValues[i] isKindOfClass:[NSNull class]]) {
+				return nil;
+			}
 		}
-		if ((_source = source) && dict[@"filename"]) {
-			_debURL = [source.baseURL URLByAppendingPathComponent:dict[@"filename"]];
-		}
-		return self;
+		_package = requiredValues[0];
+		_version = requiredValues[1];
+		_shortDescription = requiredValues[2];
+		_section = [requiredValues[3] isKindOfClass:[NSString class]] ? requiredValues[3] : nil;
 	}
-	return nil;
+	return self;
 }
 
 - (NSString *)objectForKeyedSubscript:(NSString *)key {
 	return _rawPackage[key.lowercaseString];
-}
-
-- (NSString *)rawPackagesEntry {
-	if (_rawPackagesEntry) return _rawPackagesEntry;
-	NSMutableString *string = [NSMutableString new];
-	for (NSString *key in _rawPackage) {
-		NSString *value = _rawPackage[key];
-		[string appendFormat:@"%@: %@\n", key, [value stringByReplacingOccurrencesOfString:@"\n" withString:@"\n  "]];
-	}
-	return _rawPackagesEntry = [string copy];
 }
 
 @end

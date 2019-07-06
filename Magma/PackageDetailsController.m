@@ -34,7 +34,7 @@
 
 - (instancetype)initWithPackage:(Package *)package {
 	if (package && (self = [super init])) {
-		_package = package;
+		[(_package = package) parse];
 		NSMutableArray *mFields = [NSMutableArray new];
 		NSDictionary *rawPackage = package.rawPackage.copy;
 		for (NSString *fieldName in rawPackage) [mFields addObject:@[fieldName, rawPackage[fieldName]]];

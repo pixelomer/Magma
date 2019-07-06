@@ -8,28 +8,30 @@ NS_ASSUME_NONNULL_BEGIN
 @interface Package : NSObject {
     NSString *_rawPackagesEntry;
 }
+@property (nonatomic, readonly, assign) NSRange range;
 @property (nonatomic, readonly, weak) Source * _Nullable source;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSString *> *rawPackage;
 @property (nonatomic, readonly, copy) NSArray<NSString *> * _Nullable dependencies;
+@property (nonatomic, readonly, copy) NSString *version;
+@property (nonatomic, readonly, copy) NSString *section;
+@property (nonatomic, readonly, copy) NSString *package;
 @property (nonatomic, readonly, copy) NSArray<NSString *> * _Nullable conflicts;
 @property (nonatomic, readonly, copy) NSString * _Nullable shortDescription;
 @property (nonatomic, readonly, copy) NSString * _Nullable longDescription;
 @property (nonatomic, readonly, copy) NSDate * _Nullable firstDiscovery;
 @property (nonatomic, readonly, copy) NSURL *debURL;
-- (NSString *)rawPackagesEntry;
+- (void)parse;
 - (Database *)database;
 - (NSArray * _Nullable)tags;
 - (NSComparisonResult)compare:(Package *)package;
 - (NSString * _Nullable)objectForKeyedSubscript:(NSString *)key; // package[@"abc"] = package.rawPackage[@"abc"]
 - (NSString * _Nullable)getField:(NSString *)field;
-- (instancetype)initWithDictionary:(NSDictionary *)dict source:(Source * _Nullable)source;
+- (instancetype)initWithRange:(NSRange)range source:(Source * _Nullable)source;
 + (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSDictionary<NSString *, NSString *> *> *)array source:(Source * _Nullable)source;
 @end
 
-// Implemented in +[Package load]
+// Implemented in +[Package load], -[Package parse] needs to be called before accessing these
 @interface Package(CommonKeys)
-- (NSString * _Nullable)package;
-- (NSString * _Nullable)name;
 - (NSString * _Nullable)author;
 - (NSString * _Nullable)maintainer;
 - (NSString * _Nullable)description;

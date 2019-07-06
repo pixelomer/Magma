@@ -4,7 +4,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
-	self.title = @"Home";
+	self.title = @"Featured Sources";
 }
 
 - (void)addMessageToQueue:(NSString *)message title:(NSString *)title {

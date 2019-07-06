@@ -18,6 +18,53 @@
 	return self;
 }
 
+- (void)setRawPackagesFile:(NSString *)rawPackagesFile {
+	_rawPackagesFile = rawPackagesFile;
+	NSMutableArray *packages = [NSMutableArray new];
+	NSArray *lines = [rawPackagesFile componentsSeparatedByString:@"\n"];
+	NSUInteger scanned = 0;
+	NSUInteger startIndex = 0;
+	NSUInteger length = 0;
+	BOOL lookingForEntry = YES;
+	for (NSString *line in lines) {
+		BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
+		if (!isLineEmpty) {
+			if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
+			length += line.length + 1;
+		}
+		else {
+			if (length > 1) {
+				length -= 1;
+				Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+				if (package) [packages addObject:package];
+				lookingForEntry = YES;
+			}
+			length = 0;
+		}
+		scanned += line.length + 1;
+	}
+	if (length > 0) {
+		Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+		[packages addObject:package];
+	}
+	NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
+	for (Package *package in packages) {
+		NSString *section = package.section ?: @"Other";
+		if (sections[section]) {
+			[sections[section] addObject:package];
+		}
+		else {
+			sections[section] = @[package].mutableCopy;
+		}
+	}
+	for (NSString *key in sections.allKeys.copy) {
+		sections[key] = sections[key].copy;
+	}
+	_sections = sections.copy;
+	_packages = packages;
+	packages = nil;
+}
+
 - (NSString *)origin {
 	return _parsedReleaseFile[@"origin"];
 }
@@ -43,26 +90,6 @@
 		}
 		_rawReleaseFile = [reversedReleaseFileComponents componentsJoinedByString:@"\n"];
 		_parsedReleaseFile = parsedReleaseFile;
-	}
-}
-
-- (void)setPackages:(NSArray<Package *> *)packages {
-	if (packages) {
-		_packages = packages;
-		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
-		for (Package *package in packages) {
-			NSString *section = package.section ?: @"Other";
-			if (sections[section]) {
-				[sections[section] addObject:package];
-			}
-			else {
-				sections[section] = @[package].mutableCopy;
-			}
-		}
-		for (NSString *key in sections.allKeys.copy) {
-			sections[key] = sections[key].copy;
-		}
-		_sections = sections.copy;
 	}
 }
 

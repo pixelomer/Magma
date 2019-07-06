@@ -12,7 +12,7 @@
 	[Database.sharedInstance startLoadingDataIfNeeded];
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	NSArray *tabs = @[
-		@[@(UITabBarSystemItemRecents),   @NO],
+		@[@(UITabBarSystemItemFeatured),  @NO],
 		@[@"Database",                    @YES],
 		@[@(UITabBarSystemItemDownloads), @NO],
 		@[@(UITabBarSystemItemSearch),    @YES]

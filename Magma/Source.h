@@ -14,6 +14,7 @@ typedef NSString* PackagesAlgorithm;
 @property (nonatomic, readonly, copy) NSArray<NSString *> *components;
 @property (nonatomic, copy) NSDictionary *parsedReleaseFile;
 @property (nonatomic, copy) NSString *rawReleaseFile;
+@property (nonatomic, readonly, copy) NSString *rawPackagesFile;
 @property (nonatomic, readonly, copy) NSString *architecture;
 @property (nonatomic, assign) int databaseID;
 @property (nonatomic, readonly, copy) NSDate *lastRefresh;

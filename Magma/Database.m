@@ -6,7 +6,7 @@
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
-- (void)setPackages:(NSArray<Package *> *)packages;
+- (void)setRawPackagesFile:(NSString *)fileContents;
 @end
 
 @interface Package(Private)
@@ -96,29 +96,7 @@ static NSArray *paths;
 - (void)syncFilesForSource:(Source *)source rewriteSourcesPlist:(BOOL)rewriteSources {
 	if ([sources.allValues indexOfObjectIdenticalTo:source] != NSNotFound) {
 		[source.parsedReleaseFile writeToFile:[self.class releaseFilePathForSource:source] atomically:YES];
-		if (source.packages) {
-			NSMutableDictionary *oldPackagesDictionary = [NSMutableDictionary new];
-			NSArray *detailedPackages = [self.class packagesFileForSourceFromDisk:source];
-			for (NSArray<NSDictionary *> *packageDetails in detailedPackages) {
-				NSString *packageID = packageDetails[1][@"package"];
-				NSString *version = packageDetails[1][@"version"];
-				NSDate *firstDiscovery = packageDetails[0][@"firstDiscovery"];
-				NSString *key = [NSString stringWithFormat:@"%@ %@", packageID, version];
-				oldPackagesDictionary[key] = firstDiscovery;
-			}
-			NSMutableArray *newPackagesFile = [NSMutableArray new];
-			NSDate *date = NSDate.date;
-			for (Package *newPackage in source.packages) {
-				NSString *key = [NSString stringWithFormat:@"%@ %@", newPackage.package, newPackage.version];
-				[newPackagesFile addObject:@[
-					@{
-						@"firstDiscovery" : (oldPackagesDictionary[key] ?: date)
-					},
-					newPackage.rawPackage
-				]];
-			}
-			[newPackagesFile writeToFile:[self.class packagesFilePathForSource:source] atomically:YES];
-		}
+		[source.rawPackagesFile writeToFile:[self.class packagesFilePathForSource:source] atomically:YES encoding:NSUTF8StringEncoding error:nil];
 	}
 	else {
 		[NSFileManager.defaultManager removeItemAtPath:[self.class releaseFilePathForSource:source] error:nil];
@@ -146,15 +124,15 @@ static NSArray *paths;
 }
 
 + (NSString *)packagesFilePathForSource:(Source *)source {
-	return [self.listsDirectoryPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%i_Packages.plist", source.databaseID]];
+	return [self.listsDirectoryPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%i_Packages", source.databaseID]];
 }
 
 + (NSDictionary *)releaseFileForSourceFromDisk:(Source *)source {
 	return [NSDictionary dictionaryWithContentsOfFile:[self releaseFilePathForSource:source]];
 }
 
-+ (NSArray<NSArray<NSDictionary *> *> *)packagesFileForSourceFromDisk:(Source *)source {
-	return [NSArray arrayWithContentsOfFile:[self packagesFilePathForSource:source]];
++ (NSString *)packagesFileForSourceFromDisk:(Source *)source {
+	return [NSString stringWithContentsOfFile:[self packagesFilePathForSource:source] encoding:NSUTF8StringEncoding error:nil];
 }
 
 - (void)_loadDataForSourceWithArray:(NSArray *)dataToProcess {
@@ -162,18 +140,7 @@ static NSArray *paths;
 	NSDictionary<NSString *, id> *sourceDict = dataToProcess[0];
 	source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
 	source.lastRefresh = sourceDict[@"lastRefresh"];
-	NSMutableArray *packages = [NSMutableArray new];
-	NSArray<NSArray<NSDictionary *> *> *rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
-	for (NSArray *packageInfo in rawPackagesFile) {
-		if (packageInfo.count < 2) continue;
-		NSDictionary *packageConfiguration = packageInfo[0];
-		NSDictionary *parsedControl = packageInfo[1];
-		NSDate *firstDiscovery = packageConfiguration[@"firstDiscovery"];
-		Package *package = [[Package alloc] initWithDictionary:parsedControl source:source];
-		package.firstDiscovery = firstDiscovery;
-		if (package) [packages addObject:package];
-	}
-	source.packages = packages.copy;
+	source.rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
 }
 
 - (void)_loadData {
@@ -427,12 +394,8 @@ static NSArray *paths;
 					}
 				}
 			}
-			NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:combinedPackages error:&error];
-			if (!error && parsedFile) {
-				source.packages = [Package createPackagesUsingArray:parsedFile source:source];
-				sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
-			}
-			else parseFailure();
+			source.rawPackagesFile = combinedPackages.copy;
+			sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
 		}
 		else parseFailure();
     }

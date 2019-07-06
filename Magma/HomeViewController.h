@@ -1,6 +1,6 @@
-#import "MGViewController.h"
+#import "MGTableViewController.h"
 
-@interface HomeViewController : MGViewController {
+@interface HomeViewController : MGTableViewController {
     NSMutableArray *messageQueue;
     BOOL isPresentingMessage;
 }
