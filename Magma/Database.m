@@ -117,7 +117,6 @@ static NSArray *paths;
 					newPackage.rawPackage
 				]];
 			}
-			NSLog(@"%@", newPackagesFile);
 			[newPackagesFile writeToFile:[self.class packagesFilePathForSource:source] atomically:YES];
 		}
 	}
@@ -374,6 +373,20 @@ static NSArray *paths;
 	return [self requestDataFromURL:url response:nil timeoutInterval:30 error:error];
 }
 
+- (NSData *)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo {
+    NSHTTPURLResponse *response;
+    NSData *data = [self.class requestDataFromURL:url response:&response error:nil];
+    if (!response || response.statusCode != 200) {
+        userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url];
+        userInfo[@"errorCode"] = @(response.statusCode);
+		return nil;
+    } else {
+        userInfo[@"reason"] = @"Operation completed successfully";
+        userInfo[@"errorCode"] = NSNull.null;
+		return data;
+    }
+}
+
 - (void)refreshSource:(Source *)source {
 	// Notify observers about the refresh operation
 	source.isRefreshing = YES;
@@ -383,38 +396,18 @@ static NSArray *paths;
 		userInfo:@{ @"source" : source }
 	];
 	NSLog(@"Refreshing: %@", source);
-	NSString *successReason = @"Operation completed successfully";
-	id successCode = NSNull.null;
 	NSMutableDictionary *userInfo = @{
-		@"source"    : source,
-		@"reason"    : successReason,
-		@"errorCode" : successCode
+		@"source"    : source
 	}.mutableCopy;
 
 	// Refresh
+    NSData *data;
 	NSURL *releaseFileURL = source.releaseFileURL;
-	NSHTTPURLResponse *response = nil;
 	NSError *error = nil;
-	NSData *data = nil;
-	NSURL *lastURL = nil;
 #define parseFailure() { \
-	userInfo[@"reason"] = [NSString stringWithFormat:@"Client failed to parse the file from the following URL: %@", lastURL]; \
-	userInfo[@"errorCode"] = @(-1); \
 	NSLog(@"Error: %@", error); \
 }
-#define fetch(url, block...) \
-lastURL = url; \
-response = (id)(data = nil); \
-data = [self.class requestDataFromURL:url response:&response error:nil]; \
-if (!response || response.statusCode != 200) { \
-	userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url]; \
-	userInfo[@"errorCode"] = @(response.statusCode); \
-} else { \
-	userInfo[@"reason"] = successReason; \
-	userInfo[@"errorCode"] = successCode; \
-	block \
-}
-	fetch(releaseFileURL, {
+	if ((data = [self fetchURL:releaseFileURL outputUserInfo:userInfo])) {
 		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
@@ -423,7 +416,7 @@ if (!response || response.statusCode != 200) { \
 			for (NSDictionary *possiblePackagesFileURLs in packagesFileURLsForEveryComponent.allValues) {
 				for (NSString *algorithm in possiblePackagesFileURLs) {
 					NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
-					fetch(packagesFileURL, {
+                    if ((data = [self fetchURL:packagesFileURL outputUserInfo:userInfo])) {
 						NSString *packages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
 						if (packages) {
 							[combinedPackages appendFormat:@"%@\n\n", packages];
@@ -431,7 +424,7 @@ if (!response || response.statusCode != 200) { \
 							break;
 						}
 						else parseFailure();
-					});
+					}
 				}
 			}
 			NSArray<NSDictionary<NSString *, NSString *> *> *parsedFile = [DPKGParser parseFileContents:combinedPackages error:&error];
@@ -442,9 +435,8 @@ if (!response || response.statusCode != 200) { \
 			else parseFailure();
 		}
 		else parseFailure();
-	});
+    }
 	NSLog(@"[Refresh Result] %@", userInfo);
-#undef fetch
 #undef parseFailure
 	// Notify observers about the completion of the operation
 	source.isRefreshing = NO;
@@ -463,7 +455,6 @@ if (!response || response.statusCode != 200) { \
 	}
 #endif
 	userInfo = nil;
-	response = nil;
 	data     = nil;
 }
 
