@@ -56,7 +56,6 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 	}
 }
 
-static BOOL somethingBadIsHappening;
 #define px_assert(x, message...) {if(!(x)){NSLog(message);abort();}}
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range {
 	fseek(_packagesFileHandle, range.location, SEEK_SET);
@@ -68,10 +67,6 @@ static BOOL somethingBadIsHappening;
 	NSString *returnValue = !(error = ferror(_packagesFileHandle)) ? [NSString stringWithUTF8String:line] : NULL;
 	if (error) {
 		NSLog(@"Error: %s", strerror(error));
-	}
-	if (!returnValue) somethingBadIsHappening = YES;
-	if (somethingBadIsHappening) {
-		(void)0;
 	}
 	free(line);
 	return returnValue;
@@ -160,14 +155,23 @@ static BOOL somethingBadIsHappening;
 		_parsedReleaseFile = nil;
 	}
 	else {
-		[parsedReleaseFile writeToFile:[Database.class releaseFilePathForSource:self] atomically:YES];
+		NSArray *allowedKeys = @[
+			@"origin"
+		];
+		NSMutableDictionary *filteredReleaseFile = [NSMutableDictionary new];
+		for (NSString *fieldName in parsedReleaseFile) {
+			if ([allowedKeys containsObject:fieldName]) {
+				filteredReleaseFile[fieldName] = parsedReleaseFile[fieldName];
+			}
+		}
+		[filteredReleaseFile writeToFile:[Database.class releaseFilePathForSource:self] atomically:YES];
 		NSMutableArray *reversedReleaseFileComponents = [NSMutableArray new];
-		for (NSString *field in parsedReleaseFile) {
-			NSString *value = parsedReleaseFile[field];
+		for (NSString *field in filteredReleaseFile) {
+			NSString *value = filteredReleaseFile[field];
 			[reversedReleaseFileComponents addObject:[NSString stringWithFormat:@"%@: %@", field, [value stringByReplacingOccurrencesOfString:@"\n" withString:@"\n  "]]];
 		}
 		_rawReleaseFile = [reversedReleaseFileComponents componentsJoinedByString:@"\n"];
-		_parsedReleaseFile = parsedReleaseFile;
+		_parsedReleaseFile = filteredReleaseFile.copy;
 	}
 }
 
@@ -202,7 +206,7 @@ static BOOL somethingBadIsHappening;
 
 + (BOOL)extractPackagesFile:(NSString *)inputFilePath toFile:(NSString *)outputFilePath usingAlgorithm:(PackagesAlgorithm)algorithm {
 	if ([algorithm isEqualToString:PackagesAlgorithmBZip2]) {
-		return [BZipCompression decompressDataFromFileAtPath:inputFilePath toFileAtPath:outputFilePath error:nil];
+		return [NSData bunzipFile:inputFilePath toFile:outputFilePath];
 	}
 	else if ([algorithm isEqualToString:PackagesAlgorithmGZ]) {
 		return [NSData gunzipFile:inputFilePath toFile:outputFilePath];
@@ -210,7 +214,7 @@ static BOOL somethingBadIsHappening;
 	else if ([algorithm isEqualToString:PackagesAlgorithmXZ]) {
 		// FIX ME
 	}
-	return nil;
+	return NO;
 }
 
 // Example:

@@ -1,2 +1,1 @@
-#import "NSData+GZIP.h"
-#import "BZipCompression.h"
+#import "NSData+Decompression.h"

@@ -29,8 +29,7 @@
 		444F0ACD22CDF0290029B788 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB422CDF0280029B788 /* AppDelegate.m */; };
 		444F0ACE22CDF0290029B788 /* Package.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB622CDF0280029B788 /* Package.m */; };
 		444F0ACF22CDF0290029B788 /* SourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB722CDF0290029B788 /* SourcesViewController.m */; };
-		444F0AD722CDF0530029B788 /* NSData+GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD222CDF0520029B788 /* NSData+GZIP.m */; };
-		444F0AD822CDF0530029B788 /* BZipCompression.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD322CDF0520029B788 /* BZipCompression.m */; };
+		444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD222CDF0520029B788 /* NSData+Decompression.m */; };
 		444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 /* End PBXBuildFile section */
@@ -78,11 +77,9 @@
 		444F0AB622CDF0280029B788 /* Package.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Package.m; sourceTree = "<group>"; };
 		444F0AB722CDF0290029B788 /* SourcesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SourcesViewController.m; sourceTree = "<group>"; };
 		444F0AB822CDF0290029B788 /* SectionPackagesController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SectionPackagesController.h; sourceTree = "<group>"; };
-		444F0AD222CDF0520029B788 /* NSData+GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZIP.m"; sourceTree = "<group>"; };
-		444F0AD322CDF0520029B788 /* BZipCompression.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BZipCompression.m; sourceTree = "<group>"; };
-		444F0AD422CDF0530029B788 /* BZipCompression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BZipCompression.h; sourceTree = "<group>"; };
+		444F0AD222CDF0520029B788 /* NSData+Decompression.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Decompression.m"; sourceTree = "<group>"; };
 		444F0AD522CDF0530029B788 /* Compression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Compression.h; sourceTree = "<group>"; };
-		444F0AD622CDF0530029B788 /* NSData+GZIP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+GZIP.h"; sourceTree = "<group>"; };
+		444F0AD622CDF0530029B788 /* NSData+Decompression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Decompression.h"; sourceTree = "<group>"; };
 		444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUStandardVersionComparator.m; sourceTree = "<group>"; };
 		444F0ADB22CDF07B0029B788 /* SUStandardVersionComparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUStandardVersionComparator.h; sourceTree = "<group>"; };
 		444F0ADF22CDF2600029B788 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
@@ -155,11 +152,9 @@
 		444F0AD122CDF0430029B788 /* Compression */ = {
 			isa = PBXGroup;
 			children = (
-				444F0AD422CDF0530029B788 /* BZipCompression.h */,
-				444F0AD322CDF0520029B788 /* BZipCompression.m */,
 				444F0AD522CDF0530029B788 /* Compression.h */,
-				444F0AD622CDF0530029B788 /* NSData+GZIP.h */,
-				444F0AD222CDF0520029B788 /* NSData+GZIP.m */,
+				444F0AD622CDF0530029B788 /* NSData+Decompression.h */,
+				444F0AD222CDF0520029B788 /* NSData+Decompression.m */,
 			);
 			path = Compression;
 			sourceTree = "<group>";
@@ -281,7 +276,7 @@
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,
 				444F0ACA22CDF0290029B788 /* PackagesController.m in Sources */,
 				444F0AC322CDF0290029B788 /* PackageQueue.m in Sources */,
-				444F0AD722CDF0530029B788 /* NSData+GZIP.m in Sources */,
+				444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */,
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
@@ -289,7 +284,6 @@
 				444F0AC522CDF0290029B788 /* Database.m in Sources */,
 				444F0AC022CDF0290029B788 /* HomeViewController.m in Sources */,
 				444F0AC822CDF0290029B788 /* SectionsController.m in Sources */,
-				444F0AD822CDF0530029B788 /* BZipCompression.m in Sources */,
 				444F0AC122CDF0290029B788 /* main.m in Sources */,
 				444F0ABD22CDF0290029B788 /* DownloadsController.m in Sources */,
 			);
