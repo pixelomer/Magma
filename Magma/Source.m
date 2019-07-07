@@ -2,6 +2,7 @@
 #import "DPKGParser.h"
 #import "Package.h"
 #import <Compression/Compression.h>
+#import "Database.h"
 
 @implementation Source
 
@@ -18,8 +19,26 @@
 	return self;
 }
 
+- (void)deleteFiles {
+	_packages = nil;
+	[NSFileManager.defaultManager
+		removeItemAtPath:[Database.class releaseFilePathForSource:self]
+		error:nil
+	];
+	[NSFileManager.defaultManager
+		removeItemAtPath:[Database.class packagesFilePathForSource:self]
+		error:nil
+	];
+}
+
 - (void)setRawPackagesFile:(NSString *)rawPackagesFile {
 	_rawPackagesFile = rawPackagesFile;
+	[_rawPackagesFile
+	 	writeToFile:[Database.class packagesFilePathForSource:self]
+	 	atomically:YES
+	 	encoding:NSUTF8StringEncoding
+	 	error:nil
+	];
 	NSMutableArray *packages = [NSMutableArray new];
 	NSArray *lines = [rawPackagesFile componentsSeparatedByString:@"\n"];
 	NSUInteger scanned = 0;

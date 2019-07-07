@@ -44,8 +44,11 @@
 @property (nonatomic, readonly, assign) BOOL isRefreshing;
 @property (nonatomic, readonly, strong) NSOperationQueue *refreshQueue;
 @property (nonatomic, readonly, copy) NSArray<Package *> *sortedRemotePackages;
+@property (nonatomic, readonly, assign) FILE *packagesFileHandle;
 + (NSString *)sourcesPlistPath;
 + (NSString *)listsDirectoryPath;
++ (NSString *)packagesFilePathForSource:(Source *)source;
++ (NSString *)releaseFilePathForSource:(Source *)source;
 - (Package *)packageWithIdentifier:(NSString *)identifier;
 - (BOOL)isLoaded;
 - (void)startLoadingDataIfNeeded;

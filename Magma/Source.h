@@ -24,6 +24,7 @@ typedef NSString* PackagesAlgorithm;
 + (NSString *)extractPackagesFileData:(NSData *)data usingAlgorithm:(PackagesAlgorithm)algorithm;
 - (instancetype)initWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
+- (void)deleteFiles;
 - (NSURL *)releaseFileURL;
 - (NSDictionary<NSString *, NSDictionary<PackagesAlgorithm, NSURL *> *> *)possiblePackagesFileURLs;
 @end

@@ -85,40 +85,6 @@ static NSArray *paths;
 	[serializableSourcesPlist writeToFile:self.class.sourcesPlistPath atomically:YES];
 }
 
-- (void)syncFilesForSourceOnly:(Source *)source {
-	[self syncFilesForSource:source rewriteSourcesPlist:NO];
-}
-
-- (void)syncFilesForSource:(Source *)source {
-	[self syncFilesForSource:source rewriteSourcesPlist:YES];
-}
-
-- (void)syncFilesForSource:(Source *)source rewriteSourcesPlist:(BOOL)rewriteSources {
-	if ([sources.allValues indexOfObjectIdenticalTo:source] != NSNotFound) {
-		[source.parsedReleaseFile writeToFile:[self.class releaseFilePathForSource:source] atomically:YES];
-		[source.rawPackagesFile writeToFile:[self.class packagesFilePathForSource:source] atomically:YES encoding:NSUTF8StringEncoding error:nil];
-	}
-	else {
-		[NSFileManager.defaultManager removeItemAtPath:[self.class releaseFilePathForSource:source] error:nil];
-		[NSFileManager.defaultManager removeItemAtPath:[self.class packagesFilePathForSource:source] error:nil];
-		[sourcesPlist removeObjectForKey:@(source.databaseID)];
-	}
-	if (rewriteSources) [self syncSourcesPlist];
-}
-
-- (void)syncFiles {
-	NSOperationQueue *queue = [NSOperationQueue new];
-	for (Source *source in sources.allValues) {
-		[queue addOperation:[[NSInvocationOperation alloc]
-			initWithTarget:self
-			selector:@selector(syncFilesForSourceOnly:)
-			object:source
-		]];
-	}
-	[queue waitUntilAllOperationsAreFinished];
-	[self syncSourcesPlist];
-}
-
 + (NSString *)releaseFilePathForSource:(Source *)source {
 	return [self.listsDirectoryPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%i_Release.plist", source.databaseID]];
 }
@@ -221,13 +187,15 @@ static NSArray *paths;
 				isSourceKnown = YES;
 			}
 		}
-		if (isSourceKnown) [self syncFilesForSource:source];
-		[NSNotificationCenter.defaultCenter
-			postNotificationName:DatabaseDidRemoveSource
-			object:self
-			userInfo:@{ @"source" : source }
-		];
-		[self reloadRemotePackages];
+		if (isSourceKnown) {
+			[source deleteFiles];
+			[NSNotificationCenter.defaultCenter
+				postNotificationName:DatabaseDidRemoveSource
+				object:self
+				userInfo:@{ @"source" : source }
+			];
+			[self reloadRemotePackages];
+		}
 	});
 }
 
@@ -265,7 +233,7 @@ static NSArray *paths;
 			// A repository ID wasn't specified. We need to add the repository entry ourselves.
 			int databaseID = (sourcesPlist.count > 0) ? ([(NSNumber *)[sourcesPlist.allKeys valueForKeyPath:@"@max.self"] intValue] + 1) : 0;
 			source.databaseID = databaseID;
-			[self syncFilesForSource:source]; // Delete old entries with the same ID.
+			[source deleteFiles]; // Delete old entries with the same ID.
 			sourcesPlist[@(databaseID)] = [@{
 				@"baseURL" : source.baseURL.absoluteString,
 				@"components" : ([source.components componentsJoinedByString:@" "] ?: @""),
@@ -275,7 +243,7 @@ static NSArray *paths;
 			} mutableCopy];
 		}
 		sources[[source sourcesListEntryWithComponents:NO]] = source;
-		if (self->_isLoaded) [self syncFilesForSource:source]; // Add the new source to the sources.plist file.
+		if (self->_isLoaded) [self syncSourcesPlist]; // Add the new source to the sources.plist file.
 	}
 	else {
 		notificationName = DatabaseDidEncounterAnError;
@@ -313,7 +281,6 @@ static NSArray *paths;
 - (void)waitForSourcesToRefresh {
 	[_refreshQueue waitUntilAllOperationsAreFinished];
 	[self reloadRemotePackages];
-	[self syncFiles];
 	NSLog(@"All of the sources refreshed.");
 	_isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
