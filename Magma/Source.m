@@ -4,6 +4,34 @@
 #import <Compression/Compression.h>
 #import "Database.h"
 
+// FRIENDLY REMINDER: free() the returned pointer once you are done with it.
+static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
+	int bufferSize = 1;
+	unsigned long previousLength = 0;
+	char *buffer = malloc(bufferSize);
+	buffer[0] = 0;
+	do {
+		fseek(file, startIndex, SEEK_SET);
+		previousLength = strlen(buffer);
+		bufferSize += 10;
+		buffer = realloc(buffer, bufferSize);
+		fgets(buffer, bufferSize, file);
+		if (ferror(file) || feof(file)) {
+			return NULL;
+		}
+	} while (strlen(buffer) != previousLength);
+	if (nextLineStartIndex && buffer) {
+		*nextLineStartIndex = startIndex + (int)strlen(buffer);
+	}
+	if (buffer) {
+		unsigned long stringLength = strlen(buffer);
+		if (buffer[stringLength - 1] == '\n') {
+			buffer[stringLength - 1] = 0;
+		}
+	}
+	return buffer;
+}
+
 @implementation Source
 
 - (instancetype)initWithBaseURL:(NSString *)rawBaseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components {
@@ -19,8 +47,38 @@
 	return self;
 }
 
-- (void)deleteFiles {
+- (void)unloadPackagesFile {
 	_packages = nil;
+	_sections = nil;
+	if (_packagesFileHandle) {
+		fclose(_packagesFileHandle);
+		_packagesFileHandle = NULL;
+	}
+}
+
+static BOOL somethingBadIsHappening;
+#define px_assert(x, message...) {if(!(x)){NSLog(message);abort();}}
+- (NSString *)substringFromPackagesFileInRange:(NSRange)range {
+	fseek(_packagesFileHandle, range.location, SEEK_SET);
+	char *line = malloc(range.length + 1);
+	line[range.length] = 0;
+	px_assert(line, @"line was NULL.");
+	fread(line, 1, range.length, _packagesFileHandle);
+	int error;
+	NSString *returnValue = !(error = ferror(_packagesFileHandle)) ? [NSString stringWithUTF8String:line] : NULL;
+	if (error) {
+		NSLog(@"Error: %s", strerror(error));
+	}
+	if (!returnValue) somethingBadIsHappening = YES;
+	if (somethingBadIsHappening) {
+		(void)0;
+	}
+	free(line);
+	return returnValue;
+}
+
+- (void)deleteFiles {
+	[self unloadPackagesFile];
 	[NSFileManager.defaultManager
 		removeItemAtPath:[Database.class releaseFilePathForSource:self]
 		error:nil
@@ -31,57 +89,57 @@
 	];
 }
 
-- (void)setRawPackagesFile:(NSString *)rawPackagesFile {
-	_rawPackagesFile = rawPackagesFile;
-	[_rawPackagesFile
-	 	writeToFile:[Database.class packagesFilePathForSource:self]
-	 	atomically:YES
-	 	encoding:NSUTF8StringEncoding
-	 	error:nil
-	];
-	NSMutableArray *packages = [NSMutableArray new];
-	NSArray *lines = [rawPackagesFile componentsSeparatedByString:@"\n"];
-	NSUInteger scanned = 0;
-	NSUInteger startIndex = 0;
-	NSUInteger length = 0;
-	BOOL lookingForEntry = YES;
-	for (NSString *line in lines) {
-		BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
-		if (!isLineEmpty) {
-			if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
-			length += line.length + 1;
-		}
-		else {
-			if (length > 1) {
-				length -= 1;
-				Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
-				if (package) [packages addObject:package];
-				lookingForEntry = YES;
+- (void)reloadPackagesFile {
+	[self unloadPackagesFile];
+	if ((_packagesFileHandle = fopen([Database.class packagesFilePathForSource:self].UTF8String, "r"))) {
+		NSMutableArray *packages = [NSMutableArray new];
+		NSUInteger scanned = 0;
+		NSUInteger startIndex = 0;
+		NSUInteger length = 0;
+		BOOL lookingForEntry = YES;
+		int nextLineStartIndex = 0;
+		char *CLine;
+		NSString *line;
+		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle)) && (line = @(CLine))) {
+			BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
+			if (!isLineEmpty) {
+				if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
+				length += strlen(CLine) + 1;
 			}
-			length = 0;
+			else {
+				if (length > 1) {
+					length -= 1;
+					Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+					if (package) [packages addObject:package];
+					lookingForEntry = YES;
+				}
+				length = 0;
+			}
+			scanned += strlen(CLine) + 1;
+			free(CLine);
 		}
-		scanned += line.length + 1;
-	}
-	if (length > 0) {
-		Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
-		[packages addObject:package];
-	}
-	NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
-	for (Package *package in packages) {
-		NSString *section = package.section ?: @"Other";
-		if (sections[section]) {
-			[sections[section] addObject:package];
+		if (length > 0) {
+			Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+			if (package) [packages addObject:package];
 		}
-		else {
-			sections[section] = @[package].mutableCopy;
+		_packages = packages.copy;
+		packages = nil;
+		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
+		for (Package *package in _packages) {
+			NSString *section = package.section ?: @"Other";
+			if (sections[section]) {
+				[sections[section] addObject:package];
+			}
+			else {
+				sections[section] = @[package].mutableCopy;
+			}
 		}
+		for (NSString *key in sections.allKeys.copy) {
+			sections[key] = sections[key].copy;
+		}
+		_sections = sections.copy;
+		sections = nil;
 	}
-	for (NSString *key in sections.allKeys.copy) {
-		sections[key] = sections[key].copy;
-	}
-	_sections = sections.copy;
-	_packages = packages;
-	packages = nil;
 }
 
 - (NSString *)origin {
@@ -102,6 +160,7 @@
 		_parsedReleaseFile = nil;
 	}
 	else {
+		[parsedReleaseFile writeToFile:[Database.class releaseFilePathForSource:self] atomically:YES];
 		NSMutableArray *reversedReleaseFileComponents = [NSMutableArray new];
 		for (NSString *field in parsedReleaseFile) {
 			NSString *value = parsedReleaseFile[field];
@@ -125,9 +184,7 @@
 }
 
 - (void)setRawReleaseFile:(NSString *)rawReleaseFile {
-	NSDictionary *parsedReleaseFile = [DPKGParser parsePackageEntry:rawReleaseFile error:nil];
-	_rawReleaseFile = (parsedReleaseFile ? rawReleaseFile : nil);
-	_parsedReleaseFile = parsedReleaseFile;
+	self.parsedReleaseFile = [DPKGParser parsePackageEntry:rawReleaseFile error:nil];
 }
 
 - (NSURL *)filesURL {
@@ -143,12 +200,12 @@
 	return releaseFileURL;
 }
 
-+ (NSString *)extractPackagesFileData:(NSData *)data usingAlgorithm:(PackagesAlgorithm)algorithm {
++ (BOOL)extractPackagesFile:(NSString *)inputFilePath toFile:(NSString *)outputFilePath usingAlgorithm:(PackagesAlgorithm)algorithm {
 	if ([algorithm isEqualToString:PackagesAlgorithmBZip2]) {
-		return [[NSString alloc] initWithData:[BZipCompression decompressedDataWithData:data error:nil] encoding:NSUTF8StringEncoding];
+		return [BZipCompression decompressDataFromFileAtPath:inputFilePath toFileAtPath:outputFilePath error:nil];
 	}
 	else if ([algorithm isEqualToString:PackagesAlgorithmGZ]) {
-		return [[NSString alloc] initWithData:[data gunzippedData] encoding:NSUTF8StringEncoding];
+		return [NSData gunzipFile:inputFilePath toFile:outputFilePath];
 	}
 	else if ([algorithm isEqualToString:PackagesAlgorithmXZ]) {
 		// FIX ME

@@ -8,7 +8,7 @@
 @implementation Package
 
 - (NSString *)rawPackagesEntry {
-	return [_source.rawPackagesFile substringWithRange:_range];
+	return [_source substringFromPackagesFileInRange:_range];
 }
 
 + (void)load {
@@ -91,7 +91,8 @@
 	if ((self = [super init])) {
 		_source = source;
 		_range = range;
-		NSArray *requiredValues = [DPKGParser findFirstLinesForFields:@[@"package", @"version", @"description", @"section"] inString:source.rawPackagesFile range:range];
+		NSString *string = [source substringFromPackagesFileInRange:range];
+		NSArray *requiredValues = [DPKGParser findFirstLinesForFields:@[@"package", @"version", @"description", @"section"] inString:string];
 		for (short i = 0; i <= 2; i++) {
 			if ([requiredValues[i] isKindOfClass:[NSNull class]]) {
 				return nil;

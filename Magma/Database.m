@@ -2,11 +2,11 @@
 #import "Source.h"
 #import "DPKGParser.h"
 #import "Package.h"
+#import <objc/runtime.h>
 
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
-- (void)setRawPackagesFile:(NSString *)fileContents;
 @end
 
 @interface Package(Private)
@@ -106,7 +106,7 @@ static NSArray *paths;
 	NSDictionary<NSString *, id> *sourceDict = dataToProcess[0];
 	source.parsedReleaseFile = [self.class releaseFileForSourceFromDisk:source];
 	source.lastRefresh = sourceDict[@"lastRefresh"];
-	source.rawPackagesFile = [self.class packagesFileForSourceFromDisk:source];
+	[source reloadPackagesFile];
 }
 
 - (void)_loadData {
@@ -189,6 +189,8 @@ static NSArray *paths;
 		}
 		if (isSourceKnown) {
 			[source deleteFiles];
+			[self->sourcesPlist removeObjectForKey:@(source.databaseID)];
+			[self syncSourcesPlist];
 			[NSNotificationCenter.defaultCenter
 				postNotificationName:DatabaseDidRemoveSource
 				object:self
@@ -290,40 +292,37 @@ static NSArray *paths;
 	];
 }
 
-+ (NSData *)requestDataFromURL:(NSURL *)url withRepositoryHeaders:(BOOL)includeRepositoryHeaders response:(NSHTTPURLResponse **)response timeoutInterval:(NSTimeInterval)timeoutInterval error:(NSError **)error {
-	NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:timeoutInterval];
-	return [NSURLConnection sendSynchronousRequest:request returningResponse:(id *)response error:error];
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
+	NSString *filePath = objc_getAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:));
+	[NSFileManager.defaultManager removeItemAtPath:filePath error:nil];
+	[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:filePath] error:nil];
+	objc_setAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:), nil, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
-+ (NSData *)requestDataFromURL:(NSURL *)url response:(NSHTTPURLResponse **)response timeoutInterval:(NSTimeInterval)timeoutInterval error:(NSError **)error {
-	return [self requestDataFromURL:url withRepositoryHeaders:YES response:response timeoutInterval:timeoutInterval error:error];
-}
-
-+ (NSData *)requestDataFromURL:(NSURL *)url response:(NSHTTPURLResponse **)response error:(NSError **)error {
-	return [self requestDataFromURL:url response:response timeoutInterval:30 error:error];
-}
-
-+ (NSData *)requestDataFromURL:(NSURL *)url error:(NSError **)error {
-	return [self requestDataFromURL:url response:nil timeoutInterval:30 error:error];
-}
-
-- (NSData *)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo {
-    NSHTTPURLResponse *response;
-    NSData *data = [self.class requestDataFromURL:url response:&response error:nil];
+- (BOOL)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo outputFile:(NSString *)filePath {
+	NSURLSession *session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration delegate:self delegateQueue:nil];
+	NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
+	objc_setAssociatedObject(task, _cmd, filePath, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	[task resume];
+	while (objc_getAssociatedObject(task, _cmd)) {
+		[NSThread sleepForTimeInterval:0.2];
+	}
+	NSHTTPURLResponse *response = (id)task.response;
     if (!response || response.statusCode != 200) {
         userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url];
         userInfo[@"errorCode"] = @(response.statusCode);
-		return nil;
+        return NO;
     } else {
         userInfo[@"reason"] = @"Operation completed successfully";
         userInfo[@"errorCode"] = NSNull.null;
-		return data;
+        return YES;
     }
 }
 
 - (void)refreshSource:(Source *)source {
 	// Notify observers about the refresh operation
 	source.isRefreshing = YES;
+	[source unloadPackagesFile];
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:SourceDidStartRefreshing
 		object:self
@@ -341,31 +340,55 @@ static NSArray *paths;
 #define parseFailure() { \
 	NSLog(@"Error: %@", error); \
 }
-	if ((data = [self fetchURL:releaseFileURL outputUserInfo:userInfo])) {
-		NSString *encodedFile = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+	NSString *releaseFilePath = [[self.class releaseFilePathForSource:source] stringByAppendingString:@".raw"];
+	if ([self fetchURL:releaseFileURL outputUserInfo:userInfo outputFile:releaseFilePath]) {
+		NSString *encodedFile = [[NSString alloc] initWithContentsOfFile:releaseFilePath encoding:NSUTF8StringEncoding error:nil];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
 			NSDictionary *packagesFileURLsForEveryComponent = source.possiblePackagesFileURLs;
-			NSMutableString *combinedPackages = [NSMutableString new];
+			NSString *finalPackagesPath = [self.class packagesFilePathForSource:source];
+			NSString *temporaryPackagesPath = [finalPackagesPath stringByAppendingString:@".tmp"];
+			FILE *newFile = fopen(temporaryPackagesPath.UTF8String, "w");
+			NSString *packagesFilePath = [finalPackagesPath stringByAppendingString:@".raw"];
+			NSString *decompressedFilePath = [finalPackagesPath stringByAppendingString:@".decompressed"];
 			for (NSDictionary *possiblePackagesFileURLs in packagesFileURLsForEveryComponent.allValues) {
 				for (NSString *algorithm in possiblePackagesFileURLs) {
 					NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
-                    if ((data = [self fetchURL:packagesFileURL outputUserInfo:userInfo])) {
-						NSString *packages = [Source extractPackagesFileData:data usingAlgorithm:algorithm];
-						if (packages) {
-							[combinedPackages appendFormat:@"%@\n\n", packages];
-							packages = nil;
-							break;
-						}
-						else parseFailure();
+                    if ([self fetchURL:packagesFileURL outputUserInfo:userInfo outputFile:packagesFilePath] && [Source extractPackagesFile:packagesFilePath toFile:decompressedFilePath usingAlgorithm:algorithm]) {
+                    	FILE *decompressedFileHandle = fopen(decompressedFilePath.UTF8String, "r");
+						size_t bufferSize = 0x1000;
+						size_t readBytes = 0;
+						unsigned char *buffer = malloc(bufferSize);
+                    	do {
+							readBytes = fread(buffer, 1, bufferSize, decompressedFileHandle);
+							if (!ferror(decompressedFileHandle)) {
+								fwrite(buffer, readBytes, 1, newFile);
+							}
+							else {
+								break;
+							}
+						} while (!feof(decompressedFileHandle));
+						free(buffer);
+						break;
 					}
 				}
 			}
-			source.rawPackagesFile = combinedPackages.copy;
-			sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
+			NSError *error;
+			fclose(newFile);
+			[NSFileManager.defaultManager
+				removeItemAtPath:finalPackagesPath
+				error:&error
+			];
+			[NSFileManager.defaultManager
+				moveItemAtPath:temporaryPackagesPath
+				toPath:finalPackagesPath
+				error:&error
+			];
 		}
 		else parseFailure();
     }
+    [source reloadPackagesFile];
+	sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
 	NSLog(@"[Refresh Result] %@", userInfo);
 #undef parseFailure
 	// Notify observers about the completion of the operation

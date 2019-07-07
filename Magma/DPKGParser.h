@@ -6,5 +6,5 @@
 + (NSArray<NSDictionary<NSString *, NSString *> *> *)parseFileContents:(NSString *)fileContents error:(NSError **)errorPt;
 + (NSDictionary<NSString *, NSString *> *)parsePackageEntry:(NSString *)fullEntry error:(NSError **)errorPt;
 + (NSArray<NSDictionary<NSString *, NSString *> *> *)parseFileAtPath:(NSString *)path error:(NSError **)errorPt;
-+ (NSArray<NSString *> *)findFirstLinesForFields:(NSArray<NSString *> *)fields inString:(NSString *)string range:(NSRange)range;
++ (NSArray<NSString *> *)findFirstLinesForFields:(NSArray<NSString *> *)fields inString:(NSString *)string;
 @end

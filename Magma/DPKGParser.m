@@ -68,10 +68,10 @@
 	return [self parseFileContents:fileContents error:errorPt];
 }
 
-+ (NSArray<NSString *> *)findFirstLinesForFields:(NSArray<NSString *> *)fields inString:(NSString *)string range:(NSRange)range {
++ (NSArray<NSString *> *)findFirstLinesForFields:(NSArray<NSString *> *)fields inString:(NSString *)string {
 	NSMutableArray *values = [NSMutableArray arrayWithCapacity:fields.count];
 	for (int i = 0; i < fields.count; values[i++] = NSNull.null);
-	for (NSString *line in [[string substringWithRange:range] componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
+	for (NSString *line in [string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
 		if ([line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length <= 0) break;
 		if ([[NSCharacterSet whitespaceCharacterSet] characterIsMember:[line characterAtIndex:0]]) continue;
 		NSInteger index = 0;
