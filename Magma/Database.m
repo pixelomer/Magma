@@ -347,10 +347,10 @@ static NSArray *paths;
 		if (source.rawReleaseFile) {
 			NSDictionary *packagesFileURLsForEveryComponent = source.possiblePackagesFileURLs;
 			NSString *finalPackagesPath = [self.class packagesFilePathForSource:source];
-			NSString *temporaryPackagesPath = [finalPackagesPath stringByAppendingString:@".tmp"];
+			NSString *temporaryPackagesPath = [finalPackagesPath stringByAppendingString:@"_tmp"];
 			FILE *newFile = fopen(temporaryPackagesPath.UTF8String, "w");
-			NSString *packagesFilePath = [finalPackagesPath stringByAppendingString:@".raw"];
-			NSString *decompressedFilePath = [finalPackagesPath stringByAppendingString:@".decompressed"];
+			NSString *packagesFilePath = [finalPackagesPath stringByAppendingString:@"_raw"];
+			NSString *decompressedFilePath = [finalPackagesPath stringByAppendingString:@"_decompressed"];
 			for (NSDictionary *possiblePackagesFileURLs in packagesFileURLsForEveryComponent.allValues) {
 				for (NSString *algorithm in possiblePackagesFileURLs) {
 					NSURL *packagesFileURL = possiblePackagesFileURLs[algorithm];
@@ -389,7 +389,6 @@ static NSArray *paths;
     }
     [source reloadPackagesFile];
 	sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
-	NSLog(@"[Refresh Result] %@", userInfo);
 #undef parseFailure
 	// Notify observers about the completion of the operation
 	source.isRefreshing = NO;

@@ -12,17 +12,28 @@
 
 @implementation PackageDetailsController
 
+static UIColor *separatorColor;
+static UIFont *headerFont;
+static NSArray *cells;
+
++ (void)load {
+	if ([self class] == [PackageDetailsController class]) {
+		separatorColor = [UIColor colorWithRed:0.918 green:0.918 blue:0.925 alpha:1.0];
+		headerFont = [UIFont systemFontOfSize:22 weight:UIFontWeightBold];
+		cells = @[
+			@[@"Text", @"Details", headerFont],
+			NSNull.null,
+			@[@"Text", @"Advanced", headerFont],
+			NSNull.null,
+			@[@"Text", @"Packages File Entry", @"pushFieldsTableView"]
+		];
+	}
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.tableView.separatorColor = UIColor.clearColor;
     self.title = _package.package;
-    sections = @[
-    	@"Advanced"
-    ];
-    cells = @[
-    	@[
-    		@[@"Packages File Entry", @"pushFieldsTableView"]
-		]
-	];
 }
 
 - (instancetype)init {
@@ -43,34 +54,52 @@
 	return self;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-	if (tableView == self.tableView) {
-		return sections[section];
-	}
-	else {
-		return nil;
-	}
-}
-
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
-		NSArray *rowInfo = cells[indexPath.section][indexPath.row];
 		__kindof UITableViewCell *cell;
-		if ([rowInfo[0] isKindOfClass:NSString.class]) {
-			cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
-			cell.textLabel.text = rowInfo[0];
-		}
-		else {
-			cell = rowInfo[0];
-		}
-		if (rowInfo.count > 1) {
-			if ([rowInfo[1] isKindOfClass:NSString.class]) {
-				cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
-				cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+		NSArray *rowInfo = cells[indexPath.row];
+		if ([rowInfo isKindOfClass:[NSArray class]]) {
+			if (rowInfo.count >= 1) {
+				if ([rowInfo[0] isEqualToString:@"Text"]) {
+					cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
+					if (rowInfo.count >= 2) {
+						if ([rowInfo[1] isKindOfClass:[NSString class]]) {
+							cell.textLabel.text = rowInfo[1];
+						}
+						if (rowInfo.count >= 3) {
+							if ([rowInfo[2] isKindOfClass:[NSString class]]) {
+								cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+								cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+								cell.textLabel.textColor = self.navigationController.navigationBar.tintColor;
+							}
+							else {
+								cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
+								cell.selectionStyle = UITableViewCellSelectionStyleNone;
+								cell.textLabel.textColor = [UIColor blackColor];
+							}
+							if ([rowInfo[2] isKindOfClass:[UIFont class]]) {
+								cell.textLabel.font = rowInfo[2];
+							}
+						}
+					}
+				}
 			}
-			else {
-				cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
-				cell.selectionStyle = UITableViewCellSelectionStyleNone;
+		}
+		else if ([rowInfo isKindOfClass:[NSNull class]]) {
+			if (!(cell = [tableView dequeueReusableCellWithIdentifier:@"separator"])) {
+				cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"separator"];
+				UIView *separatorView = [UIView new];
+				separatorView.backgroundColor = separatorColor;
+				separatorView.translatesAutoresizingMaskIntoConstraints = NO;
+				[cell.contentView addSubview:separatorView];
+				[separatorView.leftAnchor constraintEqualToAnchor:cell.layoutMarginsGuide.leftAnchor].active = YES;
+				[separatorView.rightAnchor constraintEqualToAnchor:cell.layoutMarginsGuide.rightAnchor].active = YES;
+				[cell.contentView addConstraints:[NSLayoutConstraint
+					constraintsWithVisualFormat:@"V:|-1-[separator(==1)]-1-|"
+					options:0
+					metrics:nil
+					views:@{ @"separator" : separatorView }
+				]];
 			}
 		}
 		return cell;
@@ -87,7 +116,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return (tableView == self.tableView) ? cells[section].count : fields.count;
+	return (tableView == self.tableView) ? cells.count : fields.count;
 }
 
 - (void)pushFieldsTableView {
@@ -99,9 +128,9 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
-		NSArray *rowInfo = cells[indexPath.section][indexPath.row];
-		if (rowInfo.count > 1 && [rowInfo[1] isKindOfClass:[NSString class]]) {
-			SEL selector = NSSelectorFromString(rowInfo[1]);
+		NSArray *rowInfo = cells[indexPath.row];
+		if ([rowInfo isKindOfClass:[NSArray class]] && [rowInfo[0] isEqualToString:@"Text"] && rowInfo.count >= 3 && [rowInfo[2] isKindOfClass:[NSString class]]) {
+			SEL selector = NSSelectorFromString(rowInfo[2]);
 			((void(*)(PackageDetailsController *, SEL))class_getMethodImplementation(self.class, selector))(self, selector);
 		}
 	}

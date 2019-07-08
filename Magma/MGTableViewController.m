@@ -3,7 +3,11 @@
 @implementation MGTableViewController
 
 - (instancetype)init {
-	return [super init];
+	if ((self = [super init])) {
+		_delegate = self;
+		_dataSource = self;
+	}
+	return self;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -22,15 +26,13 @@
 	_tableView.dataSource = _dataSource = dataSource;
 }
 
-- (void)_setupTableView {
-	_tableView = [UITableView new];
-	_tableView.dataSource = _dataSource ?: self;
-	_tableView.delegate = _delegate ?: self;
-	_tableView.translatesAutoresizingMaskIntoConstraints = NO;
-	[self.view addSubview:_tableView];
+- (UITableView *)setupTableView {
+	UITableView *tableView = [UITableView new];
+	tableView.translatesAutoresizingMaskIntoConstraints = NO;
+	[self.view addSubview:tableView];
 	[self.view addConstraints:@[
 		[NSLayoutConstraint
-			constraintWithItem:_tableView
+			constraintWithItem:tableView
 			attribute:NSLayoutAttributeLeft
 			relatedBy:NSLayoutRelationEqual
 			toItem:self.view
@@ -39,7 +41,7 @@
 			constant:0.0
 		],
 		[NSLayoutConstraint
-			constraintWithItem:_tableView
+			constraintWithItem:tableView
 			attribute:NSLayoutAttributeRight
 			relatedBy:NSLayoutRelationEqual
 			toItem:self.view
@@ -48,7 +50,7 @@
 			constant:0.0
 		],
 		[NSLayoutConstraint
-			constraintWithItem:_tableView
+			constraintWithItem:tableView
 			attribute:NSLayoutAttributeTop
 			relatedBy:NSLayoutRelationEqual
 			toItem:self.view
@@ -57,7 +59,7 @@
 			constant:0.0
 		],
 		[NSLayoutConstraint
-			constraintWithItem:_tableView
+			constraintWithItem:tableView
 			attribute:NSLayoutAttributeBottom
 			relatedBy:NSLayoutRelationEqual
 			toItem:self.view
@@ -66,6 +68,13 @@
 			constant:0.0
 		]
 	]];
+	return tableView;
+}
+
+- (void)_setupTableView {
+	_tableView = [self setupTableView];
+	_tableView.dataSource = _dataSource ?: self;
+	_tableView.delegate = _delegate ?: self;
 }
 
 - (void)viewDidLoad {

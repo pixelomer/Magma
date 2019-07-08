@@ -56,12 +56,10 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 	}
 }
 
-#define px_assert(x, message...) {if(!(x)){NSLog(message);abort();}}
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range {
 	fseek(_packagesFileHandle, range.location, SEEK_SET);
 	char *line = malloc(range.length + 1);
 	line[range.length] = 0;
-	px_assert(line, @"line was NULL.");
 	fread(line, 1, range.length, _packagesFileHandle);
 	int error;
 	NSString *returnValue = !(error = ferror(_packagesFileHandle)) ? [NSString stringWithUTF8String:line] : NULL;

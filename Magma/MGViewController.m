@@ -14,7 +14,6 @@
 		name:nil
 		object:Database.sharedInstance
 	];
-	NSLog(@"%@: Should wait: %@, Database loaded: %i", self, _waitForDatabase, Database.sharedInstance.isLoaded);
 	if (_waitForDatabase.boolValue && !Database.sharedInstance.isLoaded) {
 		containerView = [UIView new];
 		containerView.translatesAutoresizingMaskIntoConstraints = NO;
