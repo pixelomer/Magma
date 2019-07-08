@@ -81,6 +81,7 @@
 		cell.textLabel.text = cellContents[0];
 		cell.detailTextLabel.text = cellContents[1];
 		cell.detailTextLabel.numberOfLines = cell.textLabel.numberOfLines = 1;
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
 		return cell;
 	}
 }
@@ -91,9 +92,8 @@
 
 - (void)pushFieldsTableView {
 	MGTableViewController *fieldsTableViewController = [MGTableViewController new];
-	fieldsTableViewController.tableView.dataSource = self;
-	fieldsTableViewController.tableView.delegate = self;
-	fieldsTableViewController.tableView.allowsSelection = NO;
+	fieldsTableViewController.dataSource = self;
+	fieldsTableViewController.delegate = self;
 	[self.navigationController pushViewController:fieldsTableViewController animated:YES];
 }
 

@@ -6,17 +6,6 @@
 
 @implementation PackagesController
 
-+ (NSArray *)latestSortedPackagesFromPackageArray:(NSArray *)array {
-	NSMutableDictionary *filteredPackages = [NSMutableDictionary new];
-	for (Package *package in array) {
-		NSString *ID = package.package;
-		if (!filteredPackages[ID] || ([package compare:filteredPackages[ID]] == NSOrderedDescending)) {
-			filteredPackages[ID] = package;
-		}
-	}
-	return [filteredPackages.allValues sortedArrayUsingSelector:@selector(compare:)];
-}
-
 - (instancetype)init {
 	return [self initWithFilters:nil];
 }
@@ -46,7 +35,7 @@
 				[filteredPackages addObjectsFromArray:Database.sharedInstance.sortedRemotePackages];
 			}
 		}
-		filteredPackages = [self.class latestSortedPackagesFromPackageArray:filteredPackages].mutableCopy;
+		filteredPackages = [Package latestSortedPackagesFromPackageArray:filteredPackages].mutableCopy;
 		_packages = filteredPackages.copy;
 		return self;
 	}
@@ -67,12 +56,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	Package *package = _packages[indexPath.row];
 	PackageDetailsController *vc = [[PackageDetailsController alloc] initWithPackage:package];
-	if (vc) {
-		[self.navigationController pushViewController:vc animated:YES];
-	}
-	else {
-		[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	}
+	[self pushViewController:vc animated:YES];
 }
 
 @end

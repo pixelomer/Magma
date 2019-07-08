@@ -1,6 +1,7 @@
-#import "MGViewController.h"
+#import "MGTableViewController.h"
 
-@interface PackageSearchViewController : MGViewController {
-    UISearchBar *searchBar;
+@interface PackageSearchViewController : MGTableViewController<UISearchBarDelegate> {
+	NSArray *packages;
 }
+@property (nonatomic, readonly, strong) UISearchBar *searchBar;
 @end

@@ -48,7 +48,6 @@
 - (void)viewDidLoad {
 	[super viewDidLoad];
 	self.title = @"Sources";
-	self.edgesForExtendedLayout = UIRectEdgeNone;
 }
 
 - (void)handleLeftBarButton {
@@ -190,12 +189,7 @@
 		Source *source = sources[indexPath.row];
 		vc = [[SectionsController alloc] initWithSource:source];
 	}
-	if (vc) {
-		[self.navigationController pushViewController:vc animated:YES];
-	}
-	else {
-		[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	}
+	[self pushViewController:vc animated:YES];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {

@@ -11,6 +11,17 @@
 	return [_source substringFromPackagesFileInRange:_range];
 }
 
++ (NSArray *)latestSortedPackagesFromPackageArray:(NSArray *)array {
+	NSMutableDictionary *filteredPackages = [NSMutableDictionary new];
+	for (Package *package in array) {
+		NSString *ID = package.package;
+		if (!filteredPackages[ID] || ([package compare:filteredPackages[ID]] == NSOrderedDescending)) {
+			filteredPackages[ID] = package;
+		}
+	}
+	return [filteredPackages.allValues sortedArrayUsingSelector:@selector(compare:)];
+}
+
 + (void)load {
 	if ([self class] == [Package class]) {
 		NSArray *selectors = @[
@@ -35,15 +46,6 @@
 
 - (BOOL)isEqual:(Package *)object {
 	return [object isKindOfClass:[Package class]] && ([object compare:self] == NSOrderedSame);
-}
-
-// FIXME: New system
-+ (NSArray<Package *> *)createPackagesUsingArray:(NSArray<NSArray<NSNumber *> *> *)array source:(Source *)source {
-	NSMutableArray *packages = [NSMutableArray new];
-	for (NSArray<NSNumber *> *rangeArray in array) {
-		[packages addObject:[[Package alloc] initWithRange:NSMakeRange(rangeArray[0].unsignedIntegerValue, rangeArray[1].unsignedIntegerValue) source:source]];
-	}
-	return packages.copy;
 }
 
 - (NSArray *)tags {
@@ -80,11 +82,38 @@
 	_firstDiscovery = firstDiscovery;
 }
 
-- (void)parse {
-	NSError *error;
-	NSString *rawPackagesEntry = self.rawPackagesEntry;
-	_rawPackage = _rawPackage ?: [DPKGParser parsePackageEntry:rawPackagesEntry error:&error];
-	NSLog(@"%@", error);
+- (BOOL)parse {
+	if (!_rawPackage) {
+		NSError *error;
+		NSString *rawPackagesEntry = self.rawPackagesEntry;
+		if ((_rawPackage = [DPKGParser parsePackageEntry:rawPackagesEntry error:&error])) {
+			NSMutableArray *fullDescription = [_rawPackage[@"description"] componentsSeparatedByString:@"\n"].mutableCopy;
+			_shortDescription = fullDescription.firstObject;
+			if (fullDescription.count > 1) [fullDescription removeObjectAtIndex:0];
+			_longDescription = [fullDescription componentsJoinedByString:@"\n"];
+			_section = _version = _package = nil;
+			return YES;
+		}
+		else {
+			NSLog(@"Parse failure: %@", error);
+		}
+	}
+	else {
+		return YES;
+	}
+	return NO;
+}
+
+- (NSString *)version {
+	return _rawPackage[@"version"] ?: _version;
+}
+
+- (NSString *)section {
+	return _rawPackage[@"section"] ?: _section;
+}
+
+- (NSString *)package {
+	return _rawPackage[@"package"] ?: _package;
 }
 
 - (instancetype)initWithRange:(NSRange)range source:(Source *)source {

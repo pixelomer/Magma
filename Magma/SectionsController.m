@@ -3,6 +3,7 @@
 #import "SectionPackagesController.h"
 #import "Source.h"
 #import "Database.h"
+#import "Package.h"
 
 @implementation SectionsController
 
@@ -18,7 +19,7 @@
 			NSMutableDictionary *mSections = [NSMutableDictionary new];
 			NSDictionary<NSString *, NSArray *> *sourceSections = _source.sections.copy;
 			for (NSString *sectionName in sourceSections) {
-				mSections[sectionName] = @([PackagesController latestSortedPackagesFromPackageArray:sourceSections[sectionName]].count);
+				mSections[sectionName] = @([Package latestSortedPackagesFromPackageArray:sourceSections[sectionName]].count);
 			}
 			sections = [mSections copy];
 		}
@@ -28,7 +29,7 @@
 			for (Source *sourceFromDatabase in Database.sharedInstance.sources.copy) {
 				NSDictionary<NSString *, NSArray *> *sourceSections = sourceFromDatabase.sections.copy;
 				for (NSString *section in sourceSections) {
-					mSections[section] = @(mSections[section].integerValue + [PackagesController latestSortedPackagesFromPackageArray:sourceSections[section]].count);
+					mSections[section] = @(mSections[section].integerValue + [Package latestSortedPackagesFromPackageArray:sourceSections[section]].count);
 				}
 			}
 			sections = [mSections copy];
@@ -64,12 +65,7 @@
 	NSString *title = (indexPath.section ? sortedSections[indexPath.row] : @"All Packages");
 	SectionPackagesController *vc = [[SectionPackagesController alloc] initWithSection:(indexPath.section ? sortedSections[indexPath.row] : nil) inSource:_source];
 	vc.title = title;
-	if (vc) {
-		[self.navigationController pushViewController:vc animated:YES];
-	}
-	else {
-		[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	}
+	[self pushViewController:vc animated:YES];
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {

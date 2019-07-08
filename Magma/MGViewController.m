@@ -6,6 +6,7 @@
 
 - (void)viewDidLoad {
 	[super viewDidLoad];
+	self.edgesForExtendedLayout = UIRectEdgeNone;
 	self.view.backgroundColor = [UIColor whiteColor];
 	[NSNotificationCenter.defaultCenter
 		addObserver:self
