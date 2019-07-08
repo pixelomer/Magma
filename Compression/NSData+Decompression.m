@@ -1,7 +1,6 @@
 #import "NSData+Decompression.h"
 #import <zlib.h>
 #import <bzlib.h>
-#define CHUNK 0x4000
 
 @implementation NSData(GZIP)
 
@@ -35,7 +34,10 @@
     return success;
 }
 
+#define CHUNK 0x4000
 + (BOOL)gunzipFile:(NSString *)inputFile toFile:(NSString *)outputFile {
+	NSNumber *success = nil;
+	
 	FILE *inputFileHandle = fopen(inputFile.UTF8String, "r");
 	FILE *outputFileHandle = fopen(outputFile.UTF8String, "w");
 	
@@ -67,20 +69,26 @@
 					case Z_BUF_ERROR:
 						break;
 					default:
-						inflateEnd(&stream);
-						return NO;
+						success = @NO;
+						break;
 				}
+				if (success) break;
 				unsigned have = (CHUNK - stream.avail_out);
 				fwrite(outputBuffer, sizeof(unsigned char), have, outputFileHandle);
 			}
 			while (stream.avail_out == 0);
+			if (success) break;
 			if (feof(inputFileHandle)) {
-				inflateEnd (&stream);
-				return YES;
+				success = @YES;
+				break;
 			}
 		}
+		inflateEnd(&stream);
 	}
-	return NO;
+	
+	fclose(outputFileHandle);
+	fclose(inputFileHandle);
+	return success.boolValue;
 }
 
 @end
