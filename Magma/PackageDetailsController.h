@@ -17,6 +17,6 @@
 	NSArray *fields;
 	NSArray *filteredCells;
 }
-@property (nonatomic, readonly, strong) Package *package;
+@property (nonatomic, readonly, weak) Package *package;
 - (instancetype)initWithPackage:(Package *)package;
 @end

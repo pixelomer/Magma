@@ -9,21 +9,42 @@
 #import "PackageDetailsController.h"
 #import "Package.h"
 #import <objc/runtime.h>
+#import "RelatedPackagesController.h"
 #import "TextViewCell.h"
+#import <MessageUI/MessageUI.h>
 
 @implementation PackageDetailsController
 
 static UIColor *separatorColor;
 static UIFont *headerFont;
 static NSArray *allCells;
+static UIFont *defaultFont;
 
 + (void)load {
 	if ([self class] == [PackageDetailsController class]) {
+		NSArray *selectors = @[
+			@"showConflicts",
+			@"showProvides",
+			@"showBreaks"
+		];
+		for (NSString *selectorString in selectors) {
+			SEL selector = NSSelectorFromString(selectorString);
+			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(showDepends)), "v@:");
+		}
+		selectors = nil;
 		separatorColor = [UIColor colorWithRed:0.918 green:0.918 blue:0.925 alpha:1.0];
 		headerFont = [UIFont systemFontOfSize:22 weight:UIFontWeightBold];
+		defaultFont = [UIFont systemFontOfSize:17];
 		allCells = @[
-			@[@"Text", @"Details", headerFont],
+			@[@"Text", @"Description", headerFont],
 			@[@"Data", @"longDescription"],
+			NSNull.null,
+			@[@"Text", @"Relations", headerFont],
+			@[@"Text", @"Dependencies", @"showDepends", @"depends"],
+			@[@"Text", @"Conflicts", @"showConflicts", @"conflicts"],
+			@[@"Text", @"Provided Packages", @"showProvides", @"provides"],
+			@[@"Text", @"Broken Packages", @"showBreaks", @"breaks"],
+			@[@"Text", @"No relations.", @(4)],
 			NSNull.null,
 			@[@"Text", @"Contact", headerFont],
 			@[@"Text", @"Contact Author", @"openMailApp:", @"author"],
@@ -35,6 +56,12 @@ static NSArray *allCells;
 			@[@"Text", @"Packages File Entry", @"pushFieldsTableView"]
 		];
 	}
+}
+
+- (void)showDepends {
+	NSString *field = [NSStringFromSelector(_cmd) substringFromIndex:4].lowercaseString;
+	RelatedPackagesController *vc = [[RelatedPackagesController alloc] initWithPackage:_package field:field];
+	[self pushViewController:vc animated:YES];
 }
 
 - (void)viewDidLoad {
@@ -51,22 +78,32 @@ static NSArray *allCells;
 }
 
 - (instancetype)initWithPackage:(Package *)package {
-	if (package && (self = [super init])) {
-		[(_package = package) parse];
+	if ([package parse] && (self = [super init])) {
+		_package = package;
 		NSMutableArray *mFields = [NSMutableArray new];
 		NSDictionary *rawPackage = package.rawPackage.copy;
 		for (NSString *fieldName in rawPackage) [mFields addObject:@[fieldName, rawPackage[fieldName]]];
 		fields = mFields.copy;
 		NSMutableArray *filteredCells = allCells.mutableCopy;
-		for (NSInteger i = filteredCells.count-1; i >= 0; i--) {
+		int failedCheckCounter = 0;
+		for (NSInteger i = 0; i < filteredCells.count; i++) {
 			NSArray *cell = filteredCells[i];
-			if ([cell isKindOfClass:[NSArray class]] && (cell.count >= 4) && !package[cell[3]]) {
-				[filteredCells removeObjectAtIndex:i];
+			NSInteger previousCount = filteredCells.count;
+			if ([cell isKindOfClass:[NSArray class]]) {
+				if (((cell.count >= 4) && !package[cell[3]].length) || ((cell.count >= 3) && [cell[2] isKindOfClass:[NSNumber class]] && (failedCheckCounter != [(NSNumber *)cell[2] intValue]))) {
+					[filteredCells removeObjectAtIndex:i];
+				}
 			}
+			if (previousCount != filteredCells.count) {
+				i--;
+				failedCheckCounter++;
+			}
+			else failedCheckCounter = 0;
 		}
 		self->filteredCells = filteredCells.copy;
+		return self;
 	}
-	return self;
+	return nil;
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -77,6 +114,10 @@ static NSArray *allCells;
 			if (rowInfo.count >= 1) {
 				if ([rowInfo[0] isEqualToString:@"Text"]) {
 					cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
+					cell.textLabel.font = defaultFont;
+					cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
+					cell.selectionStyle = UITableViewCellSelectionStyleNone;
+					cell.textLabel.textColor = [UIColor blackColor];
 					if (rowInfo.count >= 2) {
 						if ([rowInfo[1] isKindOfClass:[NSString class]]) {
 							cell.textLabel.text = rowInfo[1];
@@ -88,11 +129,6 @@ static NSArray *allCells;
 								cell.selectionStyle = UITableViewCellSelectionStyleDefault;
 								cell.textLabel.textColor = self.navigationController.navigationBar.tintColor;
 							}
-							else {
-								cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
-								cell.selectionStyle = UITableViewCellSelectionStyleNone;
-								cell.textLabel.textColor = [UIColor blackColor];
-							}
 							if ([rowInfo[2] isKindOfClass:[UIFont class]]) {
 								cell.textLabel.font = rowInfo[2];
 							}
@@ -102,6 +138,7 @@ static NSArray *allCells;
 				else if ([rowInfo[0] isEqualToString:@"Data"]) {
 					cell = [tableView dequeueReusableCellWithIdentifier:@"textViewCell"] ?: [[TextViewCell alloc] initWithReuseIdentifier:@"textViewCell"];
 					[(TextViewCell *)cell setTextViewText:[_package valueForKey:rowInfo.lastObject]];
+					cell.selectionStyle = UITableViewCellSelectionStyleNone;
 				}
 			}
 		}
@@ -147,14 +184,33 @@ static NSArray *allCells;
 		if (regexResult && regexResult.range.location != NSNotFound) {
 			NSString *email = [fullString substringWithRange:regexResult.range];
 			NSURL *emailURL = [NSURL URLWithString:[NSString stringWithFormat:@"mailto:%@", [email stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]];
-			[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:NO];
-			[UIApplication.sharedApplication openURL:emailURL];
+			if ([UIApplication.sharedApplication canOpenURL:emailURL]) {
+				[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:NO];
+				[UIApplication.sharedApplication openURL:emailURL];
+			}
+			else {
+				[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+				if ([MFMailComposeViewController canSendMail]) {
+					MFMailComposeViewController *composeVC = [[MFMailComposeViewController alloc] init];
+					[composeVC setToRecipients:@[email]];
+					[self presentViewController:composeVC animated:YES completion:nil];
+				}
+				else {
+					UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Cannot Send Mail" message:@"Make sure you have an email client installed and have a usable email address." preferredStyle:UIAlertControllerStyleAlert];
+					[alert addAction:[UIAlertAction
+						actionWithTitle:@"OK"
+						style:UIAlertActionStyleCancel
+						handler:nil
+					]];
+					[self presentViewController:alert animated:YES completion:nil];
+				}
+			}
 			return;
 		}
 	}
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:Localize(@"No Email Specified") message:Localize(@"The package doesn't contain an email address.") preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Address Specified" message:@"The package doesn't contain an email address." preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction
-		actionWithTitle:UIKitLocalize(@"OK")
+		actionWithTitle:@"OK"
 		style:UIAlertActionStyleCancel
 		handler:nil
 	]];
@@ -172,7 +228,7 @@ static NSArray *allCells;
 	[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
 	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid URL" message:@"The package provided an invalid URL." preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction
-		actionWithTitle:UIKitLocalize(@"OK")
+		actionWithTitle:@"OK"
 		style:UIAlertActionStyleCancel
 		handler:nil
 	]];
@@ -180,9 +236,9 @@ static NSArray *allCells;
 }
 
 - (void)pushFieldsTableView {
-	MGTableViewController *fieldsTableViewController = [MGTableViewController new];
-	fieldsTableViewController.dataSource = self;
-	fieldsTableViewController.delegate = self;
+	UITableViewController *fieldsTableViewController = [UITableViewController new];
+	fieldsTableViewController.tableView.dataSource = self;
+	fieldsTableViewController.tableView.delegate = self;
 	[self.navigationController pushViewController:fieldsTableViewController animated:YES];
 }
 
@@ -191,7 +247,7 @@ static NSArray *allCells;
 		NSArray *rowInfo = filteredCells[indexPath.row];
 		if ([rowInfo isKindOfClass:[NSArray class]] && [rowInfo[0] isEqualToString:@"Text"] && rowInfo.count >= 3 && [rowInfo[2] isKindOfClass:[NSString class]]) {
 			SEL selector = NSSelectorFromString(rowInfo[2]);
-			if (rowInfo.count >= 4) {
+			if (rowInfo.count >= 4 && [NSStringFromSelector(selector) hasSuffix:@":"]) {
 				((void(*)(PackageDetailsController *, SEL, id))class_getMethodImplementation(self.class, selector))(self, selector, rowInfo[3]);
 			}
 			else {
@@ -214,6 +270,18 @@ static NSArray *allCells;
 
 - (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath {
 	return (tableView != self.tableView);
+}
+
+- (void)database:(Database *)database didRemoveSource:(Source *)source {
+	if (source == _package.source) {
+		[self.navigationController popToRootViewControllerAnimated:YES];
+	}
+}
+
+- (void)sourceDidStartRefreshing:(Source *)source {
+	if (source == _package.source) {
+		[self.navigationController popToRootViewControllerAnimated:YES];
+	}
 }
 
 @end

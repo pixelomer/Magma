@@ -52,14 +52,22 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return packages.count;
+	return !Database.sharedInstance.isRefreshing ? packages.count : 1;
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	PackageCell *cell = [tableView dequeueReusableCellWithIdentifier:@"package"] ?: [[PackageCell alloc] initWithReuseIdentifier:@"package"];
-	cell.package = packages[indexPath.row];
-	cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
-	return cell;
+	if (!Database.sharedInstance.isRefreshing) {
+		PackageCell *cell = [tableView dequeueReusableCellWithIdentifier:@"package"] ?: [[PackageCell alloc] initWithReuseIdentifier:@"package"];
+		cell.package = packages[indexPath.row];
+		cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+		return cell;
+	}
+	else {
+		UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
+		cell.textLabel.text = @"Refreshing sources...";
+		cell.selectionStyle = UITableViewCellSelectionStyleNone;
+		return cell;
+	}
 }
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
@@ -80,7 +88,7 @@
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
 	packages = nil;
 	[self.tableView reloadData];
-	if (searchText.length) {
+	if (searchText.length && !Database.sharedInstance.isRefreshing) {
 		__block NSString *prefix = [searchText stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
 			self->packages = [Package latestSortedPackagesFromPackageArray:[Database.sharedInstance.sortedRemotePackages
@@ -96,9 +104,16 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	PackageDetailsController *vc = [[PackageDetailsController alloc] initWithPackage:packages[indexPath.row]];
-	if (vc) {
-		[self.navigationController pushViewController:vc animated:YES];
-	}
+	[self pushViewController:vc animated:YES];
+}
+
+- (void)databaseDidStartRefreshingSources:(Database *)database {
+	packages = nil;
+	[self.tableView reloadData];
+}
+
+- (void)databaseDidFinishRefreshingSources:(Database *)database {
+	[self searchBar:_searchBar textDidChange:_searchBar.text];
 }
 
 @end

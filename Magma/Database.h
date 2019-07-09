@@ -17,7 +17,6 @@
 #define SourceDidStopRefreshing @"com.pixelomer.magma/SourceDidStopRefreshing"
 #define DatabaseDidStartRefreshingSources @"com.pixelomer.magma/DatabaseDidStartRefreshingSources"
 #define DatabaseDidFinishRefreshingSources @"com.pixelomer.magma/DatabaseDidFinishRefreshingSources"
-#define DatabaseDidFinishReloadingLocalPackages @"com.pixelomer.magma/DatabaseDidFinishReloadingLocalPackages"
 #define DatabaseDidFinishReloadingRemotePackages @"com.pixelomer.magma/DatabaseDidFinishReloadingRemotePackages"
 
 @class Source;

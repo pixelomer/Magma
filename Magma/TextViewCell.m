@@ -31,7 +31,7 @@ static UIFont *font;
 		textView.layoutManager.usesFontLeading = NO;
 		textView.editable = NO;
 		[self.contentView addSubview:textView];
-		[textView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor].active = YES;
+		[textView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:7.5].active = YES;
 		[textView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-7.5].active = YES;
 		[textView.heightAnchor constraintGreaterThanOrEqualToConstant:0.0].active = YES;
 		[textView.leftAnchor constraintEqualToAnchor:self.contentView.layoutMarginsGuide.leftAnchor].active = YES;
