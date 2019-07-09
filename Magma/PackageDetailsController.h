@@ -15,6 +15,7 @@
 
 @interface PackageDetailsController : MGTableViewController {
 	NSArray *fields;
+	NSArray *filteredCells;
 }
 @property (nonatomic, readonly, strong) Package *package;
 - (instancetype)initWithPackage:(Package *)package;

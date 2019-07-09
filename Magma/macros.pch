@@ -1,0 +1,16 @@
+//
+//  macros.pch
+//  Magma
+//
+//  Created by PixelOmer on 9.07.2019.
+//  Copyright © 2019 PixelOmer. All rights reserved.
+//
+
+#ifndef macros_pch
+#define macros_pch
+
+#import <Foundation/Foundation.h>
+#define UIKitLocalize(key) [[NSBundle bundleForClass:[UIView class]] localizedStringForKey:key value:key table:nil]
+#define Localize(key) [NSBundle.mainBundle localizedStringForKey:key value:key table:nil]
+
+#endif /* macros_pch */

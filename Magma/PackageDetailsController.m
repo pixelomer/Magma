@@ -9,22 +9,29 @@
 #import "PackageDetailsController.h"
 #import "Package.h"
 #import <objc/runtime.h>
+#import "TextViewCell.h"
 
 @implementation PackageDetailsController
 
 static UIColor *separatorColor;
 static UIFont *headerFont;
-static NSArray *cells;
+static NSArray *allCells;
 
 + (void)load {
 	if ([self class] == [PackageDetailsController class]) {
 		separatorColor = [UIColor colorWithRed:0.918 green:0.918 blue:0.925 alpha:1.0];
 		headerFont = [UIFont systemFontOfSize:22 weight:UIFontWeightBold];
-		cells = @[
+		allCells = @[
 			@[@"Text", @"Details", headerFont],
+			@[@"Data", @"longDescription"],
+			NSNull.null,
+			@[@"Text", @"Contact", headerFont],
+			@[@"Text", @"Contact Author", @"openMailApp:", @"author"],
+			@[@"Text", @"Contact Maintainer", @"openMailApp:", @"maintainer"],
+			@[@"Text", @"Visit Homepage", @"openURL:", @"homepage"],
+			@[@"Text", @"Report a Bug", @"openURL:", @"bugs"],
 			NSNull.null,
 			@[@"Text", @"Advanced", headerFont],
-			NSNull.null,
 			@[@"Text", @"Packages File Entry", @"pushFieldsTableView"]
 		];
 	}
@@ -33,7 +40,7 @@ static NSArray *cells;
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.tableView.separatorColor = UIColor.clearColor;
-    self.title = _package.package;
+    self.title = _package.name ?: _package.package;
 }
 
 - (instancetype)init {
@@ -50,6 +57,14 @@ static NSArray *cells;
 		NSDictionary *rawPackage = package.rawPackage.copy;
 		for (NSString *fieldName in rawPackage) [mFields addObject:@[fieldName, rawPackage[fieldName]]];
 		fields = mFields.copy;
+		NSMutableArray *filteredCells = allCells.mutableCopy;
+		for (NSInteger i = filteredCells.count-1; i >= 0; i--) {
+			NSArray *cell = filteredCells[i];
+			if ([cell isKindOfClass:[NSArray class]] && (cell.count >= 4) && !package[cell[3]]) {
+				[filteredCells removeObjectAtIndex:i];
+			}
+		}
+		self->filteredCells = filteredCells.copy;
 	}
 	return self;
 }
@@ -57,7 +72,7 @@ static NSArray *cells;
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
 		__kindof UITableViewCell *cell;
-		NSArray *rowInfo = cells[indexPath.row];
+		NSArray *rowInfo = filteredCells[indexPath.row];
 		if ([rowInfo isKindOfClass:[NSArray class]]) {
 			if (rowInfo.count >= 1) {
 				if ([rowInfo[0] isEqualToString:@"Text"]) {
@@ -66,6 +81,7 @@ static NSArray *cells;
 						if ([rowInfo[1] isKindOfClass:[NSString class]]) {
 							cell.textLabel.text = rowInfo[1];
 						}
+						else cell.textLabel.text = @"";
 						if (rowInfo.count >= 3) {
 							if ([rowInfo[2] isKindOfClass:[NSString class]]) {
 								cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -82,6 +98,10 @@ static NSArray *cells;
 							}
 						}
 					}
+				}
+				else if ([rowInfo[0] isEqualToString:@"Data"]) {
+					cell = [tableView dequeueReusableCellWithIdentifier:@"textViewCell"] ?: [[TextViewCell alloc] initWithReuseIdentifier:@"textViewCell"];
+					[(TextViewCell *)cell setTextViewText:[_package valueForKey:rowInfo.lastObject]];
 				}
 			}
 		}
@@ -116,7 +136,47 @@ static NSArray *cells;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-	return (tableView == self.tableView) ? cells.count : fields.count;
+	return (tableView == self.tableView) ? filteredCells.count : fields.count;
+}
+
+- (void)openMailApp:(NSString *)field {
+	NSString *fullString = _package[field];
+	if (fullString) {
+		NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\<(.*)\\>" options:0 error:nil];
+		NSTextCheckingResult *regexResult = [regex firstMatchInString:fullString options:0 range:NSMakeRange(0, fullString.length)];
+		if (regexResult && regexResult.range.location != NSNotFound) {
+			NSString *email = [fullString substringWithRange:regexResult.range];
+			NSURL *emailURL = [NSURL URLWithString:[NSString stringWithFormat:@"mailto:%@", [email stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]]]];
+			[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:NO];
+			[UIApplication.sharedApplication openURL:emailURL];
+			return;
+		}
+	}
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:Localize(@"No Email Specified") message:Localize(@"The package doesn't contain an email address.") preferredStyle:UIAlertControllerStyleAlert];
+	[alert addAction:[UIAlertAction
+		actionWithTitle:UIKitLocalize(@"OK")
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
+	[self presentViewController:alert animated:YES completion:nil];
+	[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+}
+
+- (void)openURL:(NSString *)field {
+	NSURL *URL = [NSURL URLWithString:_package[field]];
+	if (URL && [UIApplication.sharedApplication canOpenURL:URL]) {
+		[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:NO];
+		[UIApplication.sharedApplication openURL:URL];
+		return;
+	}
+	[self.tableView deselectRowAtIndexPath:self.tableView.indexPathForSelectedRow animated:YES];
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid URL" message:@"The package provided an invalid URL." preferredStyle:UIAlertControllerStyleAlert];
+	[alert addAction:[UIAlertAction
+		actionWithTitle:UIKitLocalize(@"OK")
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
+	[self presentViewController:alert animated:YES completion:nil];
 }
 
 - (void)pushFieldsTableView {
@@ -128,10 +188,15 @@ static NSArray *cells;
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	if (tableView == self.tableView) {
-		NSArray *rowInfo = cells[indexPath.row];
+		NSArray *rowInfo = filteredCells[indexPath.row];
 		if ([rowInfo isKindOfClass:[NSArray class]] && [rowInfo[0] isEqualToString:@"Text"] && rowInfo.count >= 3 && [rowInfo[2] isKindOfClass:[NSString class]]) {
 			SEL selector = NSSelectorFromString(rowInfo[2]);
-			((void(*)(PackageDetailsController *, SEL))class_getMethodImplementation(self.class, selector))(self, selector);
+			if (rowInfo.count >= 4) {
+				((void(*)(PackageDetailsController *, SEL, id))class_getMethodImplementation(self.class, selector))(self, selector, rowInfo[3]);
+			}
+			else {
+				((void(*)(PackageDetailsController *, SEL))class_getMethodImplementation(self.class, selector))(self, selector);
+			}
 		}
 	}
 }
