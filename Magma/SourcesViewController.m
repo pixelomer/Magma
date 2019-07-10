@@ -40,7 +40,7 @@
 		initWithTitle:@"Refresh"
 		style:UIBarButtonItemStylePlain
 		target:self
-		action:@selector(handleLeftBarButton)
+		action:@selector(handleLeftBarButton:)
 	];
 	[self reloadData];
 }
@@ -50,12 +50,64 @@
 	self.title = @"Sources";
 }
 
-- (void)handleLeftBarButton {
-	if (self.tableView.isEditing) [self showAddSourceAlert];
+- (void)handleLeftBarButton:(UIBarButtonItem *)button {
+	if (self.tableView.isEditing) [self showAddSourceAlert:button];
 	else if (!Database.sharedInstance.isRefreshing) [self startRefreshing];
 }
 
-- (void)showAddSourceAlert {
+- (void)showPPAAlert {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter PPA Details" message:nil preferredStyle:UIAlertControllerStyleAlert];
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"Cancel"
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
+	UIAlertAction *addSourceAction = [UIAlertAction
+		actionWithTitle:@"Add Source"
+		style:UIAlertActionStyleDefault
+		handler:^(UIAlertAction *action){
+			NSString *ppa, *dist, *arch;
+			for (UITextField *textField in alertController.textFields) {
+				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, _cmd);
+				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				if (value.length) {
+					switch (alertFieldIdentifier.shortValue) {
+						case 0:  ppa = value; break;
+						case 1: dist = value; break;
+						case 2: arch = value; break;
+					}
+				}
+			}
+			[Database.sharedInstance addPPA:ppa distribution:dist architecture:arch];
+		}
+	];
+	addSourceAction.enabled = NO;
+	[alertController addAction:addSourceAction];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"PPA";
+		textField.text = @"ppa:";
+		objc_setAssociatedObject(textField, _cmd, @0, OBJC_ASSOCIATION_COPY_NONATOMIC);
+		objc_setAssociatedObject(textField, @selector(textDidChange:), addSourceAction, OBJC_ASSOCIATION_ASSIGN);
+		[textField addTarget:self action:@selector(textDidChange:) forControlEvents:UIControlEventEditingChanged];
+	}];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Distribution";
+		textField.text = @"bionic";
+		objc_setAssociatedObject(textField, _cmd, @1, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
+	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
+		textField.placeholder = @"Architecture";
+		textField.text = @"amd64";
+		objc_setAssociatedObject(textField, _cmd, @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	}];
+	[self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)textDidChange:(UITextField *)textField {
+	[(UIAlertAction *)objc_getAssociatedObject(textField, _cmd) setEnabled:[textField.text containsString:@"/"]];
+}
+
+- (void)showAdvancedSourceAlert {
 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter Source Details" message:nil preferredStyle:UIAlertControllerStyleAlert];
 	[alertController addAction:[UIAlertAction
 		actionWithTitle:@"Cancel"
@@ -67,7 +119,7 @@
 		style:UIAlertActionStyleDefault
 		handler:^(UIAlertAction *action){
 			NSString *components, *baseURL, *dist = @"./", *architecture;
-			for (UITextField *textField in self->alertTextFields) {
+			for (UITextField *textField in alertController.textFields) {
 				NSNumber *alertFieldIdentifier = objc_getAssociatedObject(textField, _cmd);
 				NSString *value = [textField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 				if (value.length) {
@@ -86,7 +138,6 @@
 			else {
 				[Database.sharedInstance addSourceWithBaseURL:baseURL architecture:architecture distribution:dist components:components];
 			}
-			self->alertTextFields = nil;
 		}
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
@@ -109,7 +160,32 @@
 	for (UITextField *textField in alertController.textFields) {
 		textField.keyboardType = UIKeyboardTypeDefault;
 	}
-	alertTextFields = alertController.textFields.copy;
+	[self presentViewController:alertController animated:YES completion:nil];
+}
+
+- (void)showAddSourceAlert:(UIBarButtonItem *)button {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Add source..." message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+	alertController.modalPresentationStyle = UIModalPresentationPopover;
+	alertController.popoverPresentationController.barButtonItem = button;
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"Custom Source"
+		style:UIAlertActionStyleDefault
+		handler:^(id action){
+			[self showAdvancedSourceAlert];
+		}
+	]];
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"PPA"
+		style:UIAlertActionStyleDefault
+		handler:^(id action){
+			[self showPPAAlert];
+		}
+	]];
+	[alertController addAction:[UIAlertAction
+		actionWithTitle:@"Cancel"
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
 	[self presentViewController:alertController animated:YES completion:nil];
 }
 

@@ -222,6 +222,11 @@ static NSArray *paths;
 	[self addSourceWithBaseURL:baseURL architecture:arch distribution:dist components:components ID:nil];
 }
 
+- (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture {
+	NSString *finalPPA = [ppa.lowercaseString hasPrefix:@"ppa:"] ? [ppa substringFromIndex:4] : ppa;
+	[self addSourceWithBaseURL:[@"http://ppa.launchpad.net/" stringByAppendingPathComponent:[finalPPA stringByAppendingPathComponent:@"ubuntu"]] architecture:architecture distribution:dist components:@"main"];
+}
+
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {
 	NSString *notificationName = DatabaseDidAddSource;
 	NSDictionary *userInfo = @{ @"source" : source };

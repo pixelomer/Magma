@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadManager.m */; };
+		44023A0322D4EBE100C155D8 /* DownloadsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadsManager.m */; };
 		44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0522D4EC1800C155D8 /* LocalPackage.m */; };
 		44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */; };
 		4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4430D18B22CF810E00F21B28 /* PackageDetailsController.m */; };
@@ -39,8 +39,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		44023A0122D4EBE100C155D8 /* DownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadManager.h; sourceTree = "<group>"; };
-		44023A0222D4EBE100C155D8 /* DownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadManager.m; sourceTree = "<group>"; };
+		44023A0122D4EBE100C155D8 /* DownloadsManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadsManager.h; sourceTree = "<group>"; };
+		44023A0222D4EBE100C155D8 /* DownloadsManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadsManager.m; sourceTree = "<group>"; };
 		44023A0422D4EC1800C155D8 /* LocalPackage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackage.h; sourceTree = "<group>"; };
 		44023A0522D4EC1800C155D8 /* LocalPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackage.m; sourceTree = "<group>"; };
 		44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RelatedPackagesController.h; sourceTree = "<group>"; };
@@ -120,8 +120,8 @@
 				444F0A9322CDF0250029B788 /* Assets.xcassets */,
 				444F0AB522CDF0280029B788 /* Database.h */,
 				444F0AA422CDF0270029B788 /* Database.m */,
-				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
-				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
+				44023A0122D4EBE100C155D8 /* DownloadsManager.h */,
+				44023A0222D4EBE100C155D8 /* DownloadsManager.m */,
 				444F0A9C22CDF0260029B788 /* DownloadsController.h */,
 				444F0A9422CDF0250029B788 /* DownloadsController.m */,
 				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
@@ -285,7 +285,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */,
+				44023A0322D4EBE100C155D8 /* DownloadsManager.m in Sources */,
 				444F0AC622CDF0290029B788 /* MGViewController.m in Sources */,
 				444F0AC922CDF0290029B788 /* UIImage+ResizeImage.m in Sources */,
 				444F0ACE22CDF0290029B788 /* Package.m in Sources */,

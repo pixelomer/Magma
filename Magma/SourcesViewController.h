@@ -2,9 +2,8 @@
 
 @class Source;
 
-@interface SourcesViewController : MGTableViewController {
+@interface SourcesViewController : MGTableViewController<UITextFieldDelegate> {
 	NSMutableArray<Source *> *sources;
-	NSArray<UITextField *> *alertTextFields;
 	BOOL isRefreshing;
 }
 @end

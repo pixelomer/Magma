@@ -50,6 +50,7 @@
 - (Package *)packageWithIdentifier:(NSString *)identifier;
 - (BOOL)isLoaded;
 - (void)startLoadingDataIfNeeded;
+- (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
 - (void)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components;
