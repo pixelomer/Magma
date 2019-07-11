@@ -2,7 +2,7 @@
 #import <zlib.h>
 #import <bzlib.h>
 
-@implementation NSData(GZIP)
+@implementation NSData(Decompression)
 
 // Source: https://stackoverflow.com/a/3912510/7085621
 + (BOOL)bunzipFile:(NSString *)inputFile toFile:(NSString *)outputFile {
@@ -90,5 +90,62 @@
 	fclose(inputFileHandle);
 	return success.boolValue;
 }
+#undef CHUNK
+
+// Source: https://github.com/pixelomer/ARDecompression
+#define CHUNK 0x800
++ (BOOL)unarchiveFileAtPath:(NSString *)path toDirectoryAtPath:(NSString *)targetDir {
+	BOOL result = NO;
+	FILE *inputHandle = fopen(path.UTF8String, "r");
+	if (!inputHandle) return NO;
+	if ([NSFileManager.defaultManager createDirectoryAtPath:targetDir withIntermediateDirectories:NO attributes:nil error:nil] || ![NSFileManager.defaultManager contentsOfDirectoryAtPath:targetDir error:nil].count) {
+		char buffer[9];
+		if (fread(buffer, 1, 8, inputHandle) && !strcmp(buffer, "!<arch>\n")) {
+			char expectedSuffix[3];
+			expectedSuffix[0] = 0x60;
+			expectedSuffix[1] = '\n';
+			expectedSuffix[2] = 0x0;
+			while(!feof(inputHandle)) {
+#define read(size, output) if (fread(output, 1, size, inputHandle) != size) break; else output[size] = 0;
+				char filename[17];
+				char timestampStr[13];
+				char fileSizeStr[11];
+				char suffix[3];
+				read(16, filename);
+				read(12, timestampStr);
+				fseek(inputHandle, 20, SEEK_CUR);
+				read(10, fileSizeStr);
+				read(2, suffix);
+				if (!strcmp(suffix, expectedSuffix)) {
+					NSString *outputFile = [targetDir stringByAppendingPathComponent:[@(filename) stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+#undef read
+					FILE *outputFileHandle = fopen(outputFile.UTF8String, "w");
+#define read(size, output) if (fread(output, 1, size, inputHandle) != size) break;
+#define write(size) if (fwrite(buffer, 1, bytesToWrite, outputFileHandle) != size) break;
+					if (!outputFileHandle) break;
+					int timestamp = atoi(timestampStr);
+					size_t remainingBytes = atoi(fileSizeStr);
+					char buffer[CHUNK];
+					while (remainingBytes > 0) {
+						size_t bytesToWrite = (remainingBytes > CHUNK) ? CHUNK : remainingBytes;
+						read(bytesToWrite, buffer);
+						write(bytesToWrite);
+						remainingBytes -= bytesToWrite;
+					}
+#undef write
+#undef read
+					fclose(outputFileHandle);
+					if (remainingBytes > 0) break;
+					[NSFileManager.defaultManager setAttributes:@{ NSFileModificationDate : [NSDate dateWithTimeIntervalSince1970:timestamp] } ofItemAtPath:outputFile error:nil];
+				}
+				else break;
+			}
+			result = !!feof(inputHandle);
+		}
+	}
+	fclose(inputHandle);
+	return result;
+}
+#undef CHUNK
 
 @end
