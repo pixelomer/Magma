@@ -1,5 +1,5 @@
 //
-//  DownloadsManager.h
+//  DownloadManager.h
 //  Magma
 //
 //  Created by PixelOmer on 9.07.2019.
@@ -8,10 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface DownloadsManager : NSObject
-
+@interface DownloadManager : NSObject
++ (instancetype)sharedInstance;
 @end
-
-NS_ASSUME_NONNULL_END

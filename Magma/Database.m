@@ -3,6 +3,7 @@
 #import "DPKGParser.h"
 #import "Package.h"
 #import <objc/runtime.h>
+#import "AppDelegate.h"
 
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
@@ -25,32 +26,21 @@ static NSArray *paths;
 
 + (instancetype)sharedInstance {
 	if (!sharedInstance) {
-		if (!workingDirectory) {
+		workingDirectory = AppDelegate.workingDirectory;
+		if (!([NSFileManager.defaultManager createDirectoryAtPath:[workingDirectory stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[workingDirectory stringByAppendingPathComponent:@"sources.plist"]] || [@{} writeToFile:[workingDirectory stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
 			@throw [NSException
-				exceptionWithName:NSGenericException
-				reason:@"The working directory must be set before calling +[Database sharedInstance]."
+				exceptionWithName:NSInternalInconsistencyException
+				reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
 				userInfo:nil
 			];
 		}
+		paths = @[
+			[workingDirectory stringByAppendingPathComponent:@"sources.plist"],
+			[workingDirectory stringByAppendingPathComponent:@"lists"]
+		];
 		sharedInstance = [self new];
-		[sharedInstance startLoadingDataIfNeeded];
 	}
 	return sharedInstance;
-}
-
-+ (void)setWorkingDirectory:(NSString *)newLocation {
-	if (!([NSFileManager.defaultManager createDirectoryAtPath:[newLocation stringByAppendingPathComponent:@"lists"] withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager fileExistsAtPath:[newLocation stringByAppendingPathComponent:@"sources.plist"]] || [@{} writeToFile:[newLocation stringByAppendingPathComponent:@"sources.plist"] atomically:YES]))) {
-		@throw [NSException
-			exceptionWithName:NSInternalInconsistencyException
-			reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
-			userInfo:nil
-		];
-	}
-	workingDirectory = newLocation.copy;
-	paths = @[
-		[workingDirectory stringByAppendingPathComponent:@"sources.plist"],
-		[workingDirectory stringByAppendingPathComponent:@"lists"]
-	];
 }
 
 + (NSString *)sourcesPlistPath {
@@ -224,7 +214,7 @@ static NSArray *paths;
 
 - (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture {
 	NSString *finalPPA = [ppa.lowercaseString hasPrefix:@"ppa:"] ? [ppa substringFromIndex:4] : ppa;
-	[self addSourceWithBaseURL:[@"http://ppa.launchpad.net/" stringByAppendingPathComponent:[finalPPA stringByAppendingPathComponent:@"ubuntu"]] architecture:architecture distribution:dist components:@"main"];
+	[self addSourceWithBaseURL:[[[NSURL URLWithString:@"http://ppa.launchpad.net/"] URLByAppendingPathComponent:[finalPPA stringByAppendingPathComponent:@"ubuntu"]] absoluteString] architecture:architecture distribution:dist components:@"main"];
 }
 
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {

@@ -7,8 +7,13 @@
 
 @implementation AppDelegate
 
+static NSString *workingDirectory;
+
++ (NSString *)workingDirectory {
+	return workingDirectory ?: (workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject);
+}
+
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
-	Database.workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
 	[Database.sharedInstance startLoadingDataIfNeeded];
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	NSArray *tabs = @[

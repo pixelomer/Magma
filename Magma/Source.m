@@ -210,7 +210,7 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 		return [NSData gunzipFile:inputFilePath toFile:outputFilePath];
 	}
 	else if ([algorithm isEqualToString:PackagesAlgorithmXZ]) {
-		// FIX ME
+		return [NSData extractXZFileAtPath:inputFilePath toFileAtPath:outputFilePath];
 	}
 	return NO;
 }

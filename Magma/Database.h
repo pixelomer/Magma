@@ -30,13 +30,11 @@
 	NSMutableDictionary<NSNumber *, NSMutableDictionary<NSString *, id> *> *sourcesPlist;
 }
 
-// Configuration:
-// Use these methods to configure how the database will be loaded. These methods can only be called before calling +[Database sharedInstance].
-+ (void)setWorkingDirectory:(NSString *)newLocation;
-
 // Initialization:
 // Calling +[Database sharedInstance] for the first time will initialize the singleton Database object.
 + (instancetype)sharedInstance;
+// Call -[Database startLoadingDataIfNeeded] after creating the shared instance to load the existing data from the filesystem.
+- (void)startLoadingDataIfNeeded;
 
 // Usage:
 // Use these methods to access/modify information in the database.
@@ -49,7 +47,6 @@
 + (NSString *)releaseFilePathForSource:(Source *)source;
 - (Package *)packageWithIdentifier:(NSString *)identifier;
 - (BOOL)isLoaded;
-- (void)startLoadingDataIfNeeded;
 - (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
