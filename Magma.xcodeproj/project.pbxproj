@@ -34,6 +34,7 @@
 		444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD222CDF0520029B788 /* NSData+Decompression.m */; };
 		444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
+		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
@@ -93,6 +94,8 @@
 		444F0ADF22CDF2600029B788 /* libbz2.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libbz2.tbd; path = usr/lib/libbz2.tbd; sourceTree = SDKROOT; };
 		444F0AE322CDF3140029B788 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44564A8022D35D7F00D7FA70 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		44602D0922D78A8800440D8A /* NSFileManager+Tar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Tar.h"; sourceTree = "<group>"; };
+		44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Tar.m"; sourceTree = "<group>"; };
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
@@ -176,6 +179,8 @@
 				444F0AD522CDF0530029B788 /* Compression.h */,
 				444F0AD622CDF0530029B788 /* NSData+Decompression.h */,
 				444F0AD222CDF0520029B788 /* NSData+Decompression.m */,
+				44602D0922D78A8800440D8A /* NSFileManager+Tar.h */,
+				44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */,
 			);
 			path = Compression;
 			sourceTree = "<group>";
@@ -304,6 +309,7 @@
 				444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */,
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
+				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
 				44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
