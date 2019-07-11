@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		44023A0322D4EBE100C155D8 /* DownloadsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadsManager.m */; };
+		44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadManager.m */; };
 		44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0522D4EC1800C155D8 /* LocalPackage.m */; };
 		44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */; };
 		4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4430D18B22CF810E00F21B28 /* PackageDetailsController.m */; };
@@ -34,13 +34,13 @@
 		444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD222CDF0520029B788 /* NSData+Decompression.m */; };
 		444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
-		44564A8122D35D7F00D7FA70 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44564A8022D35D7F00D7FA70 /* libz.tbd */; };
+		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		44023A0122D4EBE100C155D8 /* DownloadsManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadsManager.h; sourceTree = "<group>"; };
-		44023A0222D4EBE100C155D8 /* DownloadsManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadsManager.m; sourceTree = "<group>"; };
+		44023A0122D4EBE100C155D8 /* DownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadManager.h; sourceTree = "<group>"; };
+		44023A0222D4EBE100C155D8 /* DownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadManager.m; sourceTree = "<group>"; };
 		44023A0422D4EC1800C155D8 /* LocalPackage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackage.h; sourceTree = "<group>"; };
 		44023A0522D4EC1800C155D8 /* LocalPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackage.m; sourceTree = "<group>"; };
 		44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RelatedPackagesController.h; sourceTree = "<group>"; };
@@ -94,6 +94,7 @@
 		444F0AE322CDF3140029B788 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44564A8022D35D7F00D7FA70 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
 		44FEECDA22D482CC00950E24 /* macros.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.pch; sourceTree = "<group>"; };
@@ -104,7 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				44564A8122D35D7F00D7FA70 /* libz.tbd in Frameworks */,
+				44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */,
 				444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,8 +121,8 @@
 				444F0A9322CDF0250029B788 /* Assets.xcassets */,
 				444F0AB522CDF0280029B788 /* Database.h */,
 				444F0AA422CDF0270029B788 /* Database.m */,
-				44023A0122D4EBE100C155D8 /* DownloadsManager.h */,
-				44023A0222D4EBE100C155D8 /* DownloadsManager.m */,
+				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
+				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
 				444F0A9C22CDF0260029B788 /* DownloadsController.h */,
 				444F0A9422CDF0250029B788 /* DownloadsController.m */,
 				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
@@ -191,6 +192,7 @@
 		444F0ADE22CDF2600029B788 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				44E067CF22D7772E0010D4A1 /* liblzma.tbd */,
 				44564A8022D35D7F00D7FA70 /* libz.tbd */,
 				444F0ADF22CDF2600029B788 /* libbz2.tbd */,
 			);
@@ -285,7 +287,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				44023A0322D4EBE100C155D8 /* DownloadsManager.m in Sources */,
+				44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */,
 				444F0AC622CDF0290029B788 /* MGViewController.m in Sources */,
 				444F0AC922CDF0290029B788 /* UIImage+ResizeImage.m in Sources */,
 				444F0ACE22CDF0290029B788 /* Package.m in Sources */,

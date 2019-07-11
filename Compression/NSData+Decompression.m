@@ -1,6 +1,7 @@
 #import "NSData+Decompression.h"
 #import <zlib.h>
 #import <bzlib.h>
+#import "lzma.h"
 
 @implementation NSData(Decompression)
 
@@ -147,5 +148,50 @@
 	return result;
 }
 #undef CHUNK
+
+// Source: https://github.com/frida/xz/blob/master/doc/examples/02_decompress.c
++ (BOOL)extractXZFileAtPath:(NSString *)inputFile toFileAtPath:(NSString *)targetPath {
+	lzma_stream stream = LZMA_STREAM_INIT;
+	if (lzma_stream_decoder(&stream, UINT64_MAX, LZMA_CONCATENATED) != LZMA_OK) return NO;
+	FILE *inputFileHandle = fopen(inputFile.UTF8String, "r");
+	if (!inputFileHandle) return NO;
+	FILE *outputFileHandle = fopen(targetPath.UTF8String, "w");
+	if (!outputFileHandle) {
+		fclose(inputFileHandle);
+		return NO;
+	}
+	lzma_action action = LZMA_RUN;
+
+	uint8_t inputBuffer[BUFSIZ];
+	uint8_t outputBuffer[BUFSIZ];
+	
+	BOOL result = NO;
+	stream.next_in = NULL;
+	stream.avail_in = 0;
+	stream.next_out = outputBuffer;
+	stream.avail_out = sizeof(outputBuffer);
+	while (true) {
+		if (stream.avail_in == 0 && !feof(inputFileHandle)) {
+			stream.next_in = inputBuffer;
+			stream.avail_in = fread(inputBuffer, 1, sizeof(inputBuffer), inputFileHandle);
+			if (ferror(inputFileHandle)) break;
+			if (feof(inputFileHandle)) action = LZMA_FINISH;
+		}
+		lzma_ret ret = lzma_code(&stream, action);
+		if (stream.avail_out == 0 || ret == LZMA_STREAM_END) {
+			size_t writeSize = sizeof(outputBuffer) - stream.avail_out;
+			if (fwrite(outputBuffer, 1, writeSize, outputFileHandle) != writeSize) break;
+			stream.next_out = outputBuffer;
+			stream.avail_out = sizeof(outputBuffer);
+		}
+		if (ret != LZMA_OK) {
+			if (ret == LZMA_STREAM_END) result = YES;
+			break;
+		}
+	}
+	fclose(outputFileHandle);
+	fclose(inputFileHandle);
+	return result;
+}
 
 @end
