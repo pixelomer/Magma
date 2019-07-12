@@ -291,19 +291,31 @@ static NSArray *paths;
 	NSString *filePath = objc_getAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:));
 	[NSFileManager.defaultManager removeItemAtPath:filePath error:nil];
 	[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:filePath] error:nil];
-	objc_setAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:), nil, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	objc_setAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
+	objc_setAssociatedObject(task, @selector(fetchURL:outputUserInfo:outputFile:), error, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (BOOL)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo outputFile:(NSString *)filePath {
 	NSURLSession *session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration delegate:self delegateQueue:nil];
 	NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
-	objc_setAssociatedObject(task, _cmd, filePath, OBJC_ASSOCIATION_COPY_NONATOMIC);
+	objc_setAssociatedObject(task, _cmd, filePath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	[task resume];
-	while (objc_getAssociatedObject(task, _cmd)) {
+	NSError *error;
+	while ((id)(error = objc_getAssociatedObject(task, _cmd)) == filePath) {
 		[NSThread sleepForTimeInterval:0.2];
 	}
 	NSHTTPURLResponse *response = (id)task.response;
-    if (!response || response.statusCode != 200) {
+	if (error) {
+		userInfo[@"reason"] = error.description;
+		userInfo[@"errorCode"] = @(error.code);
+		error = nil;
+		objc_setAssociatedObject(task, _cmd, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		return NO;
+	}
+	else if (!response || response.statusCode != 200) {
         userInfo[@"reason"] = [NSString stringWithFormat:@"Server returned a status code other than 200 for the following URL: %@", url];
         userInfo[@"errorCode"] = @(response.statusCode);
         return NO;
@@ -378,6 +390,10 @@ static NSArray *paths;
 				moveItemAtPath:temporaryPackagesPath
 				toPath:finalPackagesPath
 				error:&error
+			];
+			[NSFileManager.defaultManager
+				removeItemAtPath:temporaryPackagesPath
+				error:nil
 			];
 		}
 		else parseFailure();

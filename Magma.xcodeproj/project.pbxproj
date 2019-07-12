@@ -35,6 +35,7 @@
 		444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
+		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
@@ -97,6 +98,8 @@
 		44602D0922D78A8800440D8A /* NSFileManager+Tar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Tar.h"; sourceTree = "<group>"; };
 		44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Tar.m"; sourceTree = "<group>"; };
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
+		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
@@ -169,6 +172,8 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
+				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -318,6 +323,7 @@
 				444F0AC822CDF0290029B788 /* SectionsController.m in Sources */,
 				444F0AC122CDF0290029B788 /* main.m in Sources */,
 				444F0ABD22CDF0290029B788 /* DownloadsController.m in Sources */,
+				44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

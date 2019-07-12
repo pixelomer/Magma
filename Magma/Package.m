@@ -87,6 +87,7 @@
 		NSError *error;
 		NSString *rawPackagesEntry = self.rawPackagesEntry;
 		if ((_rawPackage = [DPKGParser parsePackageEntry:rawPackagesEntry error:&error])) {
+			_debURL = [_source.baseURL URLByAppendingPathComponent:_rawPackage[@"filename"]];
 			NSMutableArray *fullDescription = [_rawPackage[@"description"] componentsSeparatedByString:@"\n"].mutableCopy;
 			_shortDescription = fullDescription.firstObject;
 			if (fullDescription.count > 1) {

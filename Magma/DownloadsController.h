@@ -1,4 +1,6 @@
 #import "MGTableViewController.h"
 
-@interface DownloadsController : MGTableViewController
+@interface DownloadsController : MGTableViewController {
+	NSMutableArray<NSNumber *> *downloadIdentifiers;
+}
 @end

@@ -11,6 +11,7 @@
 #import <objc/runtime.h>
 #import "RelatedPackagesController.h"
 #import "TextViewCell.h"
+#import "DownloadManager.h"
 #import <MessageUI/MessageUI.h>
 
 @implementation PackageDetailsController
@@ -41,6 +42,7 @@ static UIFont *defaultFont;
 			NSNull.null,
 			@[@"Text", @"Details", headerFont],
 			@{@"Version" : @"version"},
+			@[@"Text", @"Installation Instructions", @"showInstallationInstructions"],
 			NSNull.null,
 			@[@"Text", @"Relations", headerFont],
 			@[@"Text", @"Dependencies", @"showDepends", @"depends"],
@@ -69,8 +71,15 @@ static UIFont *defaultFont;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    UIBarButtonItem *getButton = [[UIBarButtonItem alloc] initWithTitle:@"Get" style:UIBarButtonItemStylePlain target:self action:@selector(getPackage)];
+    self.navigationItem.rightBarButtonItem = getButton;
     self.tableView.separatorColor = UIColor.clearColor;
     self.title = _package.name ?: _package.package;
+}
+
+- (void)getPackage {
+	[DownloadManager.sharedInstance startDownloadingPackage:_package];
+	self.tabBarController.selectedIndex = 2;
 }
 
 - (instancetype)init {
@@ -78,6 +87,12 @@ static UIFont *defaultFont;
 		reason:[NSString stringWithFormat:@"-[%@ init] is not allowed, use -[%@ initWithPackage:] instead.", NSStringFromClass(self.class), NSStringFromClass(self.class)]
 		userInfo:nil
 	];
+}
+
+- (void)showInstallationInstructions {
+	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Not Implemented" message:@"This part of the application is not implemented yet. If you are an end user and this is a final build, you shouldn't be seeing this. Please report this to the developer." preferredStyle:UIAlertControllerStyleAlert];
+	[alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+	[self presentViewController:alertController animated:YES completion:nil];
 }
 
 - (instancetype)initWithPackage:(Package *)package {
@@ -222,7 +237,7 @@ static UIFont *defaultFont;
 			return;
 		}
 	}
-	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Address Specified" message:@"The package doesn't contain an email address." preferredStyle:UIAlertControllerStyleAlert];
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Address Available" message:@"The package doesn't contain an email address." preferredStyle:UIAlertControllerStyleAlert];
 	[alert addAction:[UIAlertAction
 		actionWithTitle:@"OK"
 		style:UIAlertActionStyleCancel

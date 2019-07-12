@@ -19,7 +19,7 @@
 // Override this method to receive other notifications from the database. You must call the super method if you want to keep the existing methods functional.
 - (void)didReceiveDatabaseNotification:(NSNotification *)notification;
 
-// Override these methods to receive notifications from the database.
+// Override these methods to receive notifications from the database. If you override -[MGViewController didReceiveDatabaseNotification:], these methods will not get called.
 - (void)sourceDidStartRefreshing:(Source *)source;
 - (void)sourceDidStopRefreshing:(Source *)source reason:(NSString *)reason;
 - (void)database:(Database *)database didAddSource:(Source *)source;
