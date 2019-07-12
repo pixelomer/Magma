@@ -89,7 +89,13 @@
 		if ((_rawPackage = [DPKGParser parsePackageEntry:rawPackagesEntry error:&error])) {
 			NSMutableArray *fullDescription = [_rawPackage[@"description"] componentsSeparatedByString:@"\n"].mutableCopy;
 			_shortDescription = fullDescription.firstObject;
-			if (fullDescription.count > 1) [fullDescription removeObjectAtIndex:0];
+			if (fullDescription.count > 1) {
+				[fullDescription removeObjectAtIndex:0];
+				for (NSInteger i = 0; i < fullDescription.count; i++) {
+					NSString *value = [fullDescription[i] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+					if ([value isEqualToString:@"."]) fullDescription[i] = @"";
+				}
+			}
 			_longDescription = [fullDescription componentsJoinedByString:@"\n"];
 			_section = _version = _package = nil;
 			return YES;
@@ -129,7 +135,7 @@
 		}
 		_package = requiredValues[0];
 		_version = requiredValues[1];
-		_shortDescription = requiredValues[2];
+		_longDescription = _shortDescription = requiredValues[2];
 		_section = [requiredValues[3] isKindOfClass:[NSString class]] ? requiredValues[3] : nil;
 	}
 	return self;

@@ -39,6 +39,9 @@ static UIFont *defaultFont;
 			@[@"Text", @"Description", headerFont],
 			@[@"Data", @"longDescription"],
 			NSNull.null,
+			@[@"Text", @"Details", headerFont],
+			@{@"Version" : @"version"},
+			NSNull.null,
 			@[@"Text", @"Relations", headerFont],
 			@[@"Text", @"Dependencies", @"showDepends", @"depends"],
 			@[@"Text", @"Conflicts", @"showConflicts", @"conflicts"],
@@ -110,14 +113,17 @@ static UIFont *defaultFont;
 	if (tableView == self.tableView) {
 		__kindof UITableViewCell *cell;
 		NSArray *rowInfo = filteredCells[indexPath.row];
+		BOOL allowsSelection = NO;
+		if ([rowInfo isKindOfClass:[NSDictionary class]]) {
+			cell = [tableView dequeueReusableCellWithIdentifier:@"value"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:@"value"];
+			cell.textLabel.text = [(NSDictionary *)rowInfo allKeys][0];
+			cell.detailTextLabel.text = _package[[(NSDictionary *)rowInfo allValues][0]];
+		}
 		if ([rowInfo isKindOfClass:[NSArray class]]) {
 			if (rowInfo.count >= 1) {
 				if ([rowInfo[0] isEqualToString:@"Text"]) {
 					cell = [tableView dequeueReusableCellWithIdentifier:@"text"] ?: [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"text"];
 					cell.textLabel.font = defaultFont;
-					cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
-					cell.selectionStyle = UITableViewCellSelectionStyleNone;
-					cell.textLabel.textColor = [UIColor blackColor];
 					if (rowInfo.count >= 2) {
 						if ([rowInfo[1] isKindOfClass:[NSString class]]) {
 							cell.textLabel.text = rowInfo[1];
@@ -125,11 +131,9 @@ static UIFont *defaultFont;
 						else cell.textLabel.text = @"";
 						if (rowInfo.count >= 3) {
 							if ([rowInfo[2] isKindOfClass:[NSString class]]) {
-								cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
-								cell.selectionStyle = UITableViewCellSelectionStyleDefault;
-								cell.textLabel.textColor = self.navigationController.navigationBar.tintColor;
+								allowsSelection = YES;
 							}
-							if ([rowInfo[2] isKindOfClass:[UIFont class]]) {
+							else if ([rowInfo[2] isKindOfClass:[UIFont class]]) {
 								cell.textLabel.font = rowInfo[2];
 							}
 						}
@@ -158,6 +162,16 @@ static UIFont *defaultFont;
 					views:@{ @"separator" : separatorView }
 				]];
 			}
+		}
+		if (allowsSelection) {
+			cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator;
+			cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+			cell.textLabel.textColor = self.navigationController.navigationBar.tintColor;
+		}
+		else {
+			cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
+			cell.selectionStyle = UITableViewCellSelectionStyleNone;
+			cell.textLabel.textColor = [UIColor blackColor];
 		}
 		return cell;
 	}
@@ -258,7 +272,7 @@ static UIFont *defaultFont;
 }
 
 - (BOOL)tableView:(UITableView *)tableView canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	return (tableView != self.tableView) && (action == @selector(copy:));
+	return ((tableView != self.tableView) || [filteredCells[indexPath.row] isKindOfClass:[NSDictionary class]]) && (action == @selector(copy:));
 }
 
 - (void)tableView:(UITableView *)tableView performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
@@ -269,7 +283,7 @@ static UIFont *defaultFont;
 }
 
 - (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath {
-	return (tableView != self.tableView);
+	return ((tableView != self.tableView) || [filteredCells[indexPath.row] isKindOfClass:[NSDictionary class]]);
 }
 
 - (void)database:(Database *)database didRemoveSource:(Source *)source {

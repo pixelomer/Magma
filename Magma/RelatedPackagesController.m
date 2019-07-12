@@ -20,16 +20,19 @@
 		NSArray *fieldComponents = [package[field] componentsSeparatedByString:@", "];
 		for (NSString *fieldComponent in fieldComponents) {
 			if (fieldComponent.length) {
-				NSMutableArray *parts = [fieldComponent componentsSeparatedByString:@" "].mutableCopy;
-				NSString *packageName = parts[0];
-				[parts removeObjectAtIndex:0];
-				NSString *restOfTheField = [parts componentsJoinedByString:@" "];
-				Package *relatedPackage = [Database.sharedInstance packageWithIdentifier:packageName];
-				if (relatedPackage) {
-					[mRelatedPackages addObject:@[relatedPackage, restOfTheField]];
-				}
-				else {
-					[mRelatedPackages addObject:@[packageName, restOfTheField]];
+				NSArray *options = [fieldComponent componentsSeparatedByString:@" | "];
+				for (NSString *option in options) {
+					NSMutableArray *parts = [option componentsSeparatedByString:@" "].mutableCopy;
+					NSString *packageName = parts[0];
+					[parts removeObjectAtIndex:0];
+					NSString *restOfTheField = [parts componentsJoinedByString:@" "];
+					Package *relatedPackage = [Database.sharedInstance packageWithIdentifier:packageName];
+					if (relatedPackage) {
+						[mRelatedPackages addObject:@[relatedPackage, restOfTheField]];
+					}
+					else {
+						[mRelatedPackages addObject:@[packageName, restOfTheField]];
+					}
 				}
 			}
 		}
