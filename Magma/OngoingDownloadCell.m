@@ -26,18 +26,14 @@
 	});
 }
 
+- (void)downloadWithIdentifier:(NSUInteger)identifier didCompleteWithError:(NSString *)error {}
+
+
 - (void)resetProgress {
 	self.detailTextLabel.text = [NSString stringWithFormat:@"%@ / %@",
-		[NSByteCountFormatter stringFromByteCount:[DownloadManager.sharedInstance receivedBytesForIdentifier:_identifier] countStyle:NSByteCountFormatterCountStyleFile],
-		[NSByteCountFormatter stringFromByteCount:[DownloadManager.sharedInstance totalBytesForIdentifier:_identifier] countStyle:NSByteCountFormatterCountStyleFile]
-	];
-}
-
-- (void)downloadWithIdentifier:(NSUInteger)identifier didCompleteWithSuccess:(BOOL)success {
-	if (identifier != _identifier) return;
-	dispatch_async(dispatch_get_main_queue(), ^{
-		self.detailTextLabel.text = success ? @"Download completed successfully." : @"Download failed.";
-	});
+								 [NSByteCountFormatter stringFromByteCount:[DownloadManager.sharedInstance receivedBytesForIdentifier:_identifier] countStyle:NSByteCountFormatterCountStyleFile],
+								 [NSByteCountFormatter stringFromByteCount:[DownloadManager.sharedInstance totalBytesForIdentifier:_identifier] countStyle:NSByteCountFormatterCountStyleFile]
+								 ];
 }
 
 - (void)setIdentifier:(NSUInteger)identifier {

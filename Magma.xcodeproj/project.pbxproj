@@ -36,6 +36,7 @@
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
+		44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
@@ -55,7 +56,7 @@
 		444F0A9322CDF0250029B788 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		444F0A9422CDF0250029B788 /* DownloadsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadsController.m; sourceTree = "<group>"; };
 		444F0A9522CDF0250029B788 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
-		444F0A9622CDF0260029B788 /* Source.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Source.m; sourceTree = "<group>"; };
+		444F0A9622CDF0260029B788 /* Source.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = Source.m; sourceTree = "<group>"; };
 		444F0A9822CDF0260029B788 /* HomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HomeViewController.m; sourceTree = "<group>"; };
 		444F0A9922CDF0260029B788 /* MGViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGViewController.h; sourceTree = "<group>"; };
 		444F0A9A22CDF0260029B788 /* DPKGParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DPKGParser.h; sourceTree = "<group>"; };
@@ -100,6 +101,8 @@
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
 		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
+		44D1178B22DF8AF100A38E9B /* NSString+Hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Hash.h"; sourceTree = "<group>"; };
+		44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Hash.m"; sourceTree = "<group>"; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
@@ -212,6 +215,7 @@
 		447DD38922CDEB1E00E6480F = {
 			isa = PBXGroup;
 			children = (
+				44D1178A22DF8A7300A38E9B /* NSString+Hash */,
 				444F0AD922CDF06C0029B788 /* SUStandardVersionComparator */,
 				444F0AD122CDF0430029B788 /* Compression */,
 				444F0A8D22CDF0170029B788 /* Magma */,
@@ -226,6 +230,15 @@
 				447DD39222CDEB1E00E6480F /* Magma.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		44D1178A22DF8A7300A38E9B /* NSString+Hash */ = {
+			isa = PBXGroup;
+			children = (
+				44D1178B22DF8AF100A38E9B /* NSString+Hash.h */,
+				44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */,
+			);
+			path = "NSString+Hash";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -318,6 +331,7 @@
 				44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
+				44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */,
 				444F0AC522CDF0290029B788 /* Database.m in Sources */,
 				444F0AC022CDF0290029B788 /* HomeViewController.m in Sources */,
 				444F0AC822CDF0290029B788 /* SectionsController.m in Sources */,

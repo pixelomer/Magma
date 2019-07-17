@@ -16,16 +16,18 @@
 @protocol DownloadManagerDelegate<NSObject>
 @required
 - (void)downloadWithIdentifier:(NSUInteger)identifier didReceiveBytes:(int64_t)receivedBytes totalBytes:(int64_t)totalBytes;
-- (void)downloadWithIdentifier:(NSUInteger)identifier didCompleteWithSuccess:(BOOL)success;
+- (void)downloadWithIdentifier:(NSUInteger)identifier didCompleteWithError:(NSString *)error;
 @end
 
 @interface DownloadManager : NSObject<NSURLSessionDelegate, NSURLSessionDownloadDelegate> {
 	NSURLSession *URLSession;
 	NSMutableDictionary<NSNumber *, NSArray<NSPointerArray *> *> *tasks;
 	NSMutableArray<NSString *> *allPackages;
+	//NSMutableDictionary<NSNumber *, NSArray *> *retryKeys;
 }
 + (instancetype)sharedInstance;
 - (int64_t)receivedBytesForIdentifier:(NSUInteger)identifier;
+//- (BOOL)retryDownloadWithIdentifier:(NSUInteger)identifier;
 - (int64_t)totalBytesForIdentifier:(NSUInteger)identifier;
 - (NSString *)packageNameForTaskWithIdentifier:(NSUInteger)taskID;
 - (NSInteger)ongoingDownloadCount;

@@ -8,7 +8,9 @@
 
 #import "DownloadManager.h"
 #import "AppDelegate.h"
+#import <Compression/Compression.h>
 #import "Package.h"
+#import <objc/runtime.h>
 
 @implementation DownloadManager
 
@@ -18,7 +20,7 @@ static NSString *workingDirectory;
 + (instancetype)sharedInstance {
 	if (!sharedInstance) {
 		workingDirectory = AppDelegate.workingDirectory;
-		if (!([NSFileManager.defaultManager createDirectoryAtPath:[workingDirectory stringByAppendingPathComponent:@"downloads"] withIntermediateDirectories:YES attributes:nil error:nil])) {
+		if (!([NSFileManager.defaultManager createDirectoryAtPath:[workingDirectory stringByAppendingPathComponent:@"downloads"] withIntermediateDirectories:YES attributes:nil error:nil] && (([NSFileManager.defaultManager removeItemAtPath:[workingDirectory stringByAppendingPathComponent:@"downloads.tmp"] error:nil] && false) || [NSFileManager.defaultManager createDirectoryAtPath:[workingDirectory stringByAppendingPathComponent:@"downloads.tmp"] withIntermediateDirectories:YES attributes:nil error:nil]))) {
 			@throw [NSException
 				exceptionWithName:NSInternalInconsistencyException
 				reason:@"Failed to prepare the directory. Continuing execution will result in a crash so just crashing now."
@@ -51,6 +53,10 @@ static NSString *workingDirectory;
 
 - (NSString *)downloadsPath {
 	return [workingDirectory stringByAppendingPathComponent:@"downloads"];
+}
+
+- (NSString *)temporaryDownloadsPath {
+	return [workingDirectory stringByAppendingPathComponent:@"downloads.tmp"];
 }
 
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
@@ -93,55 +99,127 @@ static NSString *workingDirectory;
 	return [(NSString *)tasks[@(taskID)][1] componentsSeparatedByString:@" "].firstObject;
 }
 
-- (void)finalizeDownloadWithIdentifier:(NSUInteger)identifier result:(BOOL)result {
+- (void)finalizeDownloadWithIdentifier:(NSUInteger)identifier error:(NSString *)error {
 	NSNumber *key = @(identifier);
+	if (!tasks[key]) return;
 	NSPointerArray *taskDelegates = tasks[key][0];
 	[taskDelegates compact];
 	for (NSUInteger i = 0; i < taskDelegates.count; i++) {
 		__weak id<DownloadManagerDelegate> delegate = [taskDelegates pointerAtIndex:i];
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-			[delegate downloadWithIdentifier:identifier didCompleteWithSuccess:result];
+			[delegate downloadWithIdentifier:identifier didCompleteWithError:error];
 		});
 	}
 	taskDelegates = nil;
+	//if (error) (retryKeys ?: (retryKeys = [NSMutableDictionary new]))[key] = @[ tasks[key][1], tasks[key][3] ];
+	NSString *packageName = [(NSString *)tasks[key][1] componentsSeparatedByString:@" "].firstObject;
 	[tasks removeObjectForKey:key];
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:DownloadDidCompleteNotification
 		object:self
-		userInfo:@{ @"taskID" : key, @"result" : @(result) }
+		userInfo:@{ @"packageName" : packageName, @"taskID" : key, @"error" : (error ?: NSNull.null) }
 	];
 }
 
+- (void)finalizeDownloadWithIdentifier:(NSUInteger)identifier packageName:(NSString *)packageName downloadedFilePath:(NSString *)downloadedFile {
+	BOOL isDir;
+	if ([NSFileManager.defaultManager fileExistsAtPath:downloadedFile isDirectory:&isDir] && !isDir) {
+		NSString *archiveOut = [downloadedFile stringByAppendingString:@".tmp"];
+		[NSFileManager.defaultManager removeItemAtPath:archiveOut error:nil];
+		if ([NSData unarchiveFileAtPath:downloadedFile toDirectoryAtPath:archiveOut]) {
+			NSString *finalOutput = [downloadedFile stringByAppendingString:@".out"];
+			[NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil];
+			NSDictionary *possibleExtensions = @{
+				@".xz" : @"extractXZFileAtPath:toFileAtPath:",
+				@".lzma" : @"extractXZFileAtPath:toFileAtPath:",
+				@".gz" : @"gunzipFile:toFile:"
+			};
+			NSArray *files = @[
+				[archiveOut stringByAppendingPathComponent:@"control.tar"],
+				[archiveOut stringByAppendingPathComponent:@"data.tar"]
+			];
+			for (NSString *file in files) {
+				if ([NSFileManager.defaultManager fileExistsAtPath:file]) continue;
+				for (NSString *possibleExtension in possibleExtensions) {
+					NSString *fileWithExtension = [file stringByAppendingString:possibleExtension];
+					if ([NSFileManager.defaultManager fileExistsAtPath:fileWithExtension]) {
+						NSString *selectorString = possibleExtensions[possibleExtension];
+						SEL selector = NSSelectorFromString(selectorString);
+						BOOL (*extract)(Class, SEL, id, id);
+						extract = (BOOL(*)(Class, SEL, id, id))(method_getImplementation(class_getClassMethod(NSData.class, selector)));
+						if (!extract(NSData.class, selector, fileWithExtension, file)) {
+							[NSFileManager.defaultManager removeItemAtPath:file error:nil];
+						}
+						else break;
+					}
+				}
+			}
+			NSUInteger counter = 0;
+			for (NSString *file in files) {
+				counter += !![NSFileManager.defaultManager fileExistsAtPath:file];
+			}
+			if (counter == files.count) {
+				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:[self.downloadsPath stringByAppendingPathComponent:packageName] error:nil]) {
+					// Success! UwU
+					[self finalizeDownloadWithIdentifier:identifier error:nil];
+				}
+			}
+		}
+	}
+	[self finalizeDownloadWithIdentifier:identifier error:@"Failed to extract the downloaded archive."];
+}
+
 - (void)URLSession:(NSURLSession *)urlSession downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(nonnull NSURL *)location {
-	// Parse, extract, do other stuff, ???, profit
-	[self finalizeDownloadWithIdentifier:downloadTask.taskIdentifier result:YES];
+	NSUInteger downloadTaskIdentifier = downloadTask.taskIdentifier;
+	__block NSString *packageName = [(NSString *)tasks[@(downloadTaskIdentifier)][1] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
+	__block NSString *downloadedFile = [self.temporaryDownloadsPath stringByAppendingPathComponent:[packageName stringByAppendingString:@".deb"]];
+	[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:downloadedFile] error:nil];
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+		[self finalizeDownloadWithIdentifier:downloadTaskIdentifier packageName:packageName downloadedFilePath:downloadedFile];
+		packageName = nil;
+		downloadedFile = nil;
+	});
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-	[self finalizeDownloadWithIdentifier:task.taskIdentifier result:NO];
+	[self finalizeDownloadWithIdentifier:task.taskIdentifier error:error.localizedDescription];
 }
 
 - (NSString *)localPathForRemotePackage:(Package *)remotePackage {
 	return [[self.downloadsPath stringByAppendingPathComponent:remotePackage.package] stringByAppendingString:remotePackage.version];
 }
 
-- (BOOL)startDownloadingPackage:(Package *)remotePackage {
-	NSString *key = [NSString stringWithFormat:@"%@ %@", remotePackage.package, remotePackage.version];
+/*
+- (BOOL)retryDownloadWithIdentifier:(NSUInteger)identifier {
+	NSNumber *key = @(identifier);
+	BOOL result = [self startDownloadingWithKey:retryKeys[key][0] URL:retryKeys[key][1] remotePackage:nil];
+	[retryKeys removeObjectForKey:key];
+	return result;
+}
+*/
+
+- (BOOL)startDownloadingWithKey:(NSString *)key URL:(NSURL *)url remotePackage:(Package *)remotePackage {
 	if ([allPackages containsObject:key]) return NO;
-	NSURL *url = remotePackage.debURL;
 	NSURLSessionDownloadTask *downloadTask = [URLSession downloadTaskWithURL:url];
 	tasks[@(downloadTask.taskIdentifier)] = @[
 		[NSPointerArray weakObjectsPointerArray],
 		key,
-		downloadTask
+		downloadTask,
+		url
 	];
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:DownloadDidStartNotification
 		object:self
-		userInfo:@{ @"taskID" : @(downloadTask.taskIdentifier), @"remotePackage" : remotePackage }
+		userInfo:@{ @"taskID" : @(downloadTask.taskIdentifier), @"remotePackage" : remotePackage ?: NSNull.null }
 	];
 	[downloadTask resume];
 	return YES;
+}
+
+- (BOOL)startDownloadingPackage:(Package *)remotePackage {
+	NSString *key = [NSString stringWithFormat:@"%@ %@", remotePackage.package, remotePackage.version];
+	NSURL *url = remotePackage.debURL;
+	return [self startDownloadingWithKey:key URL:url remotePackage:remotePackage];
 }
 
 - (void)addDelegate:(id<DownloadManagerDelegate>)newDelegate forDownloadWithIdentifier:(NSUInteger)identifier {
