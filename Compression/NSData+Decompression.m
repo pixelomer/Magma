@@ -14,7 +14,7 @@
 	BZFILE *BZ2InputFileHandle;
 	char buf[4096];
 	BZ2InputFileHandle = BZ2_bzReadOpen(&bzError, inputFileHandle, 0, 0, NULL, 0);
-	if (bzError == BZ_OK) {
+	if ((success = (bzError == BZ_OK))) {
 		while (bzError == BZ_OK) {
 			int nread = BZ2_bzRead(&bzError, BZ2InputFileHandle, buf, sizeof(buf));
 			if (bzError == BZ_OK || bzError == BZ_STREAM_END) {
@@ -106,6 +106,7 @@
 			expectedSuffix[0] = 0x60;
 			expectedSuffix[1] = '\n';
 			expectedSuffix[2] = 0x0;
+			BOOL shiftAttempt = NO;
 			while(!feof(inputHandle)) {
 #define read(size, output) if (fread(output, 1, size, inputHandle) != size) break; else output[size] = 0;
 				char filename[17];
@@ -118,6 +119,7 @@
 				read(10, fileSizeStr);
 				read(2, suffix);
 				if (!strcmp(suffix, expectedSuffix)) {
+					shiftAttempt = NO;
 					NSString *outputFile = [targetDir stringByAppendingPathComponent:[@(filename) stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
 #undef read
 					FILE *outputFileHandle = fopen(outputFile.UTF8String, "w");
@@ -138,8 +140,18 @@
 					fclose(outputFileHandle);
 					if (remainingBytes > 0) break;
 					[NSFileManager.defaultManager setAttributes:@{ NSFileModificationDate : [NSDate dateWithTimeIntervalSince1970:timestamp] } ofItemAtPath:outputFile error:nil];
+					continue;
 				}
-				else break;
+				else if (!shiftAttempt) {
+					if ((shiftAttempt = (suffix[1] == 0x60))) {
+						fseek(inputHandle, -59, SEEK_CUR);
+					}
+					else if ((shiftAttempt = (suffix[2] == 0x60))) {
+						fseek(inputHandle, -58, SEEK_CUR);
+					}
+					if (shiftAttempt) continue;
+				}
+				break;
 			}
 			result = !!feof(inputHandle);
 		}
