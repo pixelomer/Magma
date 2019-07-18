@@ -142,14 +142,9 @@
 					[NSFileManager.defaultManager setAttributes:@{ NSFileModificationDate : [NSDate dateWithTimeIntervalSince1970:timestamp] } ofItemAtPath:outputFile error:nil];
 					continue;
 				}
-				else if (!shiftAttempt) {
-					if ((shiftAttempt = (suffix[1] == 0x60))) {
-						fseek(inputHandle, -59, SEEK_CUR);
-					}
-					else if ((shiftAttempt = (suffix[2] == 0x60))) {
-						fseek(inputHandle, -58, SEEK_CUR);
-					}
-					if (shiftAttempt) continue;
+				if (!shiftAttempt && (shiftAttempt = (suffix[1] == 0x60))) {
+					fseek(inputHandle, -59, SEEK_CUR);
+					continue;
 				}
 				break;
 			}
