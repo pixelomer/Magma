@@ -74,6 +74,7 @@ static UIFont *defaultFont;
     UIBarButtonItem *getButton = [[UIBarButtonItem alloc] initWithTitle:@"Get" style:UIBarButtonItemStylePlain target:self action:@selector(getPackage)];
     self.navigationItem.rightBarButtonItem = getButton;
     self.tableView.separatorColor = UIColor.clearColor;
+    self.tableView.cellLayoutMarginsFollowReadableWidth = YES;
     self.title = _package.name ?: _package.package;
 }
 

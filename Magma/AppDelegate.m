@@ -23,10 +23,10 @@ static NSString *workingDirectory;
 		@[@(UITabBarSystemItemSearch),    @YES]
 	];
 	NSMutableArray *viewControllers = @[
-		[HomeViewController alloc],
-		[SourcesViewController alloc],
-		[DownloadsController alloc],
-		[PackageSearchViewController alloc]
+		[HomeViewController new],
+		[SourcesViewController new],
+		[DownloadsController new],
+		[PackageSearchViewController new]
 	].mutableCopy;
 	for (NSInteger i = 0; i < tabs.count; i++) {
 		__kindof MGViewController *rootViewController = viewControllers[i];
@@ -38,7 +38,7 @@ static NSString *workingDirectory;
 			rootViewController.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"Sources" image:[UIImage imageNamed:itemInfo[0]] tag:i];
 		}
 		rootViewController.waitForDatabase = itemInfo[1];
-		viewControllers[i] = [[UINavigationController alloc] initWithRootViewController:[rootViewController init]];
+		viewControllers[i] = [[UINavigationController alloc] initWithRootViewController:rootViewController];
 	}
 	_rootViewController = [UITabBarController new];
 	_rootViewController.view.backgroundColor = [UIColor whiteColor];

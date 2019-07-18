@@ -36,6 +36,7 @@
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
 		4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
+		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
 		44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
@@ -101,6 +102,8 @@
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4492710122E0986C000F7E51 /* AssetExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssetExtensions.h; sourceTree = "<group>"; };
 		4492710222E0986C000F7E51 /* AssetExtensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssetExtensions.m; sourceTree = "<group>"; };
+		4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackageOverviewController.h; sourceTree = "<group>"; };
+		4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackageOverviewController.m; sourceTree = "<group>"; };
 		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
 		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
 		44D1178B22DF8AF100A38E9B /* NSString+Hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Hash.h"; sourceTree = "<group>"; };
@@ -180,6 +183,8 @@
 				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
 				4492710122E0986C000F7E51 /* AssetExtensions.h */,
 				4492710222E0986C000F7E51 /* AssetExtensions.m */,
+				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
+				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -329,6 +334,7 @@
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,
 				444F0ACA22CDF0290029B788 /* PackagesController.m in Sources */,
 				444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */,
+				4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */,
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
