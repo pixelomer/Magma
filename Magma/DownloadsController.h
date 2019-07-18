@@ -2,6 +2,6 @@
 
 @interface DownloadsController : MGTableViewController {
 	NSMutableArray *downloadCells;
-	NSArray<NSArray *> *packageCells;
+	NSMutableArray<NSArray *> *packageCells;
 }
 @end

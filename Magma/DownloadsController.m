@@ -86,7 +86,7 @@
 		NSString *version = [components componentsJoinedByString:@"_"]; // It's illegal to have an underscore in a debian package version but everything is possible
 		allFiles[i] = (id)@[name, version];
 	}
-	self->packageCells = allFiles.copy;
+	self->packageCells = (id)allFiles;
 	[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:1] withRowAnimation:UITableViewRowAnimationFade];
 }
 
@@ -195,6 +195,41 @@
 		cell.detailTextLabel.text = folderComponents[1];
 	}
 	return cell;
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+	return indexPath.section;
+}
+
+- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return UITableViewCellEditingStyleDelete;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+	if (!indexPath.section || (editingStyle != UITableViewCellEditingStyleDelete)) return;
+	NSInteger row = indexPath.row;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+		NSArray *packageInfo = self->packageCells[row];
+		NSString *folderPath = [DownloadManager.sharedInstance.downloadsPath stringByAppendingPathComponent:[packageInfo componentsJoinedByString:@"_"]];
+		NSError *error;
+		if ([NSFileManager.defaultManager removeItemAtPath:folderPath error:&error]) {
+			[self->packageCells removeObjectAtIndex:row];
+			__block NSArray *indexPaths = @[[NSIndexPath indexPathForRow:row inSection:1]];
+			dispatch_sync(dispatch_get_main_queue(), ^{
+				[self.tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+				indexPaths = nil;
+			});
+		}
+		else {
+			UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Failed to Delete Package" message:(error.localizedDescription ?: @"An unknown error occurred.") preferredStyle:UIAlertControllerStyleAlert];
+			[alert addAction:[UIAlertAction
+				actionWithTitle:@"OK"
+				style:UIAlertActionStyleCancel
+				handler:nil
+			]];
+			[self presentViewController:alert animated:YES completion:nil];
+		}
+	});
 }
 
 @end
