@@ -1,6 +1,6 @@
 #import "DownloadsController.h"
 #import "DownloadManager.h"
-#import "UIImage+ResizeImage.h"
+#import "AppDelegate.h"
 #import "OngoingDownloadCell.h"
 
 @implementation DownloadsController
@@ -186,7 +186,8 @@
 		NSArray *folderComponents = packageCells[indexPath.row];
 		if (!(cell = [tableView dequeueReusableCellWithIdentifier:@"package"])) {
 			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"package"];
-			cell.imageView.image = [[UIImage imageNamed:@"Folder"] resizedImageOfSize:CGSizeMake(30, 30)];
+			cell.imageView.image = [UIImage folderIcon];
+			cell.imageView.tintColor = [UIColor folderTintColor];
 			cell.separatorInset = UIEdgeInsetsZero;
 			cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 		}
