@@ -159,9 +159,10 @@ static NSString *workingDirectory;
 				counter += !![NSFileManager.defaultManager fileExistsAtPath:file];
 			}
 			if (counter == files.count) {
-				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:[self.downloadsPath stringByAppendingPathComponent:packageName] error:nil]) {
-					// Success! UwU
+				NSString *pathToMove = [self.downloadsPath stringByAppendingPathComponent:packageName];
+				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:pathToMove error:nil]) {
 					[self finalizeDownloadWithIdentifier:identifier error:nil];
+					return;
 				}
 			}
 		}
@@ -182,7 +183,9 @@ static NSString *workingDirectory;
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-	[self finalizeDownloadWithIdentifier:task.taskIdentifier error:error.localizedDescription];
+	if (error) {
+		[self finalizeDownloadWithIdentifier:task.taskIdentifier error:error.localizedDescription];
+	}
 }
 
 - (NSString *)localPathForRemotePackage:(Package *)remotePackage {

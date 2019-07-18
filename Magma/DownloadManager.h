@@ -30,6 +30,7 @@
 //- (BOOL)retryDownloadWithIdentifier:(NSUInteger)identifier;
 - (int64_t)totalBytesForIdentifier:(NSUInteger)identifier;
 - (NSString *)packageNameForTaskWithIdentifier:(NSUInteger)taskID;
+- (NSString *)downloadsPath;
 - (NSInteger)ongoingDownloadCount;
 - (NSArray<NSNumber *> *)allTaskIdentifiers;
 - (void)removeDelegate:(id<DownloadManagerDelegate>)oldDelegate forDownloadWithIdentifier:(NSUInteger)identifier;
