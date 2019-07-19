@@ -16,6 +16,11 @@ static UIImage *folderIcon;
 	return folderIcon ?: (folderIcon = [[[UIImage imageNamed:@"Folder"] resizedImageOfSize:CGSizeMake(36, 36)] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate]);
 }
 
+static UIImage *fileIcon;
++ (UIImage *)fileIcon {
+	return fileIcon ?: (fileIcon = [[UIImage imageNamed:@"File"] resizedImageOfSize:CGSizeMake(36, 36)]);
+}
+
 @end
 
 @implementation UIColor(Assets)

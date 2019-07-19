@@ -10,6 +10,7 @@
 
 @interface UIImage(Assets)
 + (UIImage *)folderIcon;
++ (UIImage *)fileIcon;
 @end
 
 @interface UIColor(Assets)

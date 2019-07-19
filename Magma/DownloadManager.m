@@ -131,7 +131,7 @@ static NSString *workingDirectory;
 			[NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil];
 			NSDictionary *possibleExtensions = @{
 				@".xz" : @"extractXZFileAtPath:toFileAtPath:",
-				@".lzma" : @"extractXZFileAtPath:toFileAtPath:",
+				@".lzma" : @"extractLZMAFileAtPath:toFileAtPath:",
 				@".gz" : @"gunzipFile:toFile:"
 			};
 			NSArray *files = @[
@@ -160,7 +160,7 @@ static NSString *workingDirectory;
 			}
 			if (counter == files.count) {
 				NSString *pathToMove = [self.downloadsPath stringByAppendingPathComponent:packageName];
-				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:pathToMove error:nil]) {
+				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && ([NSFileManager.defaultManager removeItemAtPath:pathToMove error:nil] || true) && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:pathToMove error:nil]) {
 					[self finalizeDownloadWithIdentifier:identifier error:nil];
 					return;
 				}

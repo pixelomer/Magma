@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadManager.m */; };
-		44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0522D4EC1800C155D8 /* LocalPackage.m */; };
 		44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */; };
 		4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4430D18B22CF810E00F21B28 /* PackageDetailsController.m */; };
 		444F0AB922CDF0290029B788 /* PackageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9022CDF0250029B788 /* PackageCell.m */; };
@@ -37,6 +36,7 @@
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
 		4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
 		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
+		44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
 		44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
@@ -46,8 +46,6 @@
 /* Begin PBXFileReference section */
 		44023A0122D4EBE100C155D8 /* DownloadManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DownloadManager.h; sourceTree = "<group>"; };
 		44023A0222D4EBE100C155D8 /* DownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadManager.m; sourceTree = "<group>"; };
-		44023A0422D4EC1800C155D8 /* LocalPackage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackage.h; sourceTree = "<group>"; };
-		44023A0522D4EC1800C155D8 /* LocalPackage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackage.m; sourceTree = "<group>"; };
 		44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RelatedPackagesController.h; sourceTree = "<group>"; };
 		44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelatedPackagesController.m; sourceTree = "<group>"; };
 		4430D18A22CF810E00F21B28 /* PackageDetailsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PackageDetailsController.h; sourceTree = "<group>"; };
@@ -104,6 +102,8 @@
 		4492710222E0986C000F7E51 /* AssetExtensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssetExtensions.m; sourceTree = "<group>"; };
 		4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackageOverviewController.h; sourceTree = "<group>"; };
 		4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackageOverviewController.m; sourceTree = "<group>"; };
+		44CC638122E1D2D500215ED8 /* FilesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilesViewController.h; sourceTree = "<group>"; };
+		44CC638222E1D2D500215ED8 /* FilesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FilesViewController.m; sourceTree = "<group>"; };
 		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
 		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
 		44D1178B22DF8AF100A38E9B /* NSString+Hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Hash.h"; sourceTree = "<group>"; };
@@ -132,6 +132,8 @@
 			children = (
 				444F0AB122CDF0280029B788 /* AppDelegate.h */,
 				444F0AB422CDF0280029B788 /* AppDelegate.m */,
+				4492710122E0986C000F7E51 /* AssetExtensions.h */,
+				4492710222E0986C000F7E51 /* AssetExtensions.m */,
 				444F0A9322CDF0250029B788 /* Assets.xcassets */,
 				444F0AB522CDF0280029B788 /* Database.h */,
 				444F0AA422CDF0270029B788 /* Database.m */,
@@ -141,18 +143,22 @@
 				444F0A9422CDF0250029B788 /* DownloadsController.m */,
 				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
 				444F0A9222CDF0250029B788 /* DPKGParser.m */,
+				44CC638122E1D2D500215ED8 /* FilesViewController.h */,
+				44CC638222E1D2D500215ED8 /* FilesViewController.m */,
 				444F0AA522CDF0270029B788 /* HomeViewController.h */,
 				444F0A9822CDF0260029B788 /* HomeViewController.m */,
 				444F0AE322CDF3140029B788 /* Info.plist */,
 				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
-				44023A0422D4EC1800C155D8 /* LocalPackage.h */,
-				44023A0522D4EC1800C155D8 /* LocalPackage.m */,
+				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
+				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
 				44FEECDA22D482CC00950E24 /* macros.pch */,
 				444F0A9B22CDF0260029B788 /* main.m */,
 				444F0AA322CDF0270029B788 /* MGTableViewController.h */,
 				444F0A9D22CDF0260029B788 /* MGTableViewController.m */,
 				444F0A9922CDF0260029B788 /* MGViewController.h */,
 				444F0AA622CDF0270029B788 /* MGViewController.m */,
+				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
+				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
 				444F0AAF22CDF0280029B788 /* Package.h */,
 				444F0AB622CDF0280029B788 /* Package.m */,
 				444F0AAE22CDF0280029B788 /* PackageCell.h */,
@@ -179,12 +185,6 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
-				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
-				4492710122E0986C000F7E51 /* AssetExtensions.h */,
-				4492710222E0986C000F7E51 /* AssetExtensions.m */,
-				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
-				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -321,6 +321,7 @@
 				44023A0322D4EBE100C155D8 /* DownloadManager.m in Sources */,
 				444F0AC622CDF0290029B788 /* MGViewController.m in Sources */,
 				444F0AC922CDF0290029B788 /* UIImage+ResizeImage.m in Sources */,
+				44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */,
 				444F0ACE22CDF0290029B788 /* Package.m in Sources */,
 				444F0ACD22CDF0290029B788 /* AppDelegate.m in Sources */,
 				44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */,
@@ -338,7 +339,6 @@
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
-				44023A0622D4EC1800C155D8 /* LocalPackage.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
 				44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */,

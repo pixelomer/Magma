@@ -2,6 +2,7 @@
 #import "DownloadManager.h"
 #import "AppDelegate.h"
 #import "OngoingDownloadCell.h"
+#import "LocalPackageOverviewController.h"
 
 @implementation DownloadsController
 
@@ -152,7 +153,7 @@
 		[self presentViewController:alert animated:YES completion:nil];
 	}
 	else if (indexPath.section) {
-		
+		[self pushViewController:[[LocalPackageOverviewController alloc] initWithPackageName:[packageCells[indexPath.row] componentsJoinedByString:@"_"]] animated:YES];
 	}
 }
 
