@@ -40,7 +40,12 @@
 	NSNumber *success = nil;
 	
 	FILE *inputFileHandle = fopen(inputFile.UTF8String, "r");
+	if (!inputFileHandle) return NO;
 	FILE *outputFileHandle = fopen(outputFile.UTF8String, "w");
+	if (!outputFileHandle) {
+		fclose(inputFileHandle);
+		return NO;
+	}
 	
 	unsigned char inputBuffer[CHUNK];
 	unsigned char outputBuffer[CHUNK];
