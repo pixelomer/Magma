@@ -10,7 +10,13 @@
 static NSString *workingDirectory;
 
 + (NSString *)workingDirectory {
-	return workingDirectory ?: (workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject);
+	if (!workingDirectory) {
+		workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
+#if DEBUG
+		NSLog(@"Working directory: %@", workingDirectory);
+#endif
+	}
+	return workingDirectory;
 }
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {

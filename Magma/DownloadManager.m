@@ -160,9 +160,37 @@ static NSString *workingDirectory;
 			}
 			if (counter == files.count) {
 				NSString *pathToMove = [self.downloadsPath stringByAppendingPathComponent:packageName];
-				if ([NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && ([NSFileManager.defaultManager removeItemAtPath:pathToMove error:nil] || true) && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:pathToMove error:nil]) {
-					[self finalizeDownloadWithIdentifier:identifier error:nil];
-					return;
+				NSString *magmaContainer = [finalOutput stringByAppendingPathComponent:@".magma"];
+				if ((([NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil] || true) && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && ([NSFileManager.defaultManager removeItemAtPath:magmaContainer error:nil] || true) && [NSFileManager.defaultManager createDirectoryAtPath:magmaContainer withIntermediateDirectories:NO attributes:nil error:nil]) || ([NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil] && false)) {
+					NSString *manpageRoot = [finalOutput stringByAppendingPathComponent:@"usr/share/man"];
+					NSString *magmaManpageRoot = [magmaContainer stringByAppendingPathComponent:@"manpages"];
+					if ([NSFileManager.defaultManager fileExistsAtPath:manpageRoot isDirectory:&isDir] && isDir) {
+						for (NSString *manpageSubdir in [NSFileManager.defaultManager contentsOfDirectoryAtPath:manpageRoot error:nil]) {
+							NSString *manpageFullSubdir = [manpageRoot stringByAppendingPathComponent:manpageSubdir];
+							NSString *magmaManpageSubdir = [magmaManpageRoot stringByAppendingPathComponent:manpageSubdir];
+							if ([NSFileManager.defaultManager createDirectoryAtPath:magmaManpageSubdir withIntermediateDirectories:YES attributes:nil error:nil]) {
+								for (NSString *filename in [NSFileManager.defaultManager contentsOfDirectoryAtPath:manpageFullSubdir error:nil]) {
+									NSString *fullPath = [manpageFullSubdir stringByAppendingPathComponent:filename];
+									if (!([NSFileManager.defaultManager fileExistsAtPath:fullPath isDirectory:&isDir] && !isDir)) continue;
+									NSString *targetPath = [magmaManpageSubdir stringByAppendingPathComponent:filename];
+									if ([filename hasSuffix:@".gz"]) {
+										if (filename.length <= 3) continue;
+										targetPath = [targetPath substringToIndex:targetPath.length-3];
+										if (![NSData gunzipFile:fullPath toFile:targetPath] && [NSFileManager.defaultManager fileExistsAtPath:targetPath isDirectory:&isDir] && !isDir) {
+											[NSFileManager.defaultManager removeItemAtPath:targetPath error:nil];
+										}
+									}
+									else {
+										[NSFileManager.defaultManager copyItemAtPath:fullPath toPath:targetPath error:nil];
+									}
+								}
+							}
+						}
+					}
+					if (([NSFileManager.defaultManager removeItemAtPath:pathToMove error:nil] || true) && [NSFileManager.defaultManager moveItemAtPath:finalOutput toPath:pathToMove error:nil]) {
+						[self finalizeDownloadWithIdentifier:identifier error:nil];
+						return;
+					}
 				}
 			}
 		}
@@ -174,12 +202,21 @@ static NSString *workingDirectory;
 	NSUInteger downloadTaskIdentifier = downloadTask.taskIdentifier;
 	__block NSString *packageName = [(NSString *)tasks[@(downloadTaskIdentifier)][1] stringByReplacingOccurrencesOfString:@" " withString:@"_"];
 	__block NSString *downloadedFile = [self.temporaryDownloadsPath stringByAppendingPathComponent:[packageName stringByAppendingString:@".deb"]];
-	[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:downloadedFile] error:nil];
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-		[self finalizeDownloadWithIdentifier:downloadTaskIdentifier packageName:packageName downloadedFilePath:downloadedFile];
-		packageName = nil;
-		downloadedFile = nil;
-	});
+	[NSFileManager.defaultManager removeItemAtPath:downloadedFile error:nil];
+	if ([NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:downloadedFile] error:nil]) {
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+			[self finalizeDownloadWithIdentifier:downloadTaskIdentifier packageName:packageName downloadedFilePath:downloadedFile];
+			packageName = nil;
+			downloadedFile = nil;
+		});
+	}
+	else {
+		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+			[self finalizeDownloadWithIdentifier:downloadTaskIdentifier error:@"Failed to access the downloaded file."];
+			packageName = nil;
+			downloadedFile = nil;
+		});
+	}
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {

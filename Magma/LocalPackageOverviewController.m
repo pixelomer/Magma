@@ -17,12 +17,13 @@ static NSArray *cells;
 
 + (void)load {
 	if (self == [LocalPackageOverviewController class]) {
-		/* Cell format
-		 * @[image (not null), tint_color (nullable)]
-		 */
+		/*-- Cell format ------------------------------------------------------*
+		 * @[image, tint_color, target, selector, cell_text, subfolder, error] *
+		 *---------------------------------------------------------------------*/
 		cells = @[
 			// First cell is the description cell. It is not in this array.
-			@[[UIImage imageNamed:@"Folder"], [UIColor colorWithRed:0.968 green:0.772 blue:0.192 alpha:1.0], @"FilesViewController", @"initWithPath:", @"Browse Files"]
+			@[[UIImage imageNamed:@"Folder"], [UIColor colorWithRed:0.968 green:0.772 blue:0.192 alpha:1.0], @"FilesViewController", @"initWithPath:", @"Browse Files", NSNull.null, NSNull.null],
+			@[[UIImage imageNamed:@"Manpage"], NSNull.null, @"FilesViewController", @"initWithPath:", @"Read Manual Pages", @".magma/manpages", @"The package doesn't contain any manual pages."]
 		];
 	}
 }
@@ -53,11 +54,12 @@ static NSArray *cells;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+	__kindof UITableViewCell *cell;
 	if (!indexPath.row) {
 		TextViewCell *descriptionCell = [tableView dequeueReusableCellWithIdentifier:@"textView"] ?: [[TextViewCell alloc] initWithReuseIdentifier:@"textView"];
 		descriptionCell.textViewText = description;
 		descriptionCell.selectionStyle = UITableViewCellSelectionStyleNone;
-		return descriptionCell;
+		cell = descriptionCell;
 	}
 	else {
 		NSArray *cellInfo = cells[indexPath.row-1];
@@ -68,10 +70,11 @@ static NSArray *cells;
 			regularCell.imageView.tintColor = cellInfo[1];
 		}
 		regularCell.textLabel.text = cellInfo[4];
-		regularCell.separatorInset = UIEdgeInsetsZero;
 		regularCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-		return regularCell;
+		cell = regularCell;
 	}
+	cell.separatorInset = UIEdgeInsetsZero;
+	return cell;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -84,7 +87,7 @@ static NSArray *cells;
 		invocation.target = viewController;
 		invocation.selector = selector;
 		NSArray *possibleArguments = @[
-			_packagePath
+			[cellInfo[5] isKindOfClass:[NSString class]] ? [_packagePath stringByAppendingPathComponent:cellInfo[5]] : _packagePath
 		];
 		for (int i = 2; ((i < invocation.methodSignature.numberOfArguments) && ((i-2) < possibleArguments.count)); i++) {
 			id object = possibleArguments[i-2];
@@ -97,6 +100,13 @@ static NSArray *cells;
 		}
 		else {
 			[self.tableView deselectRowAtIndexPath:tableView.indexPathForSelectedRow animated:YES];
+			UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:([cellInfo[6] isKindOfClass:[NSString class]] ? cellInfo[6] : @"An unknown error occurred.") preferredStyle:UIAlertControllerStyleAlert];
+			[alert addAction:[UIAlertAction
+				actionWithTitle:@"OK"
+				style:UIAlertActionStyleCancel
+				handler:nil
+			]];
+			[self presentViewController:alert animated:YES completion:nil];
 		}
 	}
 }

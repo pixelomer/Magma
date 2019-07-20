@@ -39,6 +39,11 @@
 		44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
 		44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */; };
+		44DA20B022E33C09009FC7C9 /* jroff.js in Resources */ = {isa = PBXBuildFile; fileRef = 44DA20AF22E33C09009FC7C9 /* jroff.js */; };
+		44DA20B222E33C84009FC7C9 /* manpage.html in Resources */ = {isa = PBXBuildFile; fileRef = 44DA20B122E33C84009FC7C9 /* manpage.html */; };
+		44DA20B422E36C25009FC7C9 /* manpage.css in Resources */ = {isa = PBXBuildFile; fileRef = 44DA20B322E36C25009FC7C9 /* manpage.css */; };
+		44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
+		44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44DA20B822E36EF5009FC7C9 /* WebKit.framework */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
@@ -108,6 +113,12 @@
 		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
 		44D1178B22DF8AF100A38E9B /* NSString+Hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Hash.h"; sourceTree = "<group>"; };
 		44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Hash.m"; sourceTree = "<group>"; };
+		44DA20AF22E33C09009FC7C9 /* jroff.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jroff.js; sourceTree = "<group>"; };
+		44DA20B122E33C84009FC7C9 /* manpage.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = manpage.html; sourceTree = "<group>"; };
+		44DA20B322E36C25009FC7C9 /* manpage.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = manpage.css; sourceTree = "<group>"; };
+		44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManpageViewController.h; sourceTree = "<group>"; };
+		44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManpageViewController.m; sourceTree = "<group>"; };
+		44DA20B822E36EF5009FC7C9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
@@ -119,6 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */,
 				44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */,
 				444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */,
 			);
@@ -185,6 +197,8 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+				44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */,
+				44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -213,6 +227,7 @@
 		444F0ADE22CDF2600029B788 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				44DA20B822E36EF5009FC7C9 /* WebKit.framework */,
 				44E067CF22D7772E0010D4A1 /* liblzma.tbd */,
 				44564A8022D35D7F00D7FA70 /* libz.tbd */,
 				444F0ADF22CDF2600029B788 /* libbz2.tbd */,
@@ -223,6 +238,7 @@
 		447DD38922CDEB1E00E6480F = {
 			isa = PBXGroup;
 			children = (
+				44DA20AE22E33BB2009FC7C9 /* HTML */,
 				44D1178A22DF8A7300A38E9B /* NSString+Hash */,
 				444F0AD922CDF06C0029B788 /* SUStandardVersionComparator */,
 				444F0AD122CDF0430029B788 /* Compression */,
@@ -247,6 +263,16 @@
 				44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */,
 			);
 			path = "NSString+Hash";
+			sourceTree = "<group>";
+		};
+		44DA20AE22E33BB2009FC7C9 /* HTML */ = {
+			isa = PBXGroup;
+			children = (
+				44DA20AF22E33C09009FC7C9 /* jroff.js */,
+				44DA20B322E36C25009FC7C9 /* manpage.css */,
+				44DA20B122E33C84009FC7C9 /* manpage.html */,
+			);
+			path = HTML;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -306,8 +332,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44DA20B222E33C84009FC7C9 /* manpage.html in Resources */,
+				44DA20B022E33C09009FC7C9 /* jroff.js in Resources */,
 				444F0ABE22CDF0290029B788 /* Launch Screen.storyboard in Resources */,
 				444F0ABC22CDF0290029B788 /* Assets.xcassets in Resources */,
+				44DA20B422E36C25009FC7C9 /* manpage.css in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +362,7 @@
 				4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */,
 				44FEECD922D471A500950E24 /* TextViewCell.m in Sources */,
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,
+				44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */,
 				444F0ACA22CDF0290029B788 /* PackagesController.m in Sources */,
 				444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */,
 				4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */,
