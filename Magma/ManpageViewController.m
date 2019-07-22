@@ -7,30 +7,35 @@
 //
 
 #import "ManpageViewController.h"
+#import <man2html/man2html.h>
 
 @implementation ManpageViewController
 
 - (instancetype)initWithPath:(NSString *)path {
 	BOOL isDir;
-	if ([NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir] && !isDir) {
-		NSMutableString *manpageContents = [NSMutableString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
-		if (manpageContents) {
-			NSUInteger rangeLength = 0;
-    		NSArray *components = [manpageContents componentsSeparatedByString:@"\n"];
-    		for (NSString *component in components) {
-    			if ([component.lowercaseString hasPrefix:@".sh"]) {
-    				[manpageContents deleteCharactersInRange:NSMakeRange(0, rangeLength)];
-    				break;
+	if (path.pathComponents.count >= 3 && [NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir] && !isDir) {
+		NSMutableArray *pathComponents = path.pathComponents.mutableCopy;
+		if ([pathComponents[0] isEqualToString:@"/"]) {
+			if (pathComponents.count >= 4) [pathComponents removeObjectAtIndex:0];
+			else return nil;
+		}
+		//        -3     -2   -1
+		// -> /manpages/man1/owo.1
+		if ([pathComponents[pathComponents.count-3] isEqualToString:@"manpages"]) {
+			pathComponents[pathComponents.count-3] = @"parsed_manpages";
+			NSString *finalPath = [NSString stringWithFormat:@"/%@.html", [pathComponents componentsJoinedByString:@"/"]];
+			if ([NSFileManager.defaultManager createDirectoryAtPath:finalPath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil]) {
+				if (![NSFileManager.defaultManager fileExistsAtPath:finalPath]) {
+					if (!parse_manpage(path.UTF8String, finalPath.UTF8String)) return nil;
 				}
-				else {
-					rangeLength += component.length + 1;
+				NSURL *htmlURL = [NSURL fileURLWithPath:finalPath];
+				if (htmlURL && (self = [super init])) {
+					self->htmlURL = htmlURL;
+					return self;
 				}
-			}
-			javascript = [NSString stringWithFormat:@"loadManpage('%@')", [[manpageContents dataUsingEncoding:NSUTF8StringEncoding] base64EncodedStringWithOptions:0] ?: @" "];
-    		if ((self = [super init])) {
-				return self;
 			}
 		}
+		
 	}
 	return nil;
 }
@@ -39,7 +44,12 @@
     [super viewDidLoad];
     self.edgesForExtendedLayout = UIRectEdgeNone;
     self.view.backgroundColor = [UIColor whiteColor];
-    _webView = [WKWebView new];
+	WKUserScript *userScript = [[WKUserScript alloc] initWithSource:@"var style = document.createElement('style'); style.innerHTML = 'body{font-family: verdana, helvetica, arial, sans-serif;}'; document.getElementsByTagName('head')[0].appendChild(style); var meta = document.createElement('meta'); meta.name = 'viewport'; meta.content = 'width=device-width, initial-scale=1'; document.getElementsByTagName('head')[0].appendChild(meta); window.scrollTo(0, 0);" injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+	WKUserContentController *userController = [WKUserContentController new];
+	[userController addUserScript:userScript];
+	WKWebViewConfiguration *webConfiguration = [WKWebViewConfiguration new];
+	webConfiguration.userContentController = userController;
+    _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:webConfiguration];
     _webView.navigationDelegate = self;
     _webView.scrollView.delegate = self;
     _webView.scrollView.showsHorizontalScrollIndicator = NO;
@@ -50,19 +60,22 @@
     [_webView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor].active = YES;
     [_webView.leftAnchor constraintEqualToAnchor:self.view.leftAnchor].active = YES;
     [_webView.rightAnchor constraintEqualToAnchor:self.view.rightAnchor].active = YES;
-    NSURL *manpageHTML = [NSBundle.mainBundle URLForResource:@"manpage" withExtension:@"html"];
-    NSURL *accessibleURL = manpageHTML.URLByDeletingLastPathComponent;
-    [_webView loadFileURL:manpageHTML allowingReadAccessToURL:accessibleURL];
+    [_webView loadFileURL:htmlURL allowingReadAccessToURL:htmlURL];
 }
 
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
-	[_webView evaluateJavaScript:javascript completionHandler:nil];
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+	NSURL *newURL = navigationAction.request.URL;
+	if ([newURL.absoluteString isEqualToString:htmlURL.absoluteString]) decisionHandler(WKNavigationActionPolicyAllow);
+	else {
+		decisionHandler(WKNavigationActionPolicyCancel);
+		if ([UIApplication.sharedApplication canOpenURL:newURL]) {
+			[UIApplication.sharedApplication openURL:newURL];
+		}
+	}
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-	if (scrollView.contentOffset.x > 0) {
-        scrollView.contentOffset = CGPointMake(0, scrollView.contentOffset.y);
-    }
+	scrollView.contentOffset = CGPointMake(0, scrollView.contentOffset.y);
 }
 
 @end

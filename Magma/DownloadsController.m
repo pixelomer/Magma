@@ -3,6 +3,7 @@
 #import "AppDelegate.h"
 #import "OngoingDownloadCell.h"
 #import "LocalPackageOverviewController.h"
+#import "AssetExtensions.h"
 
 @implementation DownloadsController
 

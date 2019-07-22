@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ManpageViewController : UIViewController<WKNavigationDelegate, UIScrollViewDelegate> {
-	NSString *javascript;
+	NSURL *htmlURL;
 }
 @property (nonatomic, readonly, strong) WKWebView *webView;
 - (instancetype)initWithPath:(NSString *)path;

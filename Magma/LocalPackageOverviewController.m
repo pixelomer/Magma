@@ -10,6 +10,7 @@
 #import "DownloadManager.h"
 #import "TextViewCell.h"
 #import "DPKGParser.h"
+#import "UIImage+ResizeImage.h"
 
 @implementation LocalPackageOverviewController
 
