@@ -41,7 +41,6 @@
 		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
 		44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
-		44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */ = {isa = PBXBuildFile; fileRef = 44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */; };
 		44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
 		44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44DA20B822E36EF5009FC7C9 /* WebKit.framework */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
@@ -120,8 +119,6 @@
 		44CC638222E1D2D500215ED8 /* FilesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FilesViewController.m; sourceTree = "<group>"; };
 		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
 		44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OngoingDownloadCell.m; sourceTree = "<group>"; };
-		44D1178B22DF8AF100A38E9B /* NSString+Hash.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSString+Hash.h"; sourceTree = "<group>"; };
-		44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSString+Hash.m"; sourceTree = "<group>"; };
 		44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ManpageViewController.h; sourceTree = "<group>"; };
 		44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManpageViewController.m; sourceTree = "<group>"; };
 		44DA20B822E36EF5009FC7C9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
@@ -265,7 +262,6 @@
 			isa = PBXGroup;
 			children = (
 				441C48F122E620C50008D202 /* man2html */,
-				44D1178A22DF8A7300A38E9B /* NSString+Hash */,
 				444F0AD922CDF06C0029B788 /* SUStandardVersionComparator */,
 				444F0AD122CDF0430029B788 /* Compression */,
 				444F0A8D22CDF0170029B788 /* Magma */,
@@ -280,15 +276,6 @@
 				447DD39222CDEB1E00E6480F /* Magma.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		44D1178A22DF8A7300A38E9B /* NSString+Hash */ = {
-			isa = PBXGroup;
-			children = (
-				44D1178B22DF8AF100A38E9B /* NSString+Hash.h */,
-				44D1178C22DF8AFD00A38E9B /* NSString+Hash.m */,
-			);
-			path = "NSString+Hash";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -387,7 +374,6 @@
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
 				441C48FA22E626650008D202 /* strdefs.c in Sources */,
-				44D1178D22DF8AFD00A38E9B /* NSString+Hash.m in Sources */,
 				444F0AC522CDF0290029B788 /* Database.m in Sources */,
 				444F0AC022CDF0290029B788 /* HomeViewController.m in Sources */,
 				444F0AC822CDF0290029B788 /* SectionsController.m in Sources */,

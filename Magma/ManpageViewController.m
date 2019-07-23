@@ -84,8 +84,4 @@
 	scrollView.contentOffset = CGPointMake(0, scrollView.contentOffset.y);
 }
 
-- (void)dealloc {
-	NSLog(@"Deallocating...");
-}
-
 @end
