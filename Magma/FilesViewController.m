@@ -8,55 +8,96 @@
 
 #import "FilesViewController.h"
 #import "AssetExtensions.h"
+#import "SpinnerViewController.h"
 #import <objc/runtime.h>
 
 @implementation FilesViewController
 
+static UIColor *newFileColor;
+
 // Example:
-// { @".doc" : @[@"Word file", @"WordFileController", @"initWithWordFile:"] }
+// @{ @"doc" : @[@"Word file", @"WordFileController", @"initWithWordFile:"] }
 static NSDictionary<NSString *, NSArray *> *filetypes;
+
+// Example:
+// @{ @"ar" : @[@"NSData", @"unarchiveFileAtPath:toDirectoryAtPath:"] }
+static NSDictionary<NSString *, NSArray *> *archiveTypes;
 
 + (void)load {
 	if (self == [FilesViewController class]) {
+		newFileColor = [UIColor colorWithRed:1.0 green:1.0 blue:0.0 alpha:0.15];
 		NSMutableDictionary *mutableFileTypes = @{
 			@"txt" : @[@"Text File", @"TextFileViewController", @"initWithPath:"],
 			@"h" : @[@"Header File", @"SourceCodeFileController", @"initWithPath:"]
 		}.mutableCopy;
-		NSArray *manpageArray = @[@"Manual Page", @"ManpageViewController", @"initWithPath:"];
-		for (int i = 1; i <= 9; i++) mutableFileTypes[[NSString stringWithFormat:@"%d", i]] = manpageArray;
+		
+		// Manual pages
+		NSArray *sharedArray = @[@"Manual Page", @"ManpageViewController", @"initWithPath:"];
+		for (int i = 1; i <= 9; i++) mutableFileTypes[[NSString stringWithFormat:@"%d", i]] = sharedArray;
+		
+		// HTML files
+		sharedArray = @[@"HTML File", @"HTMLViewController", @"initWithPath:"];
+		for (char c = 'a'; c <= 'z'; c++) mutableFileTypes[[NSString stringWithFormat:@"%chtml", c]] = sharedArray;
+		mutableFileTypes[@"htm"] = sharedArray;
+		mutableFileTypes[@"html"] = sharedArray;
+		sharedArray = @[@"HTML Application", @"HTMLViewController", @"initWithPath:"];
+		mutableFileTypes[@"hta"] = sharedArray;
+		
+		// Archive types
+		NSMutableDictionary *mutableArchiveTypes = [NSMutableDictionary new];
+		sharedArray = @[
+			@[@"gz", @"Gzip Archive", @"NSData", @"gunzipFile:toFile:"],
+			@[@"bz2", @"Bzip2 Archive", @"NSData", @"bunzipFile:toFile:"],
+			@[@"xz", @"XZ Archive", @"NSData", @"extractXZFileAtPath:toFileAtPath:"],
+			@[@"tar", @"Tar Archive", @"NSFileManager", @"extractTarArchiveAtPath:toPath:"],
+			@[@"a", @"Archive", @"NSData", @"unarchiveFileAtPath:toDirectoryAtPath:"],
+			@[@"lzma", @"LZMA Archive", @"NSData", @"extractLZMAFileAtPath:toFileAtPath:"]
+		];
+		for (NSArray *array in sharedArray) {
+			mutableFileTypes[array[0]] = @[array[1], NSNull.null, NSNull.null];
+			mutableArchiveTypes[array[0]] = @[array[2], array[3]];
+		}
+		
+		// Assign the copies of mutable variables to the static variables
 		filetypes = mutableFileTypes.copy;
+		archiveTypes = mutableArchiveTypes.copy;
 	}
 }
 
 - (void)reloadFiles:(UIRefreshControl *)sender {
-	if (sender == refreshControl || (!sender && !filenames && !fileDetails)) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-			NSArray *newFiles = [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.path error:nil];
-			NSMutableDictionary *newFilesWithTypes = [NSMutableDictionary new];
-			for (NSString *filename in newFiles) {
-				if ([filename isEqualToString:@".magma"]) continue;
-				NSString *path = [self.path stringByAppendingPathComponent:filename];
-				BOOL isDir;
-				if (![NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir]) continue;
-				NSString *subtitle = @"";
-				if (isDir) {
-					subtitle = [NSString stringWithFormat:@"%lu file(s)", (unsigned long)[NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil].count];
-				}
-				else if (filetypes[filename.pathExtension.lowercaseString]) {
-					subtitle = filetypes[filename.pathExtension.lowercaseString][0];
-				}
-				else subtitle = @"Unknown Type";
-				newFilesWithTypes[filename] = @[@(!!isDir), subtitle];
+	__block UIRefreshControl *_refreshControl = refreshControl;
+	__block NSString *_newFile = newFile.copy;
+	newFile = nil;
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+		NSArray *newFiles = [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.path error:nil];
+		NSMutableDictionary *newFilesWithTypes = [NSMutableDictionary new];
+		for (NSString *filename in newFiles) {
+			if ([filename isEqualToString:@".magma"]) continue;
+			NSString *path = [self.path stringByAppendingPathComponent:filename];
+			BOOL isDir;
+			if (![NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir]) continue;
+			NSString *subtitle = @"";
+			if (isDir) {
+				subtitle = [NSString stringWithFormat:@"%lu file(s)", (unsigned long)[NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil].count];
 			}
-			self.files = newFilesWithTypes.copy;
-			dispatch_async(dispatch_get_main_queue(), ^{
-				if (sender) {
-					[self.tableView reloadData];
-					[sender endRefreshing];
-				}
-			});
+			else if (filetypes[filename.pathExtension.lowercaseString]) {
+				subtitle = filetypes[filename.pathExtension.lowercaseString][0];
+			}
+			else subtitle = @"Unknown Type";
+			newFilesWithTypes[filename] = @[@(!!isDir), subtitle, @(!![_newFile isEqualToString:filename])];
+		}
+		self.files = newFilesWithTypes.copy;
+		__block UIRefreshControl *__refreshControl = _refreshControl;
+		_refreshControl = nil;
+		dispatch_async(dispatch_get_main_queue(), ^{
+			if (__refreshControl) {
+				[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+				[__refreshControl endRefreshing];
+				__refreshControl = nil;
+			}
 		});
-	}
+		_newFile = nil;
+	});
 }
 
 - (void)setFiles:(NSDictionary *)files {
@@ -90,7 +131,8 @@ static NSDictionary<NSString *, NSArray *> *filetypes;
 	NSString *filename = filenames[indexPath.row];
 	NSArray *cellInfo = fileDetails[indexPath.row];
 	NSString *newPath = [_path stringByAppendingPathComponent:filename];
-	NSArray *fileTypeDetails = filetypes[filename.pathExtension.lowercaseString];
+	NSString *ext = filename.pathExtension.lowercaseString;
+	NSArray *fileTypeDetails = filetypes[ext];
 	if ([cellInfo[0] boolValue]) {
 		FilesViewController *vc = [[FilesViewController alloc] initWithPath:newPath];
 		if (vc) {
@@ -120,6 +162,34 @@ static NSDictionary<NSString *, NSArray *> *filetypes;
 		else {
 			// Developer error, not implemented
 		}
+	}
+	else if ([fileTypeDetails[1] isKindOfClass:[NSNull class]] && (fileTypeDetails = archiveTypes[ext])) {
+		// Archive type
+		Class cls = NSClassFromString(fileTypeDetails[0]);
+		SEL selector = NSSelectorFromString(fileTypeDetails[1]);
+		BOOL(*extract)(Class, SEL, NSString *, NSString *);
+		extract = (BOOL(*)(Class, SEL, NSString *, NSString *))(method_getImplementation(class_getClassMethod(cls, selector)));
+		__block SpinnerViewController *spinnerVC = [SpinnerViewController new];
+		spinnerVC.modalPresentationStyle = UIModalPresentationOverFullScreen;
+		newFile = newPath.lastPathComponent.stringByDeletingPathExtension;
+		[self presentViewController:spinnerVC animated:NO completion:^{
+			__block SpinnerViewController *_spinnerVC = spinnerVC;
+			spinnerVC = nil;
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+				BOOL success = extract(cls, selector, newPath, newPath.stringByDeletingPathExtension);
+				__block SpinnerViewController *__spinnerVC = _spinnerVC;
+				_spinnerVC = nil;
+				dispatch_async(dispatch_get_main_queue(), ^{
+					if (success) {
+						[self reloadFiles:nil];
+					}
+					else {
+						NSLog(@"Error");
+					}
+					[__spinnerVC dismissViewControllerAnimated:NO completion:nil];
+				});
+			});
+		}];
 	}
 	else {
 		// Unknown file type
@@ -152,6 +222,13 @@ static NSDictionary<NSString *, NSArray *> *filetypes;
 		cell.imageView.tintColor = nil;
 		cell.accessoryType = UITableViewCellAccessoryDetailButton;
 	}
+	if ([(NSNumber *)cellInfo[2] boolValue]) {
+		cell.backgroundColor = newFileColor;
+	}
+	else {
+		cell.backgroundColor = [UIColor clearColor];
+	}
+	cell.textLabel.backgroundColor = cell.detailTextLabel.backgroundColor = [UIColor clearColor];
 	return cell;
 }
 

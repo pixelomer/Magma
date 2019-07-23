@@ -73,6 +73,9 @@ typedef void(^NSFileManagerTarProgressBlock)(float);
                                   error:(NSError **)error
                                progress:(NSFileManagerTarProgressBlock)progressBlock;
 
+// Convience method
++ (BOOL)extractTarArchiveAtPath:(NSString *)tarPath toPath:(NSString *)path;
+
 @end
 
 /**

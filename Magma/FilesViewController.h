@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FilesViewController : UITableViewController {
+	NSString *newFile;
 	NSArray<NSString *> *filenames;
 	NSArray<NSArray *> *fileDetails;
 	UIRefreshControl *refreshControl;

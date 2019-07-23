@@ -19,23 +19,29 @@
 			if (pathComponents.count >= 4) [pathComponents removeObjectAtIndex:0];
 			else return nil;
 		}
+		NSString *finalPath;
 		//        -3     -2   -1
 		// -> /manpages/man1/owo.1
 		if ([pathComponents[pathComponents.count-3] isEqualToString:@"manpages"]) {
 			pathComponents[pathComponents.count-3] = @"parsed_manpages";
-			NSString *finalPath = [NSString stringWithFormat:@"/%@.html", [pathComponents componentsJoinedByString:@"/"]];
-			if ([NSFileManager.defaultManager createDirectoryAtPath:finalPath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil]) {
-				if (![NSFileManager.defaultManager fileExistsAtPath:finalPath]) {
-					if (!parse_manpage(path.UTF8String, finalPath.UTF8String)) return nil;
-				}
-				NSURL *htmlURL = [NSURL fileURLWithPath:finalPath];
-				if (htmlURL && (self = [super init])) {
-					self->htmlURL = htmlURL;
-					return self;
+			finalPath = [NSString stringWithFormat:@"/%@.html", [pathComponents componentsJoinedByString:@"/"]];
+		}
+		else {
+			finalPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.html", NSUUID.UUID.UUIDString]];
+		}
+		if ([NSFileManager.defaultManager createDirectoryAtPath:finalPath.stringByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil]) {
+			if (![NSFileManager.defaultManager fileExistsAtPath:finalPath]) {
+				if (!parse_manpage(path.UTF8String, finalPath.UTF8String)) {
+					[NSFileManager.defaultManager removeItemAtPath:finalPath error:nil];
+					return nil;
 				}
 			}
+			NSURL *htmlURL = [NSURL fileURLWithPath:finalPath];
+			if (htmlURL && (self = [super init])) {
+				self->htmlURL = htmlURL;
+				return self;
+			}
 		}
-		
 	}
 	return nil;
 }
@@ -76,6 +82,10 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
 	scrollView.contentOffset = CGPointMake(0, scrollView.contentOffset.y);
+}
+
+- (void)dealloc {
+	NSLog(@"Deallocating...");
 }
 
 @end

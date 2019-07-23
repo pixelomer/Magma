@@ -278,6 +278,8 @@ static NSArray *paths;
 - (void)waitForSourcesToRefresh {
 	[_refreshQueue waitUntilAllOperationsAreFinished];
 	[self reloadRemotePackages];
+	_refreshQueue.suspended = YES;
+	_refreshQueue = nil;
 	NSLog(@"All of the sources refreshed.");
 	_isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter

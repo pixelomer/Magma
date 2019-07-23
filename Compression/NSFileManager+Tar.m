@@ -289,4 +289,8 @@ static NSString * const kNSFileManagerLightUntarCorruptFileMessage = @"Invalid b
     return nil;
 }
 
++ (BOOL)extractTarArchiveAtPath:(NSString *)tarPath toPath:(NSString *)path {
+	return [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:path withTarPath:tarPath error:nil progress:nil];
+}
+
 @end

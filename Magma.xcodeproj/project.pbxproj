@@ -45,6 +45,8 @@
 		44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
 		44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44DA20B822E36EF5009FC7C9 /* WebKit.framework */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
+		44FC335122E7581700F19361 /* HTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335022E7581700F19361 /* HTMLViewController.m */; };
+		44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335322E76A3F00F19361 /* SpinnerViewController.m */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
 /* End PBXBuildFile section */
 
@@ -124,6 +126,10 @@
 		44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManpageViewController.m; sourceTree = "<group>"; };
 		44DA20B822E36EF5009FC7C9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
+		44FC334F22E7581700F19361 /* HTMLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTMLViewController.h; sourceTree = "<group>"; };
+		44FC335022E7581700F19361 /* HTMLViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HTMLViewController.m; sourceTree = "<group>"; };
+		44FC335222E76A3F00F19361 /* SpinnerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpinnerViewController.h; sourceTree = "<group>"; };
+		44FC335322E76A3F00F19361 /* SpinnerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpinnerViewController.m; sourceTree = "<group>"; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -213,6 +219,10 @@
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
 				44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */,
 				44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */,
+				44FC334F22E7581700F19361 /* HTMLViewController.h */,
+				44FC335022E7581700F19361 /* HTMLViewController.m */,
+				44FC335222E76A3F00F19361 /* SpinnerViewController.h */,
+				44FC335322E76A3F00F19361 /* SpinnerViewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -370,6 +380,7 @@
 				444F0ACA22CDF0290029B788 /* PackagesController.m in Sources */,
 				444F0AD722CDF0530029B788 /* NSData+Decompression.m in Sources */,
 				4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */,
+				44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */,
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
@@ -382,6 +393,7 @@
 				444F0AC822CDF0290029B788 /* SectionsController.m in Sources */,
 				444F0AC122CDF0290029B788 /* main.m in Sources */,
 				444F0ABD22CDF0290029B788 /* DownloadsController.m in Sources */,
+				44FC335122E7581700F19361 /* HTMLViewController.m in Sources */,
 				441C48F622E626300008D202 /* man2html.c in Sources */,
 				44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */,
 			);

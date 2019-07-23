@@ -2382,6 +2382,7 @@ scan_request(char *c) {
 		}
 		c = sl+1;
 	    } else
+		out_html("<html><head><title>Manpage</title></head><body>");
 		c = skip_till_newline(c);
 	    curpos=0;
 	    break;
@@ -3344,7 +3345,7 @@ void
 error_page(char *s, char *t, ...) {
      va_list p;
 
-     printf("<html><head><title>%s</title><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"></head>\n"
+     printf("<html><head><title>%s</title></head>\n"
 	    "<body>\n<h1>%s</h1>\n", s, s);
      va_start(p, t);
      vfprintf(__output_handle, t, p);
