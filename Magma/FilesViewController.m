@@ -144,7 +144,15 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 		Class cls = NSClassFromString(fileTypeDetails[1]);
 		SEL selector = NSSelectorFromString(fileTypeDetails[2]);
 		if (cls && selector) {
-			UIViewController *vc = ((UIViewController *(*)(UIViewController *, SEL, NSString *))(method_getImplementation(class_getInstanceMethod(cls, selector))))([cls alloc], selector, newPath);
+			UIViewController *vc = [cls alloc];
+			@autoreleasepool {
+				NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[cls instanceMethodSignatureForSelector:selector]];
+				invocation.selector = selector;
+				invocation.target = vc;
+				[invocation setArgument:&newPath atIndex:2];
+				[invocation invoke];
+				[invocation getReturnValue:&vc];
+			}
 			if (vc) {
 				vc.title = filename;
 				UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
