@@ -103,23 +103,27 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 		int nextLineStartIndex = 0;
 		char *CLine;
 		NSString *line;
-		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle)) && (line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding])) {
-			BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
-			if (!isLineEmpty) {
-				if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
-				length += strlen(CLine) + 1;
-			}
-			else {
-				if (length > 1) {
-					length -= 1;
-					Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
-					if (package) [packages addObject:package];
-					lookingForEntry = YES;
+		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle))) {
+			@autoreleasepool {
+				line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding];
+				if (!line) { free(CLine); break; }
+				BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
+				if (!isLineEmpty) {
+					if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
+					length += strlen(CLine) + 1;
 				}
-				length = 0;
+				else {
+					if (length > 1) {
+						length -= 1;
+						Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+						if (package) [packages addObject:package];
+						lookingForEntry = YES;
+					}
+					length = 0;
+				}
+				scanned += strlen(CLine) + 1;
+				free(CLine);
 			}
-			scanned += strlen(CLine) + 1;
-			free(CLine);
 		}
 		if (length > 0) {
 			Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
