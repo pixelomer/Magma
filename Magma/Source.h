@@ -28,7 +28,14 @@ typedef NSString* PackagesAlgorithm;
 - (void)unloadPackagesFile;
 - (void)reloadPackagesFile;
 - (void)deleteFiles;
-- (NSString *)substringFromPackagesFileInRange:(NSRange)range;
+
+/// @brief      Reads the specified range from the Packages file.
+/// @warning    This function is not thread-safe.
+/// @param      range The range of the string in the Packages file.
+/// @param      encodingPt A pointer to an NSStringEncoding variable. If the value is 0, the encoding will be found and written.
+///                        Otherwise the existing value will be used as the encoding.
+- (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt;
+
 - (NSURL *)releaseFileURL;
 - (NSDictionary<NSString *, NSDictionary<PackagesAlgorithm, NSURL *> *> *)possiblePackagesFileURLs;
 @end

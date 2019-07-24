@@ -9,6 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 	NSString *_package;
 	NSString *_version;
 	NSString *_section;
+	NSStringEncoding encoding;
 }
 @property (nonatomic, readonly, assign) NSRange range;
 @property (nonatomic, readonly, weak) Source * _Nullable source;

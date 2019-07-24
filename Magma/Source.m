@@ -56,18 +56,27 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 	}
 }
 
-- (NSString *)substringFromPackagesFileInRange:(NSRange)range {
-	fseek(_packagesFileHandle, range.location, SEEK_SET);
+- (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
 	char *line = malloc(range.length + 1);
 	line[range.length] = 0;
+	fseek(_packagesFileHandle, range.location, SEEK_SET);
 	fread(line, 1, range.length, _packagesFileHandle);
-	int error;
-	NSString *returnValue = !(error = ferror(_packagesFileHandle)) ? [NSString stringWithUTF8String:line] : NULL;
-	if (error) {
-		NSLog(@"Error: %s", strerror(error));
+	NSString *result = nil;
+	if (ferror(_packagesFileHandle)) {
+		NSLog(@"Failed to get a substring from the Packages file with range: %@", NSStringFromRange(range));
+	}
+	else {
+		if (!encodingPt || !*encodingPt) {
+			NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:line length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
+			if (!encoding) NSLog(@"Failed to find encoding for range %@ in %@", NSStringFromRange(range), self);
+			if (encodingPt) *encodingPt = encoding;
+		}
+		else {
+			result = [NSString stringWithCString:line encoding:*encodingPt];
+		}
 	}
 	free(line);
-	return returnValue;
+	return result;
 }
 
 - (void)deleteFiles {
@@ -84,7 +93,8 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 
 - (void)reloadPackagesFile {
 	[self unloadPackagesFile];
-	if ((_packagesFileHandle = fopen([Database.class packagesFilePathForSource:self].UTF8String, "r"))) {
+	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
+	if ((_packagesFileHandle = fopen(packagesFilePath.UTF8String, "r"))) {
 		NSMutableArray *packages = [NSMutableArray new];
 		NSUInteger scanned = 0;
 		NSUInteger startIndex = 0;
@@ -93,7 +103,7 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 		int nextLineStartIndex = 0;
 		char *CLine;
 		NSString *line;
-		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle)) && (line = @(CLine))) {
+		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle)) && (line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding])) {
 			BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
 			if (!isLineEmpty) {
 				if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
@@ -119,7 +129,7 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 		packages = nil;
 		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
 		for (Package *package in _packages) {
-			NSString *section = package.section ?: @"Other";
+			NSString *section = package.section ?: @"(unknown)";
 			if (sections[section]) {
 				[sections[section] addObject:package];
 			}
