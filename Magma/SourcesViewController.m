@@ -55,6 +55,16 @@
 	else if (!Database.sharedInstance.isRefreshing) [self startRefreshing];
 }
 
+- (void)showErrorMessage:(NSString *)message {
+	UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:message preferredStyle:UIAlertControllerStyleAlert];
+	[alert addAction:[UIAlertAction
+		actionWithTitle:@"OK"
+		style:UIAlertActionStyleCancel
+		handler:nil
+	]];
+	[self presentViewController:alert animated:YES completion:nil];
+}
+
 - (void)showPPAAlert {
 	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Enter PPA Details" message:nil preferredStyle:UIAlertControllerStyleAlert];
 	[alertController addAction:[UIAlertAction
@@ -78,7 +88,11 @@
 					}
 				}
 			}
-			[Database.sharedInstance addPPA:ppa distribution:dist architecture:arch];
+			if ([[Database.sharedInstance addPPA:ppa distribution:dist architecture:arch] isKindOfClass:NSNull.class]) {
+				dispatch_async(dispatch_get_main_queue(), ^{
+					[self showErrorMessage:@"This source is already in your sources."];
+				});
+			}
 		}
 	];
 	addSourceAction.enabled = NO;
@@ -131,13 +145,24 @@
 					}
 				}
 			}
-			if (!baseURL.length || !dist.length || !architecture.length);
+			short errorType = 0;
+			if (!baseURL.length || !dist.length || !architecture.length) errorType = 2;
 			else if (components.length <= 0 || dist.length <= 0) {
-				[Database.sharedInstance addSourceWithURL:baseURL architecture:architecture];
+				errorType = !![[Database.sharedInstance addSourceWithURL:baseURL architecture:architecture] isKindOfClass:NSNull.class];
 			}
 			else {
-				[Database.sharedInstance addSourceWithBaseURL:baseURL architecture:architecture distribution:dist components:components];
+				errorType = !![[Database.sharedInstance addSourceWithBaseURL:baseURL architecture:architecture distribution:dist components:components] isKindOfClass:NSNull.class];
 			}
+			dispatch_async(dispatch_get_main_queue(), ^{
+				switch (errorType) {
+					case 1:
+						[self showErrorMessage:@"This source is already in your sources."];
+						break;
+					case 2:
+						[self showErrorMessage:@"You didn't specify the required parameters."];
+						break;
+				}
+			});
 		}
 	]];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){

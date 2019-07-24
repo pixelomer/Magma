@@ -9,9 +9,6 @@
 // It is now safe to read/write
 #define DatabaseDidLoad @"com.pixelomer.magma/DatabaseDidLoad"
 
-// Log, show a message, crash, etc.
-#define DatabaseDidEncounterAnError @"com.pixelomer.magma/DatabaseDidEncounterAnError"
-
 // Handle reloads
 #define SourceDidStartRefreshing @"com.pixelomer.magma/SourceDidStartRefreshing"
 #define SourceDidStopRefreshing @"com.pixelomer.magma/SourceDidStopRefreshing"
@@ -47,11 +44,11 @@
 + (NSString *)releaseFilePathForSource:(Source *)source;
 - (Package *)packageWithIdentifier:(NSString *)identifier;
 - (BOOL)isLoaded;
-- (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture;
+- (Source *)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
-- (void)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components;
-- (void)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch;
+- (Source *)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components;
+- (Source *)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch;
 - (void)startRefreshingSources;
 
 @end

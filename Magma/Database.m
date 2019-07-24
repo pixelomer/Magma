@@ -161,13 +161,6 @@ static NSArray *paths;
 
 - (void)removeSource:(Source *)source {
 	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		if (self->_isRefreshing) {
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidEncounterAnError
-				object:self
-				userInfo:@{ @"error" : @"It is not possible to remove a source while refreshing." }
-			];
-		}
 		BOOL isSourceKnown = NO;
 		NSArray<NSString *> *keys = self->sources.allKeys.copy;
 		for (NSString *knownSourceIdentifier in keys) {
@@ -191,30 +184,21 @@ static NSArray *paths;
 	});
 }
 
-- (void)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch {
-	[self addSourceWithBaseURL:baseURL architecture:arch distribution:@"./" components:nil];
+- (Source *)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch {
+	return [self addSourceWithBaseURL:baseURL architecture:arch distribution:@"./" components:nil];
 }
 
 - (Source *)addSourceWithURL:(NSString *)baseURL architecture:(NSString *)arch ID:(NSNumber *)repoID {
 	return [self addSourceWithBaseURL:baseURL architecture:arch distribution:@"./" components:nil ID:repoID];
 }
 
-- (void)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components {
-	if (_isRefreshing) {
-		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-			[NSNotificationCenter.defaultCenter
-				postNotificationName:DatabaseDidEncounterAnError
-				object:self
-				userInfo:@{ @"error" : @"It is not possible to add a source while refreshing." }
-			];
-		});
-	}
-	[self addSourceWithBaseURL:baseURL architecture:arch distribution:dist components:components ID:nil];
+- (Source *)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components {
+	return [self addSourceWithBaseURL:baseURL architecture:arch distribution:dist components:components ID:nil];
 }
 
-- (void)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture {
+- (Source *)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture {
 	NSString *finalPPA = [ppa.lowercaseString hasPrefix:@"ppa:"] ? [ppa substringFromIndex:4] : ppa;
-	[self addSourceWithBaseURL:[[[NSURL URLWithString:@"http://ppa.launchpad.net/"] URLByAppendingPathComponent:[finalPPA stringByAppendingPathComponent:@"ubuntu"]] absoluteString] architecture:architecture distribution:dist components:@"main"];
+	return [self addSourceWithBaseURL:[[[NSURL URLWithString:@"http://ppa.launchpad.net/"] URLByAppendingPathComponent:[finalPPA stringByAppendingPathComponent:@"ubuntu"]] absoluteString] architecture:architecture distribution:dist components:@"main"];
 }
 
 - (Source *)addIncompleteSource:(Source *)source ID:(NSNumber *)repoID {
@@ -243,9 +227,7 @@ static NSArray *paths;
 		if (self->_isLoaded) [self syncSourcesPlist]; // Add the new source to the sources.plist file.
 	}
 	else {
-		notificationName = DatabaseDidEncounterAnError;
-		userInfo = @{@"error" : @"The new source cannot be added because it already exists."};
-		returnValue = nil;
+		return nil;
 	}
 	if (!repoID) {
 		[NSNotificationCenter.defaultCenter
@@ -261,6 +243,9 @@ static NSArray *paths;
 	if (!sources) sources = [NSMutableDictionary new];
 	__block Source *source = [[Source alloc] initWithBaseURL:baseURL architecture:arch distribution:dist components:components];
 	if (source) {
+		if (sources[[source sourcesListEntryWithComponents:NO]]) {
+			return (id)NSNull.null;
+		}
 		if (_repoID) {
 			return [self addIncompleteSource:source ID:_repoID];
 		}
@@ -410,15 +395,7 @@ static NSArray *paths;
 		object:self
 		userInfo:userInfo.copy
 	];
-#if DEBUG
-	if (![userInfo[@"errorCode"] isKindOfClass:[NSNull class]]) {
-		[NSNotificationCenter.defaultCenter
-			postNotificationName:DatabaseDidEncounterAnError
-			object:self
-			userInfo:@{ @"error" : userInfo[@"reason"] }
-		];
-	}
-#endif
+	// TODO: Somehow show the error
 	userInfo = nil;
 	data     = nil;
 }
