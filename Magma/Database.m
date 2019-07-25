@@ -367,19 +367,16 @@ static NSArray *paths;
 					}
 				}
 			}
+			NSError *error;
 			fclose(newFile);
 			[NSFileManager.defaultManager
-				removeItemAtPath:[finalPackagesPath stringByAppendingString:@"_ranges"]
-				error:nil
-			];
-			[NSFileManager.defaultManager
 				removeItemAtPath:finalPackagesPath
-				error:nil
+				error:&error
 			];
 			[NSFileManager.defaultManager
 				moveItemAtPath:temporaryPackagesPath
 				toPath:finalPackagesPath
-				error:nil
+				error:&error
 			];
 			[NSFileManager.defaultManager
 				removeItemAtPath:temporaryPackagesPath

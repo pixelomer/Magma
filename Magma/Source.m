@@ -91,85 +91,44 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 	];
 }
 
-- (void)reloadPackagesFileUsingArrayOfRanges:(NSArray *)array startValue:(short)start increment:(short)increment outputArray:(NSMutableArray *)output {
-	for (NSInteger i = start; i < array.count; i+=increment) {
-		@autoreleasepool {
-			NSString *rangeString = [array[i] stringByAppendingString:@"}"];
-			NSRange range = NSRangeFromString(rangeString);
-			Package *package = [[Package alloc] initWithRange:range source:self];
-			if (package) [output addObject:package];
-		}
-	}
-}
-
 - (void)reloadPackagesFile {
 	[self unloadPackagesFile];
 	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
 	if ((_packagesFileHandle = fopen(packagesFilePath.UTF8String, "r"))) {
 		NSMutableArray *packages = [NSMutableArray new];
-		NSString *rangeFilePath = [packagesFilePath stringByAppendingString:@"_ranges"];
-		NSString *rangeFileContents;
-		if ((rangeFileContents = [NSString stringWithContentsOfFile:rangeFilePath encoding:NSASCIIStringEncoding error:nil])) {
-			NSArray *fileComponents = [rangeFileContents componentsSeparatedByString:@"}"];
-			NSOperationQueue *queue = [NSOperationQueue new];
-			NSMutableArray *outputs = [NSMutableArray new];
-			short increment = 4;
-			queue.maxConcurrentOperationCount = increment;
-			for (short i = 0; i <= increment; i++) {
-				NSMutableArray *output = [NSMutableArray new];
-				[outputs addObject:output];
-				SEL selector = @selector(reloadPackagesFileUsingArrayOfRanges:startValue:increment:outputArray:);
-				NSInvocation *inv = [NSInvocation invocationWithMethodSignature:[self methodSignatureForSelector:selector]];
-				inv.selector = selector;
-				inv.target = self;
-				[inv setArgument:&fileComponents atIndex:2];
-				[inv setArgument:&i atIndex:3];
-				[inv setArgument:&increment atIndex:4];
-				[inv setArgument:&output atIndex:5];
-				NSInvocationOperation *operation = [[NSInvocationOperation alloc] initWithInvocation:inv];
-				[queue addOperation:operation];
-			}
-			queue.suspended = NO;
-			[queue waitUntilAllOperationsAreFinished];
-			for (NSArray *output in outputs) {
-				[packages addObjectsFromArray:output];
-			}
-		}
-		else {
-			FILE *rangeFile = fopen(rangeFilePath.UTF8String, "w");
-			NSUInteger scanned = 0;
-			NSUInteger startIndex = 0;
-			NSUInteger length = 0;
-			BOOL lookingForEntry = YES;
-			int nextLineStartIndex = 0;
-			char *CLine;
-			NSString *line;
-#define addPackageWithRange(_range) { Package *package = [[Package alloc] initWithRange:_range source:self]; if (package) { [packages addObject:package]; if (rangeFile) { NSString *rangeString = NSStringFromRange(package.range); if (rangeString) fwrite(rangeString.UTF8String, 1, strlen(rangeString.UTF8String), rangeFile); if (ferror(rangeFile)) { fclose(rangeFile); rangeFile = NULL; [NSFileManager.defaultManager removeItemAtPath:rangeFilePath error:nil]; } } } }
-			while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle))) {
-				@autoreleasepool {
-					line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding];
-					if (!line) { free(CLine); break; }
-					BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
-					if (!isLineEmpty) {
-						if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
-						length += strlen(CLine) + 1;
-					}
-					else {
-						if (length > 1) {
-							length -= 1;
-							addPackageWithRange(NSMakeRange(startIndex, length));
-							lookingForEntry = YES;
-						}
-						length = 0;
-					}
-					scanned += strlen(CLine) + 1;
-					free(CLine);
+		NSUInteger scanned = 0;
+		NSUInteger startIndex = 0;
+		NSUInteger length = 0;
+		BOOL lookingForEntry = YES;
+		int nextLineStartIndex = 0;
+		char *CLine;
+		NSString *line;
+		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle))) {
+			@autoreleasepool {
+				line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding];
+				if (!line) { free(CLine); break; }
+				BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
+				if (!isLineEmpty) {
+					if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
+					length += strlen(CLine) + 1;
 				}
+				else {
+					if (length > 1) {
+						length -= 1;
+						Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+						if (package) [packages addObject:package];
+						lookingForEntry = YES;
+					}
+					length = 0;
+				}
+				scanned += strlen(CLine) + 1;
+				free(CLine);
 			}
-			if (length > 0) addPackageWithRange(NSMakeRange(startIndex, length));
-			if (rangeFile) fclose(rangeFile);
 		}
-#undef addPackage
+		if (length > 0) {
+			Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+			if (package) [packages addObject:package];
+		}
 		_packages = packages.copy;
 		packages = nil;
 		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
