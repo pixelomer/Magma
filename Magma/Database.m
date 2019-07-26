@@ -156,7 +156,11 @@ static NSArray *paths;
 }
 
 - (NSArray *)sources {
-	return (id)[sources allValues];
+	return [sources allValues];
+}
+
+- (Source *)sourceWithSourcesListEntry:(NSString *)entry {
+	return sources[entry];
 }
 
 - (void)removeSource:(Source *)source {

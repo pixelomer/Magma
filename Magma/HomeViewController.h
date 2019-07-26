@@ -1,4 +1,6 @@
 #import "MGTableViewController.h"
 
-@interface HomeViewController : UITableViewController
+@interface HomeViewController : UITableViewController {
+	NSArray *featuredSources;
+}
 @end

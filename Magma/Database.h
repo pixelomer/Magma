@@ -45,6 +45,7 @@
 - (Package *)packageWithIdentifier:(NSString *)identifier;
 - (BOOL)isLoaded;
 - (Source *)addPPA:(NSString *)ppa distribution:(NSString *)dist architecture:(NSString *)architecture;
+- (Source *)sourceWithSourcesListEntry:(NSString *)entry;
 - (NSArray *)sources;
 - (void)removeSource:(Source *)source;
 - (Source *)addSourceWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)dist components:(NSString *)components;
