@@ -169,8 +169,8 @@ static UIFont *defaultFont;
 				separatorView.backgroundColor = separatorColor;
 				separatorView.translatesAutoresizingMaskIntoConstraints = NO;
 				[cell.contentView addSubview:separatorView];
-				[separatorView.leftAnchor constraintEqualToAnchor:cell.layoutMarginsGuide.leftAnchor].active = YES;
-				[separatorView.rightAnchor constraintEqualToAnchor:cell.layoutMarginsGuide.rightAnchor].active = YES;
+				[separatorView.leftAnchor constraintEqualToAnchor:cell.readableContentGuide.leftAnchor].active = YES;
+				[separatorView.rightAnchor constraintEqualToAnchor:cell.readableContentGuide.rightAnchor].active = YES;
 				[cell.contentView addConstraints:[NSLayoutConstraint
 					constraintsWithVisualFormat:@"V:|-1-[separator(==1)]-1-|"
 					options:0

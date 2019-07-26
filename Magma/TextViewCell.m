@@ -34,8 +34,8 @@ static UIFont *font;
 		[textView.topAnchor constraintEqualToAnchor:self.contentView.topAnchor constant:12.0].active = YES;
 		[textView.bottomAnchor constraintEqualToAnchor:self.contentView.bottomAnchor constant:-11.0].active = YES;
 		[textView.heightAnchor constraintGreaterThanOrEqualToConstant:0.0].active = YES;
-		[textView.leftAnchor constraintEqualToAnchor:self.contentView.layoutMarginsGuide.leftAnchor].active = YES;
-		[textView.rightAnchor constraintEqualToAnchor:self.contentView.layoutMarginsGuide.rightAnchor].active = YES;
+		[textView.leftAnchor constraintEqualToAnchor:self.contentView.readableContentGuide.leftAnchor].active = YES;
+		[textView.rightAnchor constraintEqualToAnchor:self.contentView.readableContentGuide.rightAnchor].active = YES;
 	}
 	return self;
 }

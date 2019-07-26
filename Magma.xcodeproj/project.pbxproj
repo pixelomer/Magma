@@ -37,6 +37,7 @@
 		444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
+		44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */; };
 		4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
 		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
 		44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
@@ -110,6 +111,8 @@
 		44564A8022D35D7F00D7FA70 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		44602D0922D78A8800440D8A /* NSFileManager+Tar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Tar.h"; sourceTree = "<group>"; };
 		44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Tar.m"; sourceTree = "<group>"; };
+		44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FeaturedSourceCell.h; sourceTree = "<group>"; };
+		44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FeaturedSourceCell.m; sourceTree = "<group>"; };
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4492710122E0986C000F7E51 /* AssetExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssetExtensions.h; sourceTree = "<group>"; };
 		4492710222E0986C000F7E51 /* AssetExtensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssetExtensions.m; sourceTree = "<group>"; };
@@ -220,6 +223,8 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
+				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -371,6 +376,7 @@
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
+				44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
 				441C48FA22E626650008D202 /* strdefs.c in Sources */,
