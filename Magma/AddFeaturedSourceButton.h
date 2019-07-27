@@ -10,7 +10,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AddSourceButton : UIButton
+@interface AddFeaturedSourceButton : UIButton
 @property (nonatomic, strong) NSDictionary *infoDictionary;
 + (instancetype)button;
 @end

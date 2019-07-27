@@ -6,23 +6,23 @@
 //  Copyright © 2019 PixelOmer. All rights reserved.
 //
 
-#import "AddSourceButton.h"
+#import "AddFeaturedSourceButton.h"
 #import "Database.h"
 
-@implementation AddSourceButton
+@implementation AddFeaturedSourceButton
 
 static UIFont *font;
 static UIColor *highlightedColor;
 
 + (void)load {
-	if (self == [AddSourceButton class]) {
+	if (self == [AddFeaturedSourceButton class]) {
 		font = [UIFont systemFontOfSize:14.0 weight:UIFontWeightBold];
 		highlightedColor = [UIColor colorWithWhite:1.0 alpha:0.25];
 	}
 }
 
 + (instancetype)button {
-	AddSourceButton *button = [self buttonWithType:UIButtonTypeCustom];
+	AddFeaturedSourceButton *button = [self buttonWithType:UIButtonTypeCustom];
 	if (button) {
 		button.layer.masksToBounds = YES;
 		button.layer.cornerRadius = 10.0;

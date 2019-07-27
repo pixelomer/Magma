@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "AddSourceButton.h"
+#import "AddFeaturedSourceButton.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 	UILabel *titleLabel;
 	UILabel *descLabel;
 }
-@property (nonatomic, readonly, strong) AddSourceButton *addSourceButton;
+@property (nonatomic, readonly, strong) AddFeaturedSourceButton *addSourceButton;
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier;
 - (void)setInfoDictionary:(NSDictionary *)dict;
 @end

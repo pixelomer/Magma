@@ -40,7 +40,9 @@
 		44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */; };
 		4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
 		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
-		44B3E13E22EB6FDD003DFF2F /* AddSourceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 44B3E13D22EB6FDD003DFF2F /* AddSourceButton.m */; };
+		44A5050322ECC33F0004D712 /* AddSourceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050222ECC33F0004D712 /* AddSourceViewController.m */; };
+		44A5050622ECC53D0004D712 /* PickerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050522ECC53D0004D712 /* PickerTableViewController.m */; };
+		44B3E13E22EB6FDD003DFF2F /* AddFeaturedSourceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */; };
 		44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
 		44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
 		44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
@@ -119,8 +121,12 @@
 		4492710222E0986C000F7E51 /* AssetExtensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssetExtensions.m; sourceTree = "<group>"; };
 		4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackageOverviewController.h; sourceTree = "<group>"; };
 		4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackageOverviewController.m; sourceTree = "<group>"; };
-		44B3E13C22EB6FDD003DFF2F /* AddSourceButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSourceButton.h; sourceTree = "<group>"; };
-		44B3E13D22EB6FDD003DFF2F /* AddSourceButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddSourceButton.m; sourceTree = "<group>"; };
+		44A5050122ECC33F0004D712 /* AddSourceViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSourceViewController.h; sourceTree = "<group>"; };
+		44A5050222ECC33F0004D712 /* AddSourceViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddSourceViewController.m; sourceTree = "<group>"; };
+		44A5050422ECC53D0004D712 /* PickerTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PickerTableViewController.h; sourceTree = "<group>"; };
+		44A5050522ECC53D0004D712 /* PickerTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PickerTableViewController.m; sourceTree = "<group>"; };
+		44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddFeaturedSourceButton.h; sourceTree = "<group>"; };
+		44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddFeaturedSourceButton.m; sourceTree = "<group>"; };
 		44CC638122E1D2D500215ED8 /* FilesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilesViewController.h; sourceTree = "<group>"; };
 		44CC638222E1D2D500215ED8 /* FilesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FilesViewController.m; sourceTree = "<group>"; };
 		44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OngoingDownloadCell.h; sourceTree = "<group>"; };
@@ -166,6 +172,8 @@
 		444F0A8D22CDF0170029B788 /* Magma */ = {
 			isa = PBXGroup;
 			children = (
+				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
+				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
 				444F0AB122CDF0280029B788 /* AppDelegate.h */,
 				444F0AB422CDF0280029B788 /* AppDelegate.m */,
 				4492710122E0986C000F7E51 /* AssetExtensions.h */,
@@ -179,6 +187,8 @@
 				444F0A9422CDF0250029B788 /* DownloadsController.m */,
 				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
 				444F0A9222CDF0250029B788 /* DPKGParser.m */,
+				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
+				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
 				44CC638122E1D2D500215ED8 /* FilesViewController.h */,
 				44CC638222E1D2D500215ED8 /* FilesViewController.m */,
 				444F0AA522CDF0270029B788 /* HomeViewController.h */,
@@ -226,10 +236,10 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
-				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
-				44B3E13C22EB6FDD003DFF2F /* AddSourceButton.h */,
-				44B3E13D22EB6FDD003DFF2F /* AddSourceButton.m */,
+				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
+				44A5050222ECC33F0004D712 /* AddSourceViewController.m */,
+				44A5050422ECC53D0004D712 /* PickerTableViewController.h */,
+				44A5050522ECC53D0004D712 /* PickerTableViewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -370,6 +380,8 @@
 				444F0AC722CDF0290029B788 /* SectionPackagesController.m in Sources */,
 				4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */,
 				4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */,
+				44A5050322ECC33F0004D712 /* AddSourceViewController.m in Sources */,
+				44A5050622ECC53D0004D712 /* PickerTableViewController.m in Sources */,
 				44FEECD922D471A500950E24 /* TextViewCell.m in Sources */,
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,
 				441C48F822E6264D0008D202 /* abbrev.c in Sources */,
@@ -383,7 +395,7 @@
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
 				44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,
-				44B3E13E22EB6FDD003DFF2F /* AddSourceButton.m in Sources */,
+				44B3E13E22EB6FDD003DFF2F /* AddFeaturedSourceButton.m in Sources */,
 				444F0AB922CDF0290029B788 /* PackageCell.m in Sources */,
 				441C48FA22E626650008D202 /* strdefs.c in Sources */,
 				444F0AC522CDF0290029B788 /* Database.m in Sources */,

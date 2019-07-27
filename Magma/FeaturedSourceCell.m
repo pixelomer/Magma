@@ -16,14 +16,14 @@ static UIFont *descFont;
 + (void)load {
 	if (self == [FeaturedSourceCell class]) {
 		titleFont = [UIFont systemFontOfSize:17.0 weight:UIFontWeightBold];
-		descFont = [UIFont systemFontOfSize:16.0 weight:UIFontWeightLight];
+		descFont = [UIFont systemFontOfSize:16.0];
 	}
 }
 
 - (instancetype)initWithReuseIdentifier:(NSString *)reuseIdentifier {
 	if ((self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier])) {
 		self.selectionStyle = UITableViewCellSelectionStyleNone;
-		_addSourceButton = [AddSourceButton button];
+		_addSourceButton = [AddFeaturedSourceButton button];
 		_addSourceButton.translatesAutoresizingMaskIntoConstraints = NO;
 		iconView = [UIImageView new];
 		iconView.contentMode = UIViewContentModeScaleAspectFit;

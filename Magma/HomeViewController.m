@@ -71,9 +71,16 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 }
 
 - (__kindof UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-	FeaturedSourceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"] ?: [[FeaturedSourceCell alloc] initWithReuseIdentifier:@"cell"];
+	FeaturedSourceCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell"];
+	if (!cell && (cell = [[FeaturedSourceCell alloc] initWithReuseIdentifier:@"cell"])) {
+		[cell.addSourceButton addTarget:self action:@selector(addSourceWithButton:) forControlEvents:UIControlEventTouchUpInside];
+	}
 	cell.infoDictionary = [(NSArray *)featuredSources[indexPath.section][1] objectAtIndex:indexPath.row];
 	return cell;
+}
+
+- (void)addSourceWithButton:(AddFeaturedSourceButton *)button {
+	
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {

@@ -169,6 +169,7 @@ static UIFont *defaultFont;
 				separatorView.backgroundColor = separatorColor;
 				separatorView.translatesAutoresizingMaskIntoConstraints = NO;
 				[cell.contentView addSubview:separatorView];
+				// this breaks constraints but it works so idc
 				[separatorView.leftAnchor constraintEqualToAnchor:cell.readableContentGuide.leftAnchor].active = YES;
 				[separatorView.rightAnchor constraintEqualToAnchor:cell.readableContentGuide.rightAnchor].active = YES;
 				[cell.contentView addConstraints:[NSLayoutConstraint
