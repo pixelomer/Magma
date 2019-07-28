@@ -9,7 +9,6 @@ NS_ASSUME_NONNULL_BEGIN
 	NSString *_package;
 	NSString *_version;
 	NSString *_section;
-	NSStringEncoding encoding;
 }
 @property (nonatomic, readonly, assign) NSRange range;
 @property (nonatomic, readonly, weak) Source * _Nullable source;
@@ -20,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, copy) NSString * _Nullable longDescription;
 @property (nonatomic, readonly, copy) NSDate * _Nullable firstDiscovery;
 @property (nonatomic, readonly, copy) NSURL *debURL;
+@property (nonatomic, assign) NSStringEncoding encoding;
 - (BOOL)parse;
 - (NSString *)version;
 - (NSString *)section;

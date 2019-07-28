@@ -2,12 +2,17 @@
 
 @implementation MGTableViewController
 
-- (instancetype)init {
+- (instancetype)initWithStyle:(UITableViewStyle)style {
 	if ((self = [super init])) {
 		_delegate = self;
 		_dataSource = self;
+		self->style = style;
 	}
 	return self;
+}
+
+- (instancetype)init {
+	return [self initWithStyle:UITableViewStylePlain];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -27,7 +32,7 @@
 }
 
 - (UITableView *)setupTableView {
-	UITableView *tableView = [UITableView new];
+	UITableView *tableView = [[UITableView alloc] initWithFrame:CGRectZero style:style];
 	tableView.translatesAutoresizingMaskIntoConstraints = NO;
 	[self.view addSubview:tableView];
 	[self.view addConstraints:@[

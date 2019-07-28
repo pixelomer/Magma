@@ -24,14 +24,11 @@ static UIColor *highlightedColor;
 + (instancetype)button {
 	AddFeaturedSourceButton *button = [self buttonWithType:UIButtonTypeCustom];
 	if (button) {
-		button.layer.masksToBounds = YES;
-		button.layer.cornerRadius = 10.0;
 		button.titleLabel.numberOfLines = 1;
 		button.titleLabel.adjustsFontSizeToFitWidth = YES;
 		button.titleLabel.lineBreakMode = NSLineBreakByClipping;
 		button.titleLabel.textColor = [UIColor whiteColor];
 		button.titleLabel.font = font;
-		button.contentEdgeInsets = UIEdgeInsetsMake(0.0, 5.0, 1.0, 5.0);
 		[button setTitle:@"Add" forState:UIControlStateNormal];
 		[button setTitleColor:highlightedColor forState:UIControlStateHighlighted];
 		[button reloadState];
@@ -68,12 +65,17 @@ static UIColor *highlightedColor;
 	});
 }
 
+- (void)setContentEdgeInsets:(UIEdgeInsets)contentEdgeInsets {
+	[super setContentEdgeInsets:UIEdgeInsetsMake(self.contentEdgeInsets.top, contentEdgeInsets.left, self.contentEdgeInsets.bottom, contentEdgeInsets.right)];
+}
+
 - (void)reloadState {
 	if (!_infoDictionary) return;
 	if (!Database.sharedInstance.isLoaded) {
 		self.backgroundColor = [UIColor lightGrayColor];
 		self.enabled = NO;
 		[self setTitle:@"Loading" forState:UIControlStateDisabled];
+		[super setContentEdgeInsets:UIEdgeInsetsMake(0.0, self.contentEdgeInsets.left, 2.0, self.contentEdgeInsets.right)];
 	}
 	else {
 		Source *source = nil;
@@ -84,6 +86,7 @@ static UIColor *highlightedColor;
 					self.backgroundColor = [UIColor lightGrayColor];
 					[self setTitle:@"Added" forState:UIControlStateDisabled];
 					self.enabled = NO;
+					[super setContentEdgeInsets:UIEdgeInsetsMake(0.0, self.contentEdgeInsets.left, 1.0, self.contentEdgeInsets.right)];
 					break;
 				}
 			}
@@ -91,6 +94,7 @@ static UIColor *highlightedColor;
 		if (!source) {
 			self.enabled = YES;
 			self.backgroundColor = self.tintColor;
+			[super setContentEdgeInsets:UIEdgeInsetsMake(0.0, self.contentEdgeInsets.left, 0.0, self.contentEdgeInsets.right)];
 		}
 	}
 }

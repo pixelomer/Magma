@@ -14,9 +14,8 @@ typedef NSString* PackagesAlgorithm;
 @property (nonatomic, readonly, copy) NSArray<NSString *> *components;
 @property (nonatomic, copy) NSDictionary *parsedReleaseFile;
 @property (nonatomic, copy) NSString *rawReleaseFile;
-@property (nonatomic, readonly, copy) NSString *rawPackagesFile;
+@property (nonatomic, readonly, copy) NSString *packagesFile;
 @property (nonatomic, readonly, copy) NSString *architecture;
-@property (nonatomic, readonly, assign) FILE *packagesFileHandle;
 @property (nonatomic, assign) int databaseID;
 @property (nonatomic, readonly, copy) NSDate *lastRefresh;
 @property (nonatomic, readonly, assign) BOOL isRefreshing;
@@ -28,6 +27,7 @@ typedef NSString* PackagesAlgorithm;
 - (void)unloadPackagesFile;
 - (void)reloadPackagesFile;
 - (void)deleteFiles;
+- (void)createRangesFile;
 
 /// @brief      Reads the specified range from the Packages file.
 /// @warning    This function is not thread-safe.

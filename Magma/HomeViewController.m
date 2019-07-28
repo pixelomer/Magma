@@ -1,5 +1,6 @@
 #import "HomeViewController.h"
 #import "FeaturedSourceCell.h"
+#import "AddSourceViewController.h"
 
 @implementation HomeViewController
 
@@ -80,7 +81,9 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 }
 
 - (void)addSourceWithButton:(AddFeaturedSourceButton *)button {
-	
+	AddSourceViewController *vc = [[AddSourceViewController alloc] initWithInformationDictionary:button.infoDictionary];
+	vc.modalPresentationStyle = UIModalPresentationFullScreen;
+	[self presentViewController:vc animated:YES completion:nil];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -97,6 +100,14 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 
 - (void)showSettings {
 	// Show settings
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return UITableViewAutomaticDimension;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return UITableViewAutomaticDimension;
 }
 
 @end

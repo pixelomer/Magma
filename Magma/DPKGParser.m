@@ -68,17 +68,20 @@
 	return [self parseFileContents:fileContents error:errorPt];
 }
 
+// WARNING: Contains unnecessary optimization
 + (NSArray<NSString *> *)findFirstLinesForFields:(NSArray<NSString *> *)fields inString:(NSString *)string {
 	NSMutableArray *values = [NSMutableArray arrayWithCapacity:fields.count];
-	for (int i = 0; i < fields.count; values[i++] = NSNull.null);
-	for (NSString *line in [string componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]]) {
-		if ([line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length <= 0) break;
-		if ([[NSCharacterSet whitespaceCharacterSet] characterIsMember:[line characterAtIndex:0]]) continue;
+	int expectedValue = 0;
+	int currentValue = 0;
+	for (int i = 0; i < fields.count; values[i++] = NSNull.null) expectedValue += (1 << i);
+	for (NSString *line in [string componentsSeparatedByString:@"\n"]) {
+		if (expectedValue == currentValue) break;
 		NSInteger index = 0;
 		NSMutableArray<NSString *> *components = [line componentsSeparatedByString:@": "].mutableCopy;
 		if ((components.count > 0) && ((index = [fields indexOfObject:components[0].lowercaseString]) != NSNotFound)) {
 			[components removeObjectAtIndex:0];
 			values[index] = [components componentsJoinedByString:@": "];
+			currentValue |= (1 << index);
 		}
 	}
 	return values.copy;

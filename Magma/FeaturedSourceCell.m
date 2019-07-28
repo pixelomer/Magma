@@ -63,8 +63,12 @@ static UIFont *descFont;
 			[iconView.heightAnchor constraintEqualToAnchor:iconView.widthAnchor].active = YES;
 		}
 		[self.contentView addSubview:_addSourceButton]; {
+			CGFloat height = 25.0;
 			[_addSourceButton.bottomAnchor constraintLessThanOrEqualToAnchor:self.contentView.bottomAnchor constant:-15.0].active = YES;
-			[_addSourceButton.heightAnchor constraintEqualToConstant:20.0].active = YES;
+			[_addSourceButton.heightAnchor constraintEqualToConstant:height].active = YES;
+			_addSourceButton.layer.masksToBounds = YES;
+			_addSourceButton.layer.cornerRadius = (height / 2.0);
+			_addSourceButton.contentEdgeInsets = UIEdgeInsetsMake(0.0, (height / 4.0), 0.0, (height / 4.0));
 		}
 		[_addSourceButton.leftAnchor constraintEqualToAnchor:iconView.leftAnchor].active = YES;
 		[_addSourceButton.topAnchor constraintEqualToAnchor:iconView.bottomAnchor constant:5.0].active = YES;

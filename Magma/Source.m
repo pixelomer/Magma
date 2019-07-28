@@ -4,34 +4,6 @@
 #import <Compression/Compression.h>
 #import "Database.h"
 
-// FRIENDLY REMINDER: free() the returned pointer once you are done with it.
-static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
-	int bufferSize = 1;
-	unsigned long previousLength = 0;
-	char *buffer = malloc(bufferSize);
-	buffer[0] = 0;
-	do {
-		fseek(file, startIndex, SEEK_SET);
-		previousLength = strlen(buffer);
-		bufferSize += 10;
-		buffer = realloc(buffer, bufferSize);
-		fgets(buffer, bufferSize, file);
-		if (ferror(file) || feof(file)) {
-			return NULL;
-		}
-	} while (strlen(buffer) != previousLength);
-	if (nextLineStartIndex && buffer) {
-		*nextLineStartIndex = startIndex + (int)strlen(buffer);
-	}
-	if (buffer) {
-		unsigned long stringLength = strlen(buffer);
-		if (buffer[stringLength - 1] == '\n') {
-			buffer[stringLength - 1] = 0;
-		}
-	}
-	return buffer;
-}
-
 @implementation Source
 
 - (instancetype)initWithBaseURL:(NSString *)rawBaseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components {
@@ -50,32 +22,20 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 - (void)unloadPackagesFile {
 	_packages = nil;
 	_sections = nil;
-	if (_packagesFileHandle) {
-		fclose(_packagesFileHandle);
-		_packagesFileHandle = NULL;
-	}
+	_packagesFile = nil;
 }
 
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
-	char *line = malloc(range.length + 1);
-	line[range.length] = 0;
-	fseek(_packagesFileHandle, range.location, SEEK_SET);
-	fread(line, 1, range.length, _packagesFileHandle);
-	NSString *result = nil;
-	if (ferror(_packagesFileHandle)) {
-		NSLog(@"Failed to get a substring from the Packages file with range: %@", NSStringFromRange(range));
+	NSString *result;
+	NSString *possiblyCorruptedString = [_packagesFile substringWithRange:range];
+	if (!encodingPt || !*encodingPt) {
+		NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:possiblyCorruptedString.UTF8String length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
+		if (!encoding) NSLog(@"Failed to find encoding for range %@ in %@", NSStringFromRange(range), self);
+		if (encodingPt) *encodingPt = encoding;
 	}
 	else {
-		if (!encodingPt || !*encodingPt) {
-			NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:line length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
-			if (!encoding) NSLog(@"Failed to find encoding for range %@ in %@", NSStringFromRange(range), self);
-			if (encodingPt) *encodingPt = encoding;
-		}
-		else {
-			result = [NSString stringWithCString:line encoding:*encodingPt];
-		}
+		result = [NSString stringWithCString:possiblyCorruptedString.UTF8String encoding:*encodingPt];
 	}
-	free(line);
 	return result;
 }
 
@@ -92,42 +52,43 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 }
 
 - (void)reloadPackagesFile {
+	NSDate *start = [NSDate date];
 	[self unloadPackagesFile];
 	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
-	if ((_packagesFileHandle = fopen(packagesFilePath.UTF8String, "r"))) {
+	if ((_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSASCIIStringEncoding error:nil])) {
 		NSMutableArray *packages = [NSMutableArray new];
-		NSUInteger scanned = 0;
-		NSUInteger startIndex = 0;
-		NSUInteger length = 0;
-		BOOL lookingForEntry = YES;
-		int nextLineStartIndex = 0;
-		char *CLine;
-		NSString *line;
-		while ((CLine = fgetline(nextLineStartIndex, &nextLineStartIndex, _packagesFileHandle))) {
-			@autoreleasepool {
-				line = [NSString stringWithCString:CLine encoding:NSISOLatin1StringEncoding];
-				if (!line) { free(CLine); break; }
-				BOOL isLineEmpty = ![line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]].length;
-				if (!isLineEmpty) {
-					if (lookingForEntry) lookingForEntry = (startIndex = scanned) && false;
-					length += strlen(CLine) + 1;
-				}
-				else {
-					if (length > 1) {
-						length -= 1;
-						Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
+		NSString *ranges = [NSString stringWithContentsOfFile:[packagesFilePath stringByAppendingString:@"_ranges"] encoding:NSASCIIStringEncoding error:nil];
+		if (ranges) {
+			NSArray *components = [ranges componentsSeparatedByString:@"\n"];
+			for (NSString *info in components) {
+				@autoreleasepool {
+					NSArray *parts = [info componentsSeparatedByString:@"-"];
+					if (parts.count >= 2) {
+						NSRange range = NSRangeFromString(parts[0]);
+						NSStringEncoding encoding = (NSStringEncoding)[(NSString *)parts[1] longLongValue];
+						Package *package = [Package alloc];
+						package.encoding = encoding;
+						package = [package initWithRange:range source:self];
 						if (package) [packages addObject:package];
-						lookingForEntry = YES;
 					}
-					length = 0;
 				}
-				scanned += strlen(CLine) + 1;
-				free(CLine);
 			}
 		}
-		if (length > 0) {
-			Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, length) source:self];
-			if (package) [packages addObject:package];
+		else {
+			NSUInteger startIndex = 0;
+			NSArray *components = [_packagesFile componentsSeparatedByString:@"\n\n"];
+			for (NSString *line in components) {
+				@autoreleasepool {
+					@try {
+						Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, line.length) source:self];
+						startIndex += line.length + 2;
+						if (package) [packages addObject:package];
+					}
+					@catch (NSException *ex) {
+						break;
+					}
+				}
+			}
 		}
 		_packages = packages.copy;
 		packages = nil;
@@ -147,6 +108,23 @@ static char *fgetline(int startIndex, int *nextLineStartIndex, FILE *file) {
 		_sections = sections.copy;
 		sections = nil;
 	}
+	NSLog(@"Took %f seconds", [[NSDate date] timeIntervalSinceDate:start]);
+}
+
+- (void)createRangesFile {
+	NSString *finalPath = [[Database.class packagesFilePathForSource:self] stringByAppendingString:@"_ranges"];
+	NSString *tmpPath = [finalPath stringByAppendingString:@".tmp"];
+	FILE *rangesFile = fopen(tmpPath.UTF8String, "w");
+	if (!rangesFile) return;
+	for (Package *package in _packages) {
+		@autoreleasepool {
+			NSRange range = package.range;
+			NSString *line = [NSString stringWithFormat:@"%@-%lu\n", NSStringFromRange(range), (unsigned long)package.encoding];
+			fwrite(line.UTF8String, 1, strlen(line.UTF8String), rangesFile);
+		}
+	}
+	fclose(rangesFile);
+	[NSFileManager.defaultManager moveItemAtPath:tmpPath toPath:finalPath error:nil];
 }
 
 - (NSString *)origin {

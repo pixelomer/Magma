@@ -116,4 +116,12 @@ static NSArray *cells;
 	return 1;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return UITableViewAutomaticDimension;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+	return UITableViewAutomaticDimension;
+}
+
 @end

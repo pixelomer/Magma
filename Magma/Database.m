@@ -371,25 +371,29 @@ static NSArray *paths;
 					}
 				}
 			}
-			NSError *error;
 			fclose(newFile);
 			[NSFileManager.defaultManager
 				removeItemAtPath:finalPackagesPath
-				error:&error
+				error:nil
 			];
 			[NSFileManager.defaultManager
 				moveItemAtPath:temporaryPackagesPath
 				toPath:finalPackagesPath
-				error:&error
+				error:nil
 			];
 			[NSFileManager.defaultManager
 				removeItemAtPath:temporaryPackagesPath
+				error:nil
+			];
+			[NSFileManager.defaultManager
+				removeItemAtPath:[finalPackagesPath stringByAppendingString:@"_ranges"]
 				error:nil
 			];
 		}
 		else parseFailure();
     }
     [source reloadPackagesFile];
+    [source createRangesFile];
 	sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
 #undef parseFailure
 	// Notify observers about the completion of the operation

@@ -7,11 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MGTableViewController.h"
+#import "PickerTableViewController.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AddSourceViewController : UITableViewController
-
+@interface AddSourceViewController : UINavigationController<UITableViewDelegate, UITableViewDataSource, PickerTableViewControllerDelegate> {
+	MGTableViewController *tableViewController;
+	NSMutableArray<NSArray *> *selectedOptions;
+}
+@property (nonatomic, copy, readonly) NSDictionary *infoDictionary;
+- (instancetype)initWithInformationDictionary:(NSDictionary *)dict;
 @end
 
 NS_ASSUME_NONNULL_END
