@@ -55,7 +55,8 @@
 	NSDate *start = [NSDate date];
 	[self unloadPackagesFile];
 	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
-	if ((_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSASCIIStringEncoding error:nil])) {
+	BOOL isUTF8 = NO;
+	if ((isUTF8 = !!(_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSUTF8StringEncoding error:nil])) || (_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSASCIIStringEncoding error:nil])) {
 		NSMutableArray *packages = [NSMutableArray new];
 		NSString *ranges = [NSString stringWithContentsOfFile:[packagesFilePath stringByAppendingString:@"_ranges"] encoding:NSASCIIStringEncoding error:nil];
 		if (ranges) {
@@ -80,12 +81,14 @@
 			for (NSString *line in components) {
 				@autoreleasepool {
 					@try {
-						Package *package = [[Package alloc] initWithRange:NSMakeRange(startIndex, line.length) source:self];
+						Package *package = [Package alloc];
+						if (isUTF8) package.encoding = NSUTF8StringEncoding;
+						package = [package initWithRange:NSMakeRange(startIndex, line.length) source:self];
 						startIndex += line.length + 2;
 						if (package) [packages addObject:package];
 					}
 					@catch (NSException *ex) {
-						break;
+						continue;
 					}
 				}
 			}
@@ -108,7 +111,7 @@
 		_sections = sections.copy;
 		sections = nil;
 	}
-	NSLog(@"Took %f seconds", [[NSDate date] timeIntervalSinceDate:start]);
+	NSLog(@"Took %f seconds to reload %@", [[NSDate date] timeIntervalSinceDate:start], self);
 }
 
 - (void)createRangesFile {

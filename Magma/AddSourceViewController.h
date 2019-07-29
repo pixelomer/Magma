@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface AddSourceViewController : UINavigationController<UITableViewDelegate, UITableViewDataSource, PickerTableViewControllerDelegate> {
-	MGTableViewController *tableViewController;
+	UITableViewController *tableViewController;
 	NSMutableArray<NSArray *> *selectedOptions;
 }
 @property (nonatomic, copy, readonly) NSDictionary *infoDictionary;

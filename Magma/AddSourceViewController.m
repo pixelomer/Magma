@@ -30,11 +30,11 @@ static NSArray *cells;
 }
 
 - (instancetype)initWithInformationDictionary:(NSDictionary *)dict {
-	MGTableViewController *tableViewController = [[MGTableViewController alloc] initWithStyle:UITableViewStyleGrouped];
+	UITableViewController *tableViewController = [[UITableViewController alloc] initWithStyle:UITableViewStyleGrouped];
 	if (dict && (self = [super initWithRootViewController:tableViewController])) {
 		_infoDictionary = dict;
-		tableViewController.dataSource = self;
-		tableViewController.delegate = self;
+		tableViewController.tableView.dataSource = self;
+		tableViewController.tableView.delegate = self;
 		tableViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleDone target:self action:@selector(handleCancelButton)];
 		tableViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Add" style:UIBarButtonItemStylePlain target:self action:@selector(handleAddButton)];
 		tableViewController.title = _infoDictionary[@"title"];
