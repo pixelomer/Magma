@@ -61,7 +61,7 @@
 			constant:0.0
 		]
 	]];
-	[(UIImageView *)[activityIndicator valueForKey:@"_internalView"] setTransform:CGAffineTransformMakeScale(0.8, 0.8)];
+	activityIndicator.transform = CGAffineTransformMakeScale(0.8, 0.8);
 	return self;
 }
 
