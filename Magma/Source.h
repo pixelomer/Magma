@@ -8,13 +8,15 @@ typedef NSString* PackagesAlgorithm;
 
 @class Package;
 
-@interface Source : NSObject
+@interface Source : NSObject {
+	NSObject *fileHandleToken;
+}
 @property (nonatomic, readonly, copy) NSURL *baseURL;
 @property (nonatomic, readonly, copy) NSString *distribution;
 @property (nonatomic, readonly, copy) NSArray<NSString *> *components;
 @property (nonatomic, copy) NSDictionary *parsedReleaseFile;
 @property (nonatomic, copy) NSString *rawReleaseFile;
-@property (nonatomic, readonly, copy) NSString *packagesFile;
+@property (nonatomic, readonly, assign) FILE *packagesFileHandle;
 @property (nonatomic, readonly, copy) NSString *architecture;
 @property (nonatomic, assign) int databaseID;
 @property (nonatomic, readonly, copy) NSDate *lastRefresh;

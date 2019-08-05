@@ -26,7 +26,6 @@
 	if ([self class] == [Package class]) {
 		NSArray *selectors = @[
 			@"maintainer",
-			@"description",
 			@"md5sum",
 			@"sha1",
 			@"sha256",
@@ -124,15 +123,17 @@
 }
 
 - (instancetype)initWithRange:(NSRange)range source:(Source *)source {
-	if ((self = [super init])) {
-		_source = source;
-		_range = range;
-		NSArray *requiredValues = [DPKGParser findFirstLinesForFields:@[@"package", @"version", @"description", @"section"] inString:self.rawPackagesEntry];
-		for (short i = 0; i <= 2; i++) {
-			if ([requiredValues[i] isKindOfClass:[NSNull class]]) {
-				return nil;
-			}
+	_source = source;
+	_range = range;
+	NSString *rawPackagesEntry = self.rawPackagesEntry;
+	if (!rawPackagesEntry) return nil;
+	NSArray *requiredValues = [DPKGParser findFirstLinesForFields:@[@"package", @"version", @"description", @"section"] inString:rawPackagesEntry];
+	for (short i = 0; i <= 2; i++) {
+		if ([requiredValues[i] isKindOfClass:[NSNull class]]) {
+			return nil;
 		}
+	}
+	if ((self = [super init])) {
 		_package = requiredValues[0];
 		_version = requiredValues[1];
 		_longDescription = _shortDescription = requiredValues[2];

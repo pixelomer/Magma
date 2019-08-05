@@ -174,6 +174,8 @@
 			children = (
 				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
 				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
+				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
+				44A5050222ECC33F0004D712 /* AddSourceViewController.m */,
 				444F0AB122CDF0280029B788 /* AppDelegate.h */,
 				444F0AB422CDF0280029B788 /* AppDelegate.m */,
 				4492710122E0986C000F7E51 /* AssetExtensions.h */,
@@ -218,6 +220,8 @@
 				444F0AAB22CDF0270029B788 /* PackagesController.m */,
 				444F0A8F22CDF0250029B788 /* PackageSearchViewController.h */,
 				444F0A9F22CDF0260029B788 /* PackageSearchViewController.m */,
+				44A5050422ECC53D0004D712 /* PickerTableViewController.h */,
+				44A5050522ECC53D0004D712 /* PickerTableViewController.m */,
 				44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */,
 				44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */,
 				444F0AB822CDF0290029B788 /* SectionPackagesController.h */,
@@ -236,10 +240,6 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
-				44A5050222ECC33F0004D712 /* AddSourceViewController.m */,
-				44A5050422ECC53D0004D712 /* PickerTableViewController.h */,
-				44A5050522ECC53D0004D712 /* PickerTableViewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";

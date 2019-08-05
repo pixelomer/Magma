@@ -11,6 +11,7 @@
 	NSURL *baseURL = [NSURL URLWithString:rawBaseURL];
 	if (!baseURL) return nil;
 	self = [super init];
+	fileHandleToken = [NSObject new];
 	_baseURL = baseURL;
 	_architecture = arch;
 	_distribution = distribution ?: @"./";
@@ -22,20 +23,29 @@
 - (void)unloadPackagesFile {
 	_packages = nil;
 	_sections = nil;
-	_packagesFile = nil;
+	if (_packagesFileHandle) {
+		fclose(_packagesFileHandle);
+		_packagesFileHandle = NULL;
+	}
 }
 
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
-	NSString *result;
-	NSString *possiblyCorruptedString = [_packagesFile substringWithRange:range];
+	NSString *result = nil;
+	char *asciiString = malloc(range.length);
+	@synchronized (fileHandleToken) {
+		long oldPos = ftell(_packagesFileHandle);
+		fseek(_packagesFileHandle, range.location, SEEK_SET);
+		fread(asciiString, 1, range.length, _packagesFileHandle);
+		fseek(_packagesFileHandle, oldPos, SEEK_SET);
+	}
 	if (!encodingPt || !*encodingPt) {
-		NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:possiblyCorruptedString.UTF8String length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
-		if (!encoding) NSLog(@"Failed to find encoding for range %@ in %@", NSStringFromRange(range), self);
-		if (encodingPt) *encodingPt = encoding;
+		NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:asciiString length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
+		if (result && encodingPt) *encodingPt = encoding;
 	}
 	else {
-		result = [NSString stringWithCString:possiblyCorruptedString.UTF8String encoding:*encodingPt];
+		result = [NSString stringWithCString:asciiString encoding:*encodingPt];
 	}
+	free(asciiString);
 	return result;
 }
 
@@ -55,14 +65,15 @@
 	NSDate *start = [NSDate date];
 	[self unloadPackagesFile];
 	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
-	BOOL isUTF8 = NO;
-	if ((isUTF8 = !!(_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSUTF8StringEncoding error:nil])) || (_packagesFile = [NSString stringWithContentsOfFile:packagesFilePath encoding:NSASCIIStringEncoding error:nil])) {
+	if ((_packagesFileHandle = fopen(packagesFilePath.UTF8String, "r"))) {
 		NSMutableArray *packages = [NSMutableArray new];
-		NSString *ranges = [NSString stringWithContentsOfFile:[packagesFilePath stringByAppendingString:@"_ranges"] encoding:NSASCIIStringEncoding error:nil];
-		if (ranges) {
-			NSArray *components = [ranges componentsSeparatedByString:@"\n"];
-			for (NSString *info in components) {
+		FILE *rangesFileHandle = fopen([packagesFilePath stringByAppendingString:@"_ranges"].UTF8String, "r");
+		if (rangesFileHandle) {
+			char *cinfo = nil;
+			size_t nread = 0;
+			while (getline(&cinfo, &nread, rangesFileHandle) != -1) {
 				@autoreleasepool {
+					NSString *info = [NSString stringWithCString:cinfo encoding:NSASCIIStringEncoding];
 					NSArray *parts = [info componentsSeparatedByString:@"-"];
 					if (parts.count >= 2) {
 						NSRange range = NSRangeFromString(parts[0]);
@@ -74,24 +85,36 @@
 					}
 				}
 			}
+			fclose(rangesFileHandle);
 		}
 		else {
 			NSUInteger startIndex = 0;
-			NSArray *components = [_packagesFile componentsSeparatedByString:@"\n\n"];
-			for (NSString *line in components) {
-				@autoreleasepool {
-					@try {
-						Package *package = [Package alloc];
-						if (isUTF8) package.encoding = NSUTF8StringEncoding;
-						package = [package initWithRange:NSMakeRange(startIndex, line.length) source:self];
-						startIndex += line.length + 2;
-						if (package) [packages addObject:package];
-					}
-					@catch (NSException *ex) {
-						continue;
+			NSUInteger length = 0;
+			char *cline = NULL;
+			size_t nread = 0;
+			while (getline(&cline, &nread, _packagesFileHandle) != -1) {
+				if (!strcmp(cline, "\n")) {
+					@autoreleasepool {
+						@try {
+							Package *package = [Package alloc];
+							package.encoding = NSUTF8StringEncoding; // Assume UTF-8
+							NSRange range = NSMakeRange(startIndex, length-1);
+							if (![package initWithRange:range source:self]) {
+								package.encoding = 0; // This is not UTF-8, try finding the correct encoding
+								package = [package initWithRange:range source:self];
+							}
+							startIndex += length + 1;
+							length = 0;
+							if (package) [packages addObject:package];
+						}
+						@catch (NSException *ex) {
+							continue;
+						}
 					}
 				}
+				else length += strlen(cline);
 			}
+			if (cline) free(cline);
 		}
 		_packages = packages.copy;
 		packages = nil;

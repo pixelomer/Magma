@@ -55,7 +55,30 @@ static NSArray *cells;
 }
 
 - (void)handleAddButton {
-	
+	for (NSArray *array in selectedOptions) {
+		if ([array isKindOfClass:[NSArray class]] && !array.count) {
+			UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"You need to select a distribution and at least one component." preferredStyle:UIAlertControllerStyleAlert];
+			[alert addAction:[UIAlertAction
+				actionWithTitle:@"OK"
+				style:UIAlertActionStyleCancel
+				handler:nil
+			]];
+			[tableViewController presentViewController:alert animated:YES completion:nil];
+			return;
+		}
+	}
+	id result = [Database.sharedInstance addSourceWithBaseURL:_infoDictionary[@"url"] architecture:_infoDictionary[@"arch"] distribution:selectedOptions[1][0] components:[selectedOptions[2] componentsJoinedByString:@" "]];
+	if ([result isKindOfClass:[NSNull class]]) {
+		// This should never happen. AddFeaturedSourceButton should handle this situation.
+		UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"This source is already in your sources. If you want to change its components, please remove that source and try again." preferredStyle:UIAlertControllerStyleAlert];
+		[alert addAction:[UIAlertAction
+			actionWithTitle:@"OK"
+			style:UIAlertActionStyleCancel
+			handler:nil
+		]];
+		[tableViewController presentViewController:alert animated:YES completion:nil];
+	}
+	[self dismissViewControllerAnimated:YES completion:nil];
 }
 
 - (void)viewDidLoad {

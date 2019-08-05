@@ -29,7 +29,8 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 					},
 					@"description" : @"This is the default repository for the Ubuntu® operating system.",
 					@"image" : @"Ubuntu",
-					@"url" : @"http://archive.ubuntu.com/ubuntu"
+					@"url" : @"http://archive.ubuntu.com/ubuntu",
+					@"arch" : @"amd64"
 				},
 				@{
 					@"title" : @"Debian",
@@ -49,7 +50,8 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 					},
 					@"description" : @"This is the default repository for the Debian operating system.",
 					@"image" : @"Debian",
-					@"url" : @"https://deb.debian.org/debian"
+					@"url" : @"https://deb.debian.org/debian",
+					@"arch" : @"amd64"
 				}
 			]],
 		];
