@@ -3,6 +3,7 @@
 #import "Package.h"
 #import <Compression/Compression.h>
 #import "Database.h"
+#import "MagmaPreferences.h"
 
 @implementation Source
 
@@ -97,10 +98,15 @@
 					@autoreleasepool {
 						@try {
 							Package *package = [Package alloc];
-							package.encoding = NSUTF8StringEncoding; // Assume UTF-8
 							NSRange range = NSMakeRange(startIndex, length-1);
-							if (![package initWithRange:range source:self]) {
-								package.encoding = 0; // This is not UTF-8, try finding the correct encoding
+							if (MagmaPreferences.assumesUTF8) {
+								package.encoding = NSUTF8StringEncoding; // Assume UTF-8
+								if (![package initWithRange:range source:self]) {
+									package.encoding = 0; // This is not UTF-8, try finding the correct encoding
+									package = [package initWithRange:range source:self];
+								}
+							}
+							else {
 								package = [package initWithRange:range source:self];
 							}
 							startIndex += length + 1;

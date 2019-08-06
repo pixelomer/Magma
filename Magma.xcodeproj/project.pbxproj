@@ -48,6 +48,8 @@
 		44DA20B722E36DE5009FC7C9 /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
 		44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44DA20B822E36EF5009FC7C9 /* WebKit.framework */; };
 		44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
+		44EB033222F9A3120034DD4C /* MagmaPreferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 44EB033122F9A3120034DD4C /* MagmaPreferences.m */; };
+		44EB033522F9B53E0034DD4C /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44EB033422F9B53E0034DD4C /* PreferencesViewController.m */; };
 		44FC335122E7581700F19361 /* HTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335022E7581700F19361 /* HTMLViewController.m */; };
 		44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335322E76A3F00F19361 /* SpinnerViewController.m */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
@@ -133,6 +135,10 @@
 		44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ManpageViewController.m; sourceTree = "<group>"; };
 		44DA20B822E36EF5009FC7C9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		44E067CF22D7772E0010D4A1 /* liblzma.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = liblzma.tbd; path = usr/lib/liblzma.tbd; sourceTree = SDKROOT; };
+		44EB033022F9A3120034DD4C /* MagmaPreferences.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MagmaPreferences.h; sourceTree = "<group>"; };
+		44EB033122F9A3120034DD4C /* MagmaPreferences.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MagmaPreferences.m; sourceTree = "<group>"; };
+		44EB033322F9B53E0034DD4C /* PreferencesViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
+		44EB033422F9B53E0034DD4C /* PreferencesViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PreferencesViewController.m; sourceTree = "<group>"; };
 		44FC334F22E7581700F19361 /* HTMLViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HTMLViewController.h; sourceTree = "<group>"; };
 		44FC335022E7581700F19361 /* HTMLViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HTMLViewController.m; sourceTree = "<group>"; };
 		44FC335222E76A3F00F19361 /* SpinnerViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SpinnerViewController.h; sourceTree = "<group>"; };
@@ -238,6 +244,10 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
+				44EB033122F9A3120034DD4C /* MagmaPreferences.m */,
+				44EB033322F9B53E0034DD4C /* PreferencesViewController.h */,
+				44EB033422F9B53E0034DD4C /* PreferencesViewController.m */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -373,6 +383,8 @@
 				444F0AC222CDF0290029B788 /* MGTableViewController.m in Sources */,
 				444F0ACF22CDF0290029B788 /* SourcesViewController.m in Sources */,
 				444F0ADC22CDF07B0029B788 /* SUStandardVersionComparator.m in Sources */,
+				44EB033522F9B53E0034DD4C /* PreferencesViewController.m in Sources */,
+				44EB033222F9A3120034DD4C /* MagmaPreferences.m in Sources */,
 				444F0AC722CDF0290029B788 /* SectionPackagesController.m in Sources */,
 				4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */,
 				4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */,

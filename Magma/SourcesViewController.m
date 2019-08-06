@@ -2,6 +2,7 @@
 #import "SourceCell.h"
 #import "Source.h"
 #import <objc/runtime.h>
+#import "MagmaPreferences.h"
 #import "SectionsController.h"
 #import "PackagesController.h"
 
@@ -111,7 +112,7 @@
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Architecture";
-		textField.text = @"amd64";
+		textField.text = MagmaPreferences.defaultArchitecture;
 		objc_setAssociatedObject(textField, _cmd, @2, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	[self presentViewController:alertController animated:YES completion:nil];
@@ -179,7 +180,7 @@
 	}];
 	[alertController addTextFieldWithConfigurationHandler:^(UITextField *textField){
 		textField.placeholder = @"Architecture";
-		textField.text = @"amd64";
+		textField.text = MagmaPreferences.defaultArchitecture;
 		objc_setAssociatedObject(textField, _cmd, @3, OBJC_ASSOCIATION_COPY_NONATOMIC);
 	}];
 	for (UITextField *textField in alertController.textFields) {

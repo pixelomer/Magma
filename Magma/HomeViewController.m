@@ -1,5 +1,6 @@
 #import "HomeViewController.h"
 #import "FeaturedSourceCell.h"
+#import "PreferencesViewController.h"
 #import "AddSourceViewController.h"
 
 @implementation HomeViewController
@@ -101,7 +102,9 @@ static NSArray<NSArray *> *defaultFeaturedSources; //Example: ( ("Section name",
 }
 
 - (void)showSettings {
-	// Show settings
+	PreferencesViewController *prefsVC = [PreferencesViewController new];
+	prefsVC.modalPresentationStyle = UIModalPresentationFullScreen;
+	[self presentViewController:prefsVC animated:YES completion:nil];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
