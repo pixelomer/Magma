@@ -58,8 +58,6 @@
 		44023A0222D4EBE100C155D8 /* DownloadManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DownloadManager.m; sourceTree = "<group>"; };
 		44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RelatedPackagesController.h; sourceTree = "<group>"; };
 		44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RelatedPackagesController.m; sourceTree = "<group>"; };
-		441C48EF22E620900008D202 /* man2html.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = man2html.a; path = ../man2html/man2html/man2html.a; sourceTree = "<group>"; };
-		441C48F222E620EB0008D202 /* man2html.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = man2html.a; path = man2html/man2html.a; sourceTree = "<group>"; };
 		441C48F422E620F60008D202 /* man2html.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = man2html.h; sourceTree = "<group>"; };
 		441C48F522E626300008D202 /* man2html.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = man2html.c; sourceTree = "<group>"; };
 		441C48F722E6264D0008D202 /* abbrev.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = abbrev.c; sourceTree = "<group>"; };
@@ -268,8 +266,6 @@
 		444F0ADE22CDF2600029B788 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				441C48EF22E620900008D202 /* man2html.a */,
-				441C48F222E620EB0008D202 /* man2html.a */,
 				44DA20B822E36EF5009FC7C9 /* WebKit.framework */,
 				44E067CF22D7772E0010D4A1 /* liblzma.tbd */,
 				44564A8022D35D7F00D7FA70 /* libz.tbd */,
