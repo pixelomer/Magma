@@ -42,11 +42,11 @@ static NSArray *list;
 }
 
 + (BOOL)assumesUTF8 {
-	return [[self valueForKey:@"Assume UTF-8"] boolValue];
+	return [[self valueForKey:list[0]] boolValue];
 }
 
 + (NSString *)defaultArchitecture {
-	return [self valueForKey:@"Default Architecture"];
+	return [self valueForKey:list[1]];
 }
 
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
