@@ -22,6 +22,7 @@
 		tableViewController.title = @"Preferences";
 		tableViewController.tableView.dataSource = self;
 		tableViewController.tableView.delegate = self;
+		tableViewController.tableView.cellLayoutMarginsFollowReadableWidth = YES;
 		tableViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(didPressDoneButton)];
 		return self;
 	}

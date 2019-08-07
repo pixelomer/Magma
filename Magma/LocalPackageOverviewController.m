@@ -29,6 +29,11 @@ static NSArray *cells;
 	}
 }
 
+- (void)viewDidLoad {
+	[super viewDidLoad];
+	self.tableView.tableFooterView = [UIView new];
+}
+
 - (instancetype)initWithPackageName:(NSString *)packageName {
 	NSString *fullPath = [DownloadManager.sharedInstance.downloadsPath stringByAppendingPathComponent:packageName];
 	BOOL isDir;

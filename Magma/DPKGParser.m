@@ -11,8 +11,10 @@
 	}]; \
 	return nil; \
 }
-	NSArray<NSString *> *components = [fullEntry componentsSeparatedByString:@"\n"];
-	if (!components) fail(1, @"Failed to split the file contents.")
+	NSArray<NSString *> *components;
+	if (!(components = [fullEntry componentsSeparatedByString:@"\n"])) {
+		fail(1, @"Failed to split the file contents.")
+	}
 	else if (components.count <= 0) fail(2, @"File doesn't contain anything.")
 	NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
 	for (int i = (int)components.count-1; i >= 0; i--) {

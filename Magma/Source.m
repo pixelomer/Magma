@@ -32,13 +32,14 @@
 
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
 	NSString *result = nil;
-	char *asciiString = malloc(range.length);
+	char *asciiString = malloc(range.length+1);
 	@synchronized (fileHandleToken) {
 		long oldPos = ftell(_packagesFileHandle);
 		fseek(_packagesFileHandle, range.location, SEEK_SET);
 		fread(asciiString, 1, range.length, _packagesFileHandle);
 		fseek(_packagesFileHandle, oldPos, SEEK_SET);
 	}
+	asciiString[range.length] = 0;
 	if (!encodingPt || !*encodingPt) {
 		NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:asciiString length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
 		if (result && encodingPt) *encodingPt = encoding;

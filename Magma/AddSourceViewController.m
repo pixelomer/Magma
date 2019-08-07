@@ -35,6 +35,7 @@ static NSArray *cells;
 		_infoDictionary = dict;
 		tableViewController.tableView.dataSource = self;
 		tableViewController.tableView.delegate = self;
+		tableViewController.tableView.cellLayoutMarginsFollowReadableWidth = YES;
 		tableViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStyleDone target:self action:@selector(handleCancelButton)];
 		tableViewController.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Add" style:UIBarButtonItemStylePlain target:self action:@selector(handleAddButton)];
 		tableViewController.title = _infoDictionary[@"title"];
@@ -113,10 +114,11 @@ static NSArray *cells;
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSArray *cellInfo = cells[indexPath.row];
 	if (![cellInfo[1] isKindOfClass:[NSNull class]]) {
-		PickerTableViewController *vc = [[PickerTableViewController alloc] initWithOptions:_infoDictionary[cellInfo[2]] allowsMultipleSelections:[cellInfo[1] boolValue]];
+		PickerTableViewController *vc = [PickerTableViewController alloc];
 		vc.delegate = self;
 		vc.showsInternalValues = YES;
 		vc.selectedOptions = selectedOptions[indexPath.row];
+		vc = [vc initWithOptions:_infoDictionary[cellInfo[2]] allowsMultipleSelections:[cellInfo[1] boolValue]];
 		objc_setAssociatedObject(vc, @selector(pickerTableViewController:selectedItemsDidChange:), @(indexPath.row), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		[self pushViewController:vc animated:YES];
 	}

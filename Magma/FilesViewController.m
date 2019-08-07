@@ -132,7 +132,8 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 	NSArray *cellInfo = fileDetails[indexPath.row];
 	NSString *newPath = [_path stringByAppendingPathComponent:filename];
 	NSString *ext = filename.pathExtension.lowercaseString;
-	NSArray *fileTypeDetails = filetypes[ext];
+	NSArray *fileTypeDetails = filetypes[ext] ?: filetypes[@"txt"];
+	
 	if ([cellInfo[0] boolValue]) {
 		FilesViewController *vc = [[FilesViewController alloc] initWithPath:newPath];
 		if (vc) {
@@ -162,6 +163,7 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 					UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(dismissInfoViewController:)];
 					objc_setAssociatedObject(doneButton, @selector(dismissInfoViewController:), navController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 					vc.navigationItem.leftBarButtonItem = doneButton;
+    				vc.edgesForExtendedLayout = UIRectEdgeNone;
 					[self presentViewController:navController animated:YES completion:nil];
 					return;
 				}

@@ -13,6 +13,7 @@
 #import "TextViewCell.h"
 #import "DownloadManager.h"
 #import <MessageUI/MessageUI.h>
+#import "InstructionsViewController.h"
 
 @implementation PackageDetailsController
 
@@ -42,6 +43,7 @@ static UIFont *defaultFont;
 			NSNull.null,
 			@[@"Text", @"Details", headerFont],
 			@{@"Version" : @"version"},
+			@[@"Text", @"This package is doesn't contain enough information.", @(1)],
 			@[@"Text", @"Installation Instructions", @"showInstallationInstructions"],
 			NSNull.null,
 			@[@"Text", @"Relations", headerFont],
@@ -91,9 +93,8 @@ static UIFont *defaultFont;
 }
 
 - (void)showInstallationInstructions {
-	UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Not Implemented" message:@"This part of the application is not implemented yet. If you are an end user and this is a final build, you shouldn't be seeing this. Please report this to the developer." preferredStyle:UIAlertControllerStyleAlert];
-	[alertController addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
-	[self presentViewController:alertController animated:YES completion:nil];
+	InstructionsViewController *vc = [[InstructionsViewController alloc] initWithPackage:_package];
+	[self pushViewController:vc animated:YES];
 }
 
 - (instancetype)initWithPackage:(Package *)package {

@@ -57,6 +57,7 @@
 	if ((self = [super initWithStyle:UITableViewStyleGrouped])) {
 		self.options = options;
 		self.allowsMultipleSelections = allowsMultipleSelections;
+		self.tableView.cellLayoutMarginsFollowReadableWidth = YES;
 	}
 	return self;
 }
