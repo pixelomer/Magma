@@ -179,7 +179,8 @@
 	}
 	else {
 		NSArray *allowedKeys = @[
-			@"origin"
+			@"origin",
+			@"architecture"
 		];
 		NSMutableDictionary *filteredReleaseFile = [NSMutableDictionary new];
 		for (NSString *fieldName in parsedReleaseFile) {

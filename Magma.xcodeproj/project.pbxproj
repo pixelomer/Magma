@@ -129,6 +129,7 @@
 		44A5050222ECC33F0004D712 /* AddSourceViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddSourceViewController.m; sourceTree = "<group>"; };
 		44A5050422ECC53D0004D712 /* PickerTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PickerTableViewController.h; sourceTree = "<group>"; };
 		44A5050522ECC53D0004D712 /* PickerTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PickerTableViewController.m; sourceTree = "<group>"; };
+		44AE060F22FC1D110025D7A8 /* macros.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.pch; sourceTree = "<group>"; };
 		44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddFeaturedSourceButton.h; sourceTree = "<group>"; };
 		44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddFeaturedSourceButton.m; sourceTree = "<group>"; };
 		44CB82A422FB00A800D0E806 /* InstructionsViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InstructionsViewController.h; sourceTree = "<group>"; };
@@ -258,6 +259,7 @@
 				44A4ED3722FABE5600E4E736 /* TextFileViewController.m */,
 				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
 				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
+				44AE060F22FC1D110025D7A8 /* macros.pch */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -550,6 +552,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Magma/macros.pch;
 				INFOPLIST_FILE = Magma/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -573,6 +577,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Magma/macros.pch;
 				INFOPLIST_FILE = Magma/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (

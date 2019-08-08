@@ -13,6 +13,7 @@
 @implementation InstructionsViewController
 
 static NSAttributedString *incompleteContent;
+static NSDictionary *inlineCodeAttributes;
 
 + (void)load {
 	if (self == [InstructionsViewController class]) {
@@ -32,7 +33,7 @@ static NSAttributedString *incompleteContent;
 			NSBackgroundColorAttributeName : [UIColor clearColor],
 			NSForegroundColorAttributeName : [UIColor blackColor]
 		};
-		NSDictionary *inlineCodeAttributes = @{
+		inlineCodeAttributes = @{
 			NSFontAttributeName : [UIFont fontWithName:@"Courier" size:17],
 			NSBackgroundColorAttributeName : [UIColor clearColor],
 			NSForegroundColorAttributeName : [UIColor redColor]
@@ -131,9 +132,13 @@ static NSAttributedString *incompleteContent;
 - (instancetype)initWithPackage:(Package *)package {
 	if ([package parse] && (self = [super init])) {
 		NSMutableAttributedString *completeContent = incompleteContent.mutableCopy;
-		NSString *arch = (package.architecture ?: @"any");
-		arch = ([arch isEqualToString:@"all"] ? @"any" : arch);
+		NSString *arch = package.architecture ?: @"any";
+		arch = [arch isEqualToString:@"all"] ? @"any" : arch;
+		NSRange architectureRange = NSMakeRange([completeContent.mutableString rangeOfString:@"<arch>"].location, arch.length);
 		[completeContent.mutableString replaceOccurrencesOfString:@"<arch>" withString:arch options:0 range:NSMakeRange(0, completeContent.mutableString.length)];
+		if (![arch isEqualToString:@"any"]) {
+			[completeContent addAttributes:inlineCodeAttributes range:architectureRange];
+		}
 		[completeContent.mutableString replaceOccurrencesOfString:@"<entry>" withString:[package.source sourcesListEntryWithComponents:YES] options:0 range:NSMakeRange(0, completeContent.mutableString.length)];
 		[completeContent.mutableString replaceOccurrencesOfString:@"<package>" withString:package.package options:0 range:NSMakeRange(0, completeContent.mutableString.length)];
 		_completeContent = completeContent.copy;
