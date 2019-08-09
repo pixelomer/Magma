@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <QuickLook/QuickLook.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface FilesViewController : UITableViewController {
+@interface FilesViewController : UITableViewController<QLPreviewControllerDataSource> {
 	NSString *newFile;
 	NSArray<NSString *> *filenames;
 	NSArray<NSArray *> *fileDetails;

@@ -10,6 +10,7 @@
 #import "AssetExtensions.h"
 #import "SpinnerViewController.h"
 #import <objc/runtime.h>
+#import <CoreServices/CoreServices.h>
 
 @implementation FilesViewController
 
@@ -20,16 +21,17 @@ static UIColor *newFileColor;
 static NSDictionary<NSString *, NSArray *> *filetypes;
 
 // Example:
-// @{ @"ar" : @[@"NSData", @"unarchiveFileAtPath:toDirectoryAtPath:"] }
+// @{ @"a" : @[@"NSData", @"unarchiveFileAtPath:toDirectoryAtPath:"] }
 static NSDictionary<NSString *, NSArray *> *archiveTypes;
+
+static void fake_dispatch(__unused dispatch_queue_t queue, void(^block)(void)) {
+	block();
+}
 
 + (void)load {
 	if (self == [FilesViewController class]) {
 		newFileColor = [UIColor colorWithRed:1.0 green:1.0 blue:0.0 alpha:0.15];
-		NSMutableDictionary *mutableFileTypes = @{
-			@"txt" : @[@"Text File", @"TextFileViewController", @"initWithPath:"],
-			@"h" : @[@"Header File", @"SourceCodeFileController", @"initWithPath:"]
-		}.mutableCopy;
+		NSMutableDictionary *mutableFileTypes = [NSMutableDictionary new];
 		
 		// Manual pages
 		NSArray *sharedArray = @[@"Manual Page", @"ManpageViewController", @"initWithPath:"];
@@ -64,39 +66,43 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 	}
 }
 
-- (void)reloadFiles:(UIRefreshControl *)sender {
-	__block UIRefreshControl *_refreshControl = refreshControl;
-	__block NSString *_newFile = newFile.copy;
-	newFile = nil;
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
-		NSArray *newFiles = [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.path error:nil];
-		NSMutableDictionary *newFilesWithTypes = [NSMutableDictionary new];
-		for (NSString *filename in newFiles) {
-			if ([filename isEqualToString:@".magma"]) continue;
-			NSString *path = [self.path stringByAppendingPathComponent:filename];
-			BOOL isDir;
-			if (![NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir]) continue;
-			NSString *subtitle = @"";
-			if (isDir) {
-				subtitle = [NSString stringWithFormat:@"%lu file(s)", (unsigned long)[NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil].count];
-			}
+- (void)_reloadFiles {
+	NSArray *newFiles = [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.path error:nil];
+	NSMutableDictionary *newFilesWithTypes = [NSMutableDictionary new];
+	for (NSString *filename in newFiles) {
+		if ([filename isEqualToString:@".magma"]) continue;
+		NSString *path = [self.path stringByAppendingPathComponent:filename];
+		BOOL isDir;
+		if (![NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&isDir]) continue;
+		NSString *subtitle = @"Unknown Type";
+		if (isDir) {
+			subtitle = [NSString stringWithFormat:@"%lu file(s)", (unsigned long)[NSFileManager.defaultManager contentsOfDirectoryAtPath:path error:nil].count];
+		}
+		else if (path.pathExtension.length) {
+			CFStringRef description = UTTypeCopyDescription(UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)path.pathExtension, NULL));
+			if (description) subtitle = [(__bridge NSString *)description capitalizedString];
 			else if (filetypes[filename.pathExtension.lowercaseString]) {
 				subtitle = filetypes[filename.pathExtension.lowercaseString][0];
 			}
-			else subtitle = @"Unknown Type";
-			newFilesWithTypes[filename] = @[@(!!isDir), subtitle, @(!![_newFile isEqualToString:filename])];
 		}
-		self.files = newFilesWithTypes.copy;
-		__block UIRefreshControl *__refreshControl = _refreshControl;
-		_refreshControl = nil;
-		dispatch_async(dispatch_get_main_queue(), ^{
-			if (__refreshControl) {
-				[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
-				[__refreshControl endRefreshing];
-				__refreshControl = nil;
-			}
-		});
-		_newFile = nil;
+		newFilesWithTypes[filename] = @[@(!!isDir), subtitle, @(!![newFile isEqualToString:filename])];
+	}
+	self.files = newFilesWithTypes.copy;
+	__block UIRefreshControl *_refreshControl = refreshControl;
+	void(*dispatch)(dispatch_queue_t, void(^)(void)) = [NSThread isMainThread] ? &fake_dispatch : &dispatch_async;
+	dispatch(dispatch_get_main_queue(), ^{
+		if (_refreshControl) {
+			[self.tableView reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationFade];
+			[_refreshControl endRefreshing];
+			_refreshControl = nil;
+		}
+	});
+	newFile = nil;
+}
+
+- (void)reloadFiles:(UIRefreshControl *)sender {
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+		[self _reloadFiles];
 	});
 }
 
@@ -112,7 +118,7 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self reloadFiles:nil];
+    [self _reloadFiles];
 	refreshControl = [UIRefreshControl new];
 	if (@available(iOS 10.0, *)) {
 		self.tableView.refreshControl = refreshControl;
@@ -127,13 +133,20 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 	return filenames.count;
 }
 
+- (NSInteger)numberOfPreviewItemsInPreviewController:(QLPreviewController *)controller {
+	return 1;
+}
+
+- (id<QLPreviewItem>)previewController:(QLPreviewController *)controller previewItemAtIndex:(NSInteger)index {
+	return objc_getAssociatedObject(controller, @selector(tableView:didSelectRowAtIndexPath:));
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 	NSString *filename = filenames[indexPath.row];
 	NSArray *cellInfo = fileDetails[indexPath.row];
 	NSString *newPath = [_path stringByAppendingPathComponent:filename];
 	NSString *ext = filename.pathExtension.lowercaseString;
-	NSArray *fileTypeDetails = filetypes[ext] ?: filetypes[@"txt"];
-	
+	NSArray *fileTypeDetails = filetypes[ext];
 	if ([cellInfo[0] boolValue]) {
 		FilesViewController *vc = [[FilesViewController alloc] initWithPath:newPath];
 		if (vc) {
@@ -141,11 +154,12 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 			return;
 		}
 	}
-	else if ([fileTypeDetails[1] isKindOfClass:[NSString class]]) {
+	else if ([fileTypeDetails[1] isKindOfClass:[NSString class]] || !fileTypeDetails) {
 		Class cls = NSClassFromString(fileTypeDetails[1]);
 		SEL selector = NSSelectorFromString(fileTypeDetails[2]);
+		UIViewController *vc = nil;
 		if (cls && selector) {
-			UIViewController *vc = [cls alloc];
+			vc = [cls alloc];
 			@autoreleasepool {
 				NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:[cls instanceMethodSignatureForSelector:selector]];
 				invocation.selector = selector;
@@ -164,13 +178,33 @@ static NSDictionary<NSString *, NSArray *> *archiveTypes;
 					objc_setAssociatedObject(doneButton, @selector(dismissInfoViewController:), navController, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 					vc.navigationItem.leftBarButtonItem = doneButton;
     				vc.edgesForExtendedLayout = UIRectEdgeNone;
-					[self presentViewController:navController animated:YES completion:nil];
-					return;
+    				vc = navController;
 				}
 			}
 		}
-		else {
-			// Developer error, not implemented
+		if (!vc) {
+			NSURL *url = [NSURL fileURLWithPath:newPath];
+			if (![QLPreviewController canPreviewItem:url]) {
+				BOOL success = NO;
+				@autoreleasepool {
+					NSString *string = [NSString stringWithContentsOfFile:newPath usedEncoding:nil error:nil];
+					success = !!string;
+				}
+				if (success) {
+					NSURL *newURL = [NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"%@/%@.txt", NSUUID.UUID.UUIDString, filename]]];
+					if ([NSFileManager.defaultManager createDirectoryAtURL:newURL.URLByDeletingLastPathComponent withIntermediateDirectories:YES attributes:nil error:nil] && ([NSFileManager.defaultManager removeItemAtURL:newURL error:nil] || true) && [NSFileManager.defaultManager copyItemAtURL:url toURL:newURL error:nil]) url = newURL;
+				}
+			}
+			if (url) {
+				QLPreviewController *previewController = [QLPreviewController new];
+				objc_setAssociatedObject(previewController, _cmd, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
+				previewController.dataSource = self;
+				vc = previewController;
+			}
+		}
+		if (vc) {
+			[self presentViewController:vc animated:YES completion:nil];
+			return;
 		}
 	}
 	else if ([fileTypeDetails[1] isKindOfClass:[NSNull class]] && (fileTypeDetails = archiveTypes[ext])) {

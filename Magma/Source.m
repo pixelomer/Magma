@@ -180,7 +180,7 @@
 	else {
 		NSArray *allowedKeys = @[
 			@"origin",
-			@"architecture"
+			@"architectures"
 		];
 		NSMutableDictionary *filteredReleaseFile = [NSMutableDictionary new];
 		for (NSString *fieldName in parsedReleaseFile) {
@@ -194,6 +194,7 @@
 			NSString *value = filteredReleaseFile[field];
 			[reversedReleaseFileComponents addObject:[NSString stringWithFormat:@"%@: %@", field, [value stringByReplacingOccurrencesOfString:@"\n" withString:@"\n  "]]];
 		}
+		_supportedArchitectures = [filteredReleaseFile[@"architectures"] componentsSeparatedByString:@" "];
 		_rawReleaseFile = [reversedReleaseFileComponents componentsJoinedByString:@"\n"];
 		_parsedReleaseFile = filteredReleaseFile.copy;
 	}

@@ -9,8 +9,6 @@
 #ifndef macros_pch
 #define macros_pch
 
-#if 0
-#define ALLOW_IOS_REPOSITORIES
-#endif
+
 
 #endif /* macros_pch */

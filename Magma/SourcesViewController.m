@@ -148,10 +148,7 @@
 			}
 			short errorType = 0;
 			if (!baseURL.length || !dist.length || !architecture.length) errorType = 2;
-		#ifndef ALLOW_IOS_REPOSITORIES
-			else if ([architecture isEqualToString:@"iphoneos-arm"]) errorType = 3;
-		#endif
-			else if (![baseURL isEqualToString:@"http://"] && ![baseURL isEqualToString:@"https://"]) errorType = 4;
+			else if (![baseURL hasPrefix:@"http://"] && ![baseURL hasPrefix:@"https://"]) errorType = 4;
 			else if (components.length <= 0 || dist.length <= 0) {
 				errorType = !![[Database.sharedInstance addSourceWithURL:baseURL architecture:architecture] isKindOfClass:NSNull.class];
 			}
@@ -166,11 +163,6 @@
 					case 2:
 						[self showErrorMessage:@"You didn't specify the required parameters."];
 						break;
-		#ifndef ALLOW_IOS_REPOSITORIES
-					case 3:
-						[self showErrorMessage:@"This architecture is not supported."];
-						break;
-		#endif
 					case 4:
 						[self showErrorMessage:@"The URL must be an HTTP(S) URL."];
 						break;

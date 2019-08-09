@@ -38,9 +38,9 @@
 		444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
 		44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */; };
+		447E40D722FD8DE800B6BD2D /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 447E40D622FD8DE800B6BD2D /* CoreServices.framework */; };
 		4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
 		4492710622E0BC58000F7E51 /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
-		44A4ED3822FABE5600E4E736 /* TextFileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A4ED3722FABE5600E4E736 /* TextFileViewController.m */; };
 		44A5050322ECC33F0004D712 /* AddSourceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050222ECC33F0004D712 /* AddSourceViewController.m */; };
 		44A5050622ECC53D0004D712 /* PickerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050522ECC53D0004D712 /* PickerTableViewController.m */; };
 		44B3E13E22EB6FDD003DFF2F /* AddFeaturedSourceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */; };
@@ -119,12 +119,11 @@
 		44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FeaturedSourceCell.h; sourceTree = "<group>"; };
 		44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FeaturedSourceCell.m; sourceTree = "<group>"; };
 		447DD39222CDEB1E00E6480F /* Magma.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Magma.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		447E40D622FD8DE800B6BD2D /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		4492710122E0986C000F7E51 /* AssetExtensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AssetExtensions.h; sourceTree = "<group>"; };
 		4492710222E0986C000F7E51 /* AssetExtensions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AssetExtensions.m; sourceTree = "<group>"; };
 		4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocalPackageOverviewController.h; sourceTree = "<group>"; };
 		4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LocalPackageOverviewController.m; sourceTree = "<group>"; };
-		44A4ED3622FABE5600E4E736 /* TextFileViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextFileViewController.h; sourceTree = "<group>"; };
-		44A4ED3722FABE5600E4E736 /* TextFileViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextFileViewController.m; sourceTree = "<group>"; };
 		44A5050122ECC33F0004D712 /* AddSourceViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddSourceViewController.h; sourceTree = "<group>"; };
 		44A5050222ECC33F0004D712 /* AddSourceViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AddSourceViewController.m; sourceTree = "<group>"; };
 		44A5050422ECC53D0004D712 /* PickerTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PickerTableViewController.h; sourceTree = "<group>"; };
@@ -159,6 +158,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				447E40D722FD8DE800B6BD2D /* CoreServices.framework in Frameworks */,
 				44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */,
 				44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */,
 				444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */,
@@ -255,8 +255,6 @@
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
 				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				44A4ED3622FABE5600E4E736 /* TextFileViewController.h */,
-				44A4ED3722FABE5600E4E736 /* TextFileViewController.m */,
 				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
 				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
 				44AE060F22FC1D110025D7A8 /* macros.pch */,
@@ -288,6 +286,7 @@
 		444F0ADE22CDF2600029B788 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				447E40D622FD8DE800B6BD2D /* CoreServices.framework */,
 				44DA20B822E36EF5009FC7C9 /* WebKit.framework */,
 				44E067CF22D7772E0010D4A1 /* liblzma.tbd */,
 				44564A8022D35D7F00D7FA70 /* libz.tbd */,
@@ -412,7 +411,6 @@
 				44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */,
 				444F0ACC22CDF0290029B788 /* SourceCell.m in Sources */,
 				444F0AC422CDF0290029B788 /* PackageSearchViewController.m in Sources */,
-				44A4ED3822FABE5600E4E736 /* TextFileViewController.m in Sources */,
 				44602D0B22D78A8800440D8A /* NSFileManager+Tar.m in Sources */,
 				44664E9B22EB2AE40042E8E1 /* FeaturedSourceCell.m in Sources */,
 				444F0ABB22CDF0290029B788 /* DPKGParser.m in Sources */,

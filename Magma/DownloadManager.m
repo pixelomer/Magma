@@ -221,7 +221,7 @@ static NSString *workingDirectory;
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
 	if (error) {
-		[self finalizeDownloadWithIdentifier:task.taskIdentifier error:error.localizedDescription];
+		[self finalizeDownloadWithIdentifier:task.taskIdentifier error:((error.code == NSURLErrorCancelled) ? @"This package cannot be downloaded with this application." : error.localizedDescription)];
 	}
 }
 
@@ -252,7 +252,8 @@ static NSString *workingDirectory;
 		object:self
 		userInfo:@{ @"taskID" : @(downloadTask.taskIdentifier), @"remotePackage" : remotePackage ?: NSNull.null }
 	];
-	[downloadTask resume];
+	if ([remotePackage.architecture isEqualToString:@"iphoneos-arm"]) [downloadTask cancel];
+	else [downloadTask resume];
 	return YES;
 }
 

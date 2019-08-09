@@ -343,9 +343,6 @@ static NSArray *paths;
 		NSString *encodedFile = [[NSString alloc] initWithContentsOfFile:releaseFilePath encoding:NSUTF8StringEncoding error:nil];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
-		#ifndef ALLOW_IOS_REPOSITORIES
-			if (![source.parsedReleaseFile[@"architecture"] isEqualToString:@"iphoneos-arm"]) {
-		#endif
 			NSDictionary *packagesFileURLsForEveryComponent = source.possiblePackagesFileURLs;
 			NSString *finalPackagesPath = [self.class packagesFilePathForSource:source];
 			NSString *temporaryPackagesPath = [finalPackagesPath stringByAppendingString:@"_tmp"];
@@ -392,9 +389,6 @@ static NSArray *paths;
 				removeItemAtPath:[finalPackagesPath stringByAppendingString:@"_ranges"]
 				error:nil
 			];
-		#ifndef ALLOW_IOS_REPOSITORIES
-			}
-		#endif
 		}
 		else parseFailure();
     }
