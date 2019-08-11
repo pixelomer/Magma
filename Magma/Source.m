@@ -32,22 +32,24 @@
 
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
 	NSString *result = nil;
-	char *asciiString = malloc(range.length+1);
+	char *substring = malloc(range.length);
 	@synchronized (fileHandleToken) {
 		long oldPos = ftell(_packagesFileHandle);
 		fseek(_packagesFileHandle, range.location, SEEK_SET);
-		fread(asciiString, 1, range.length, _packagesFileHandle);
+		fread(substring, 1, range.length, _packagesFileHandle);
 		fseek(_packagesFileHandle, oldPos, SEEK_SET);
 	}
-	asciiString[range.length] = 0;
-	if (!encodingPt || !*encodingPt) {
-		NSStringEncoding encoding = [NSString stringEncodingForData:[NSData dataWithBytes:asciiString length:range.length] encodingOptions:nil convertedString:&result usedLossyConversion:nil];
-		if (result && encodingPt) *encodingPt = encoding;
-	}
-	else {
-		result = [NSString stringWithCString:asciiString encoding:*encodingPt];
-	}
-	free(asciiString);
+    if (substring) {
+        NSData *data = [NSData dataWithBytes:substring length:range.length];
+        if (!encodingPt || !*encodingPt) {
+            NSStringEncoding encoding = [NSString stringEncodingForData:data encodingOptions:nil convertedString:&result usedLossyConversion:nil];
+            if (result && encodingPt) *encodingPt = encoding;
+        }
+        else {
+            result = [[NSString alloc] initWithData:data encoding:*encodingPt];
+        }
+    }
+	free(substring);
 	return result;
 }
 
