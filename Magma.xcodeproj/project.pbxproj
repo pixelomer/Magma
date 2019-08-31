@@ -55,6 +55,54 @@
 		44FC335122E7581700F19361 /* HTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335022E7581700F19361 /* HTMLViewController.m */; };
 		44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335322E76A3F00F19361 /* SpinnerViewController.m */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
+		CEA65531231AA790004D57EC /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadManager.m */; };
+		CEA65532231AA790004D57EC /* MGViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AA622CDF0270029B788 /* MGViewController.m */; };
+		CEA65533231AA790004D57EC /* UIImage+ResizeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */; };
+		CEA65534231AA790004D57EC /* FilesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CC638222E1D2D500215ED8 /* FilesViewController.m */; };
+		CEA65535231AA790004D57EC /* Package.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB622CDF0280029B788 /* Package.m */; };
+		CEA65536231AA790004D57EC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB422CDF0280029B788 /* AppDelegate.m */; };
+		CEA65537231AA790004D57EC /* RelatedPackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */; };
+		CEA65538231AA790004D57EC /* MGTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9D22CDF0260029B788 /* MGTableViewController.m */; };
+		CEA65539231AA790004D57EC /* SourcesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB722CDF0290029B788 /* SourcesViewController.m */; };
+		CEA6553A231AA790004D57EC /* SUStandardVersionComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0ADA22CDF07B0029B788 /* SUStandardVersionComparator.m */; };
+		CEA6553B231AA790004D57EC /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44EB033422F9B53E0034DD4C /* PreferencesViewController.m */; };
+		CEA6553C231AA790004D57EC /* MagmaPreferences.m in Sources */ = {isa = PBXBuildFile; fileRef = 44EB033122F9A3120034DD4C /* MagmaPreferences.m */; };
+		CEA6553D231AA790004D57EC /* SectionPackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AA822CDF0270029B788 /* SectionPackagesController.m */; };
+		CEA6553E231AA790004D57EC /* PackageDetailsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4430D18B22CF810E00F21B28 /* PackageDetailsController.m */; };
+		CEA6553F231AA790004D57EC /* AssetExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710222E0986C000F7E51 /* AssetExtensions.m */; };
+		CEA65540231AA790004D57EC /* AddSourceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050222ECC33F0004D712 /* AddSourceViewController.m */; };
+		CEA65541231AA790004D57EC /* PickerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44A5050522ECC53D0004D712 /* PickerTableViewController.m */; };
+		CEA65542231AA790004D57EC /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
+		CEA65543231AA790004D57EC /* Source.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9622CDF0260029B788 /* Source.m */; };
+		CEA65544231AA790004D57EC /* abbrev.c in Sources */ = {isa = PBXBuildFile; fileRef = 441C48F722E6264D0008D202 /* abbrev.c */; };
+		CEA65545231AA790004D57EC /* ManpageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */; };
+		CEA65546231AA790004D57EC /* PackagesController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AAB22CDF0270029B788 /* PackagesController.m */; };
+		CEA65547231AA790004D57EC /* NSData+Decompression.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AD222CDF0520029B788 /* NSData+Decompression.m */; };
+		CEA65548231AA790004D57EC /* LocalPackageOverviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */; };
+		CEA65549231AA790004D57EC /* SpinnerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335322E76A3F00F19361 /* SpinnerViewController.m */; };
+		CEA6554A231AA790004D57EC /* SourceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AB322CDF0280029B788 /* SourceCell.m */; };
+		CEA6554B231AA790004D57EC /* PackageSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9F22CDF0260029B788 /* PackageSearchViewController.m */; };
+		CEA6554C231AA790004D57EC /* NSFileManager+Tar.m in Sources */ = {isa = PBXBuildFile; fileRef = 44602D0A22D78A8800440D8A /* NSFileManager+Tar.m */; };
+		CEA6554D231AA790004D57EC /* FeaturedSourceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */; };
+		CEA6554E231AA790004D57EC /* DPKGParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9222CDF0250029B788 /* DPKGParser.m */; };
+		CEA6554F231AA790004D57EC /* AddFeaturedSourceButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */; };
+		CEA65550231AA790004D57EC /* PackageCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9022CDF0250029B788 /* PackageCell.m */; };
+		CEA65551231AA790004D57EC /* strdefs.c in Sources */ = {isa = PBXBuildFile; fileRef = 441C48F922E626650008D202 /* strdefs.c */; };
+		CEA65552231AA790004D57EC /* Database.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AA422CDF0270029B788 /* Database.m */; };
+		CEA65553231AA790004D57EC /* HomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9822CDF0260029B788 /* HomeViewController.m */; };
+		CEA65554231AA790004D57EC /* SectionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AA922CDF0270029B788 /* SectionsController.m */; };
+		CEA65555231AA790004D57EC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9B22CDF0260029B788 /* main.m */; };
+		CEA65556231AA790004D57EC /* DownloadsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0A9422CDF0250029B788 /* DownloadsController.m */; };
+		CEA65557231AA790004D57EC /* InstructionsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CB82A522FB00A800D0E806 /* InstructionsViewController.m */; };
+		CEA65558231AA790004D57EC /* HTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335022E7581700F19361 /* HTMLViewController.m */; };
+		CEA65559231AA790004D57EC /* man2html.c in Sources */ = {isa = PBXBuildFile; fileRef = 441C48F522E626300008D202 /* man2html.c */; };
+		CEA6555A231AA790004D57EC /* OngoingDownloadCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */; };
+		CEA6555C231AA790004D57EC /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 447E40D622FD8DE800B6BD2D /* CoreServices.framework */; };
+		CEA6555D231AA790004D57EC /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44DA20B822E36EF5009FC7C9 /* WebKit.framework */; };
+		CEA6555E231AA790004D57EC /* liblzma.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 44E067CF22D7772E0010D4A1 /* liblzma.tbd */; };
+		CEA6555F231AA790004D57EC /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
+		CEA65561231AA790004D57EC /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9522CDF0250029B788 /* Launch Screen.storyboard */; };
+		CEA65562231AA790004D57EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9322CDF0250029B788 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -151,6 +199,8 @@
 		44FC335322E76A3F00F19361 /* SpinnerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpinnerViewController.m; sourceTree = "<group>"; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
+		CEA65566231AA790004D57EC /* MagmaAPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MagmaAPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA65567231AA791004D57EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Users/pixelomer/Documents/Projects/Magma/Info.plist; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +212,17 @@
 				44DA20B922E36EF5009FC7C9 /* WebKit.framework in Frameworks */,
 				44E067D022D7772E0010D4A1 /* liblzma.tbd in Frameworks */,
 				444F0AE022CDF2600029B788 /* libbz2.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEA6555B231AA790004D57EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEA6555C231AA790004D57EC /* CoreServices.framework in Frameworks */,
+				CEA6555D231AA790004D57EC /* WebKit.framework in Frameworks */,
+				CEA6555E231AA790004D57EC /* liblzma.tbd in Frameworks */,
+				CEA6555F231AA790004D57EC /* libbz2.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,81 +244,10 @@
 		444F0A8D22CDF0170029B788 /* Magma */ = {
 			isa = PBXGroup;
 			children = (
-				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
-				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
-				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
-				44A5050222ECC33F0004D712 /* AddSourceViewController.m */,
-				444F0AB122CDF0280029B788 /* AppDelegate.h */,
-				444F0AB422CDF0280029B788 /* AppDelegate.m */,
-				4492710122E0986C000F7E51 /* AssetExtensions.h */,
-				4492710222E0986C000F7E51 /* AssetExtensions.m */,
+				CEA6556B231AA7DF004D57EC /* Shared */,
+				CEA6556A231AA7D5004D57EC /* Sandboxed */,
+				CEA65569231AA7CD004D57EC /* Jailbroken */,
 				444F0A9322CDF0250029B788 /* Assets.xcassets */,
-				444F0AB522CDF0280029B788 /* Database.h */,
-				444F0AA422CDF0270029B788 /* Database.m */,
-				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
-				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
-				444F0A9C22CDF0260029B788 /* DownloadsController.h */,
-				444F0A9422CDF0250029B788 /* DownloadsController.m */,
-				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
-				444F0A9222CDF0250029B788 /* DPKGParser.m */,
-				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
-				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
-				44CC638122E1D2D500215ED8 /* FilesViewController.h */,
-				44CC638222E1D2D500215ED8 /* FilesViewController.m */,
-				444F0AA522CDF0270029B788 /* HomeViewController.h */,
-				444F0A9822CDF0260029B788 /* HomeViewController.m */,
-				44FC334F22E7581700F19361 /* HTMLViewController.h */,
-				44FC335022E7581700F19361 /* HTMLViewController.m */,
-				444F0AE322CDF3140029B788 /* Info.plist */,
-				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
-				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
-				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
-				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
-				44EB033122F9A3120034DD4C /* MagmaPreferences.m */,
-				444F0A9B22CDF0260029B788 /* main.m */,
-				44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */,
-				44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */,
-				444F0AA322CDF0270029B788 /* MGTableViewController.h */,
-				444F0A9D22CDF0260029B788 /* MGTableViewController.m */,
-				444F0A9922CDF0260029B788 /* MGViewController.h */,
-				444F0AA622CDF0270029B788 /* MGViewController.m */,
-				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
-				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
-				444F0AAF22CDF0280029B788 /* Package.h */,
-				444F0AB622CDF0280029B788 /* Package.m */,
-				444F0AAE22CDF0280029B788 /* PackageCell.h */,
-				444F0A9022CDF0250029B788 /* PackageCell.m */,
-				4430D18A22CF810E00F21B28 /* PackageDetailsController.h */,
-				4430D18B22CF810E00F21B28 /* PackageDetailsController.m */,
-				444F0AA722CDF0270029B788 /* PackagesController.h */,
-				444F0AAB22CDF0270029B788 /* PackagesController.m */,
-				444F0A8F22CDF0250029B788 /* PackageSearchViewController.h */,
-				444F0A9F22CDF0260029B788 /* PackageSearchViewController.m */,
-				44A5050422ECC53D0004D712 /* PickerTableViewController.h */,
-				44A5050522ECC53D0004D712 /* PickerTableViewController.m */,
-				44EB033322F9B53E0034DD4C /* PreferencesViewController.h */,
-				44EB033422F9B53E0034DD4C /* PreferencesViewController.m */,
-				44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */,
-				44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */,
-				444F0AB822CDF0290029B788 /* SectionPackagesController.h */,
-				444F0AA822CDF0270029B788 /* SectionPackagesController.m */,
-				444F0AA022CDF0260029B788 /* SectionsController.h */,
-				444F0AA922CDF0270029B788 /* SectionsController.m */,
-				444F0AB222CDF0280029B788 /* Source.h */,
-				444F0A9622CDF0260029B788 /* Source.m */,
-				444F0AA122CDF0270029B788 /* SourceCell.h */,
-				444F0AB322CDF0280029B788 /* SourceCell.m */,
-				444F0AB022CDF0280029B788 /* SourcesViewController.h */,
-				444F0AB722CDF0290029B788 /* SourcesViewController.m */,
-				44FC335222E76A3F00F19361 /* SpinnerViewController.h */,
-				44FC335322E76A3F00F19361 /* SpinnerViewController.m */,
-				44FEECD722D471A500950E24 /* TextViewCell.h */,
-				44FEECD822D471A500950E24 /* TextViewCell.m */,
-				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
-				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
-				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
-				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
-				44AE060F22FC1D110025D7A8 /* macros.pch */,
 			);
 			path = Magma;
 			sourceTree = "<group>";
@@ -311,8 +301,105 @@
 			isa = PBXGroup;
 			children = (
 				447DD39222CDEB1E00E6480F /* Magma.app */,
+				CEA65566231AA790004D57EC /* MagmaAPT.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CEA65569231AA7CD004D57EC /* Jailbroken */ = {
+			isa = PBXGroup;
+			children = (
+				CEA65567231AA791004D57EC /* Info.plist */,
+			);
+			path = Jailbroken;
+			sourceTree = "<group>";
+		};
+		CEA6556A231AA7D5004D57EC /* Sandboxed */ = {
+			isa = PBXGroup;
+			children = (
+				444F0AE322CDF3140029B788 /* Info.plist */,
+			);
+			path = Sandboxed;
+			sourceTree = "<group>";
+		};
+		CEA6556B231AA7DF004D57EC /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
+				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
+				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
+				44A5050222ECC33F0004D712 /* AddSourceViewController.m */,
+				444F0AB122CDF0280029B788 /* AppDelegate.h */,
+				444F0AB422CDF0280029B788 /* AppDelegate.m */,
+				4492710122E0986C000F7E51 /* AssetExtensions.h */,
+				4492710222E0986C000F7E51 /* AssetExtensions.m */,
+				444F0AB522CDF0280029B788 /* Database.h */,
+				444F0AA422CDF0270029B788 /* Database.m */,
+				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
+				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
+				444F0A9C22CDF0260029B788 /* DownloadsController.h */,
+				444F0A9422CDF0250029B788 /* DownloadsController.m */,
+				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
+				444F0A9222CDF0250029B788 /* DPKGParser.m */,
+				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
+				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
+				44CC638122E1D2D500215ED8 /* FilesViewController.h */,
+				44CC638222E1D2D500215ED8 /* FilesViewController.m */,
+				444F0AA522CDF0270029B788 /* HomeViewController.h */,
+				444F0A9822CDF0260029B788 /* HomeViewController.m */,
+				44FC334F22E7581700F19361 /* HTMLViewController.h */,
+				44FC335022E7581700F19361 /* HTMLViewController.m */,
+				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
+				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
+				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
+				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
+				44EB033122F9A3120034DD4C /* MagmaPreferences.m */,
+				444F0A9B22CDF0260029B788 /* main.m */,
+				44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */,
+				44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */,
+				444F0AA322CDF0270029B788 /* MGTableViewController.h */,
+				444F0A9D22CDF0260029B788 /* MGTableViewController.m */,
+				444F0A9922CDF0260029B788 /* MGViewController.h */,
+				444F0AA622CDF0270029B788 /* MGViewController.m */,
+				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
+				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
+				444F0AAF22CDF0280029B788 /* Package.h */,
+				444F0AB622CDF0280029B788 /* Package.m */,
+				444F0AAE22CDF0280029B788 /* PackageCell.h */,
+				444F0A9022CDF0250029B788 /* PackageCell.m */,
+				4430D18A22CF810E00F21B28 /* PackageDetailsController.h */,
+				4430D18B22CF810E00F21B28 /* PackageDetailsController.m */,
+				444F0AA722CDF0270029B788 /* PackagesController.h */,
+				444F0AAB22CDF0270029B788 /* PackagesController.m */,
+				444F0A8F22CDF0250029B788 /* PackageSearchViewController.h */,
+				444F0A9F22CDF0260029B788 /* PackageSearchViewController.m */,
+				44A5050422ECC53D0004D712 /* PickerTableViewController.h */,
+				44A5050522ECC53D0004D712 /* PickerTableViewController.m */,
+				44EB033322F9B53E0034DD4C /* PreferencesViewController.h */,
+				44EB033422F9B53E0034DD4C /* PreferencesViewController.m */,
+				44023A0722D4FB8600C155D8 /* RelatedPackagesController.h */,
+				44023A0822D4FB8600C155D8 /* RelatedPackagesController.m */,
+				444F0AB822CDF0290029B788 /* SectionPackagesController.h */,
+				444F0AA822CDF0270029B788 /* SectionPackagesController.m */,
+				444F0AA022CDF0260029B788 /* SectionsController.h */,
+				444F0AA922CDF0270029B788 /* SectionsController.m */,
+				444F0AB222CDF0280029B788 /* Source.h */,
+				444F0A9622CDF0260029B788 /* Source.m */,
+				444F0AA122CDF0270029B788 /* SourceCell.h */,
+				444F0AB322CDF0280029B788 /* SourceCell.m */,
+				444F0AB022CDF0280029B788 /* SourcesViewController.h */,
+				444F0AB722CDF0290029B788 /* SourcesViewController.m */,
+				44FC335222E76A3F00F19361 /* SpinnerViewController.h */,
+				44FC335322E76A3F00F19361 /* SpinnerViewController.m */,
+				44FEECD722D471A500950E24 /* TextViewCell.h */,
+				44FEECD822D471A500950E24 /* TextViewCell.m */,
+				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
+				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
+				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
+				44AE060F22FC1D110025D7A8 /* macros.pch */,
+			);
+			name = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -333,6 +420,23 @@
 			name = Magma;
 			productName = Magma;
 			productReference = 447DD39222CDEB1E00E6480F /* Magma.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CEA6552F231AA790004D57EC /* MagmaAPT */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CEA65563231AA790004D57EC /* Build configuration list for PBXNativeTarget "MagmaAPT" */;
+			buildPhases = (
+				CEA65530231AA790004D57EC /* Sources */,
+				CEA6555B231AA790004D57EC /* Frameworks */,
+				CEA65560231AA790004D57EC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MagmaAPT;
+			productName = Magma;
+			productReference = CEA65566231AA790004D57EC /* MagmaAPT.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -363,6 +467,7 @@
 			projectRoot = "";
 			targets = (
 				447DD39122CDEB1E00E6480F /* Magma */,
+				CEA6552F231AA790004D57EC /* MagmaAPT */,
 			);
 		};
 /* End PBXProject section */
@@ -374,6 +479,15 @@
 			files = (
 				444F0ABE22CDF0290029B788 /* Launch Screen.storyboard in Resources */,
 				444F0ABC22CDF0290029B788 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEA65560231AA790004D57EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEA65561231AA790004D57EC /* Launch Screen.storyboard in Resources */,
+				CEA65562231AA790004D57EC /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,6 +540,55 @@
 				44FC335122E7581700F19361 /* HTMLViewController.m in Sources */,
 				441C48F622E626300008D202 /* man2html.c in Sources */,
 				44CE730822D8DC6D00DD7767 /* OngoingDownloadCell.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEA65530231AA790004D57EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CEA65531231AA790004D57EC /* DownloadManager.m in Sources */,
+				CEA65532231AA790004D57EC /* MGViewController.m in Sources */,
+				CEA65533231AA790004D57EC /* UIImage+ResizeImage.m in Sources */,
+				CEA65534231AA790004D57EC /* FilesViewController.m in Sources */,
+				CEA65535231AA790004D57EC /* Package.m in Sources */,
+				CEA65536231AA790004D57EC /* AppDelegate.m in Sources */,
+				CEA65537231AA790004D57EC /* RelatedPackagesController.m in Sources */,
+				CEA65538231AA790004D57EC /* MGTableViewController.m in Sources */,
+				CEA65539231AA790004D57EC /* SourcesViewController.m in Sources */,
+				CEA6553A231AA790004D57EC /* SUStandardVersionComparator.m in Sources */,
+				CEA6553B231AA790004D57EC /* PreferencesViewController.m in Sources */,
+				CEA6553C231AA790004D57EC /* MagmaPreferences.m in Sources */,
+				CEA6553D231AA790004D57EC /* SectionPackagesController.m in Sources */,
+				CEA6553E231AA790004D57EC /* PackageDetailsController.m in Sources */,
+				CEA6553F231AA790004D57EC /* AssetExtensions.m in Sources */,
+				CEA65540231AA790004D57EC /* AddSourceViewController.m in Sources */,
+				CEA65541231AA790004D57EC /* PickerTableViewController.m in Sources */,
+				CEA65542231AA790004D57EC /* TextViewCell.m in Sources */,
+				CEA65543231AA790004D57EC /* Source.m in Sources */,
+				CEA65544231AA790004D57EC /* abbrev.c in Sources */,
+				CEA65545231AA790004D57EC /* ManpageViewController.m in Sources */,
+				CEA65546231AA790004D57EC /* PackagesController.m in Sources */,
+				CEA65547231AA790004D57EC /* NSData+Decompression.m in Sources */,
+				CEA65548231AA790004D57EC /* LocalPackageOverviewController.m in Sources */,
+				CEA65549231AA790004D57EC /* SpinnerViewController.m in Sources */,
+				CEA6554A231AA790004D57EC /* SourceCell.m in Sources */,
+				CEA6554B231AA790004D57EC /* PackageSearchViewController.m in Sources */,
+				CEA6554C231AA790004D57EC /* NSFileManager+Tar.m in Sources */,
+				CEA6554D231AA790004D57EC /* FeaturedSourceCell.m in Sources */,
+				CEA6554E231AA790004D57EC /* DPKGParser.m in Sources */,
+				CEA6554F231AA790004D57EC /* AddFeaturedSourceButton.m in Sources */,
+				CEA65550231AA790004D57EC /* PackageCell.m in Sources */,
+				CEA65551231AA790004D57EC /* strdefs.c in Sources */,
+				CEA65552231AA790004D57EC /* Database.m in Sources */,
+				CEA65553231AA790004D57EC /* HomeViewController.m in Sources */,
+				CEA65554231AA790004D57EC /* SectionsController.m in Sources */,
+				CEA65555231AA790004D57EC /* main.m in Sources */,
+				CEA65556231AA790004D57EC /* DownloadsController.m in Sources */,
+				CEA65557231AA790004D57EC /* InstructionsViewController.m in Sources */,
+				CEA65558231AA790004D57EC /* HTMLViewController.m in Sources */,
+				CEA65559231AA790004D57EC /* man2html.c in Sources */,
+				CEA6555A231AA790004D57EC /* OngoingDownloadCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,7 +715,7 @@
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = Magma/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Sandboxed/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -577,7 +740,57 @@
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = Magma/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Sandboxed/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/man2html",
+				);
+				OTHER_CFLAGS = "-I.";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pixelomer.Magma;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		CEA65564231AA790004D57EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9UQFRSGV3G;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Magma/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/man2html",
+				);
+				OTHER_CFLAGS = "-I.";
+				PRODUCT_BUNDLE_IDENTIFIER = com.pixelomer.Magma;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		CEA65565231AA790004D57EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9UQFRSGV3G;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Magma/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -611,6 +824,15 @@
 			buildConfigurations = (
 				447DD3A922CDEB2000E6480F /* Debug */,
 				447DD3AA22CDEB2000E6480F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CEA65563231AA790004D57EC /* Build configuration list for PBXNativeTarget "MagmaAPT" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEA65564231AA790004D57EC /* Debug */,
+				CEA65565231AA790004D57EC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
