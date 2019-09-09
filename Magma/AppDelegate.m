@@ -12,10 +12,12 @@ static NSString *workingDirectory;
 
 + (NSString *)workingDirectory {
 	if (!workingDirectory) {
+#if JAILBROKEN
+		workingDirectory = @"/var/mobile/Documents/Magma";
+#else
 		workingDirectory = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES).firstObject;
-#if DEBUG
-		NSLog(@"Working directory: %@", workingDirectory);
 #endif
+		NSLog(@"Working directory: %@", workingDirectory);
 	}
 	return workingDirectory;
 }

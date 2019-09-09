@@ -199,8 +199,9 @@
 		44FC335322E76A3F00F19361 /* SpinnerViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SpinnerViewController.m; sourceTree = "<group>"; };
 		44FEECD722D471A500950E24 /* TextViewCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TextViewCell.h; sourceTree = "<group>"; };
 		44FEECD822D471A500950E24 /* TextViewCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TextViewCell.m; sourceTree = "<group>"; };
+		CE37428C2326AD5A0079FBBE /* macros.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.pch; sourceTree = "<group>"; };
+		CE37428D2326AE890079FBBE /* macros.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.pch; sourceTree = "<group>"; };
 		CEA65566231AA790004D57EC /* MagmaAPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MagmaAPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEA65567231AA791004D57EC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = /Users/pixelomer/Documents/Projects/Magma/Info.plist; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -309,7 +310,7 @@
 		CEA65569231AA7CD004D57EC /* Jailbroken */ = {
 			isa = PBXGroup;
 			children = (
-				CEA65567231AA791004D57EC /* Info.plist */,
+				44AE060F22FC1D110025D7A8 /* macros.pch */,
 			);
 			path = Jailbroken;
 			sourceTree = "<group>";
@@ -317,7 +318,7 @@
 		CEA6556A231AA7D5004D57EC /* Sandboxed */ = {
 			isa = PBXGroup;
 			children = (
-				444F0AE322CDF3140029B788 /* Info.plist */,
+				CE37428C2326AD5A0079FBBE /* macros.pch */,
 			);
 			path = Sandboxed;
 			sourceTree = "<group>";
@@ -397,7 +398,8 @@
 				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
 				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
 				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
-				44AE060F22FC1D110025D7A8 /* macros.pch */,
+				CE37428D2326AE890079FBBE /* macros.pch */,
+				444F0AE322CDF3140029B788 /* Info.plist */,
 			);
 			name = Shared;
 			sourceTree = "<group>";
@@ -714,8 +716,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = "$(SRCROOT)/Magma/Sandboxed/Info.plist";
+				GCC_PREFIX_HEADER = Magma/Sandboxed/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -739,8 +741,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = "$(SRCROOT)/Magma/Sandboxed/Info.plist";
+				GCC_PREFIX_HEADER = Magma/Sandboxed/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -764,8 +766,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				GCC_PREFIX_HEADER = Magma/Jailbroken/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -789,8 +791,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9UQFRSGV3G;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = Magma/macros.pch;
-				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				GCC_PREFIX_HEADER = Magma/Jailbroken/macros.pch;
+				INFOPLIST_FILE = "$(SRCROOT)/Magma/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

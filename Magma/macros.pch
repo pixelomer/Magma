@@ -2,13 +2,18 @@
 //  macros.pch
 //  Magma
 //
-//  Created by PixelOmer on 8.08.2019.
+//  Created by PixelOmer on 9.09.2019.
 //  Copyright © 2019 PixelOmer. All rights reserved.
 //
 
 #ifndef macros_pch
 #define macros_pch
 
-
+#if DEBUG
+// The string is not necessary but it makes it necessary to use a string literal so it's good
+#define NSLog(args...) NSLog(@""args)
+#else
+#define NSLog(...)
+#endif
 
 #endif /* macros_pch */
