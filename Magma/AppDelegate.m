@@ -1,3 +1,5 @@
+#import <TargetConditionals.h>
+#import <Magma/macOS/CatalystSplitViewController.h>
 #import "AppDelegate.h"
 #import "HomeViewController.h"
 #import "DownloadsController.h"
@@ -25,12 +27,24 @@ static NSString *workingDirectory;
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 	[Database.sharedInstance startLoadingDataIfNeeded];
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+	#if TARGET_OS_MACCATALYST
+	#define star [UIImage systemImageNamed:@"star.fill"]
+	#define downloads [UIImage systemImageNamed:@"square.and.arrow.down.fill"]
+	#define search [UIImage systemImageNamed:@"magnifyingglass"]
+	#else
+	#define star @(UITabBarSystemItemFeatured)
+	#define downloads @(UITabBarSystemItemDownloads)
+	#define search @(UITabBarSystemItemSearch)
+	#endif
 	NSArray *tabs = @[
-		@[@(UITabBarSystemItemFeatured), @NO],
+		@[star, @"Featured", @NO],
 		@[[UIImage imageNamed:@"Storage"], @"Sources", @YES],
-		@[@(UITabBarSystemItemDownloads), @NO],
-		@[@(UITabBarSystemItemSearch), @YES]
+		@[downloads, @"Downloads", @NO],
+		@[search, @"Search", @YES]
 	];
+	#undef star
+	#undef downloads
+	#undef search
 	NSMutableArray *viewControllers = @[
 		[HomeViewController new],
 		[SourcesViewController new],
@@ -52,9 +66,16 @@ static NSString *workingDirectory;
 		}
 		viewControllers[i] = [[UINavigationController alloc] initWithRootViewController:rootViewController];
 	}
-	_rootViewController = [UITabBarController new];
-	_rootViewController.view.backgroundColor = [UIColor whiteColor];
+#if TARGET_OS_MACCATALYST
+	_rootViewController = [CatalystSplitViewController new];
 	_rootViewController.viewControllers = viewControllers;
+	_window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
+	_window.windowScene.titlebar.autoHidesToolbarInFullScreen = YES;
+#else
+	_rootViewController = [UITabBarController new];
+	_rootViewController.viewControllers = viewControllers;
+#endif
+	_rootViewController.view.backgroundColor = [UIColor systemGray6Color];
 	_window.rootViewController = _rootViewController;
 	[_window makeKeyAndVisible];
 }
