@@ -33,6 +33,10 @@
 - (NSString *)substringFromPackagesFileInRange:(NSRange)range encoding:(NSStringEncoding *)encodingPt {
 	NSString *result = nil;
 	char *substring = malloc(range.length);
+	if (!substring) {
+		// Either the range is horribly wrong or the system is out of memory
+		return nil;
+	}
 	@synchronized (fileHandleToken) {
 		long oldPos = ftell(_packagesFileHandle);
 		fseek(_packagesFileHandle, range.location, SEEK_SET);
@@ -100,21 +104,23 @@
 				if (!strcmp(cline, "\n")) {
 					@autoreleasepool {
 						@try {
-							Package *package = [Package alloc];
-							NSRange range = NSMakeRange(startIndex, length-1);
-							if (MagmaPreferences.assumesUTF8) {
-								package.encoding = NSUTF8StringEncoding; // Assume UTF-8
-								if (![package initWithRange:range source:self]) {
-									package.encoding = 0; // This is not UTF-8, try finding the correct encoding
+							if (length) {
+								Package *package = [Package alloc];
+								NSRange range = NSMakeRange(startIndex, length-1);
+								if (MagmaPreferences.assumesUTF8) {
+									package.encoding = NSUTF8StringEncoding; // Assume UTF-8
+									if (![package initWithRange:range source:self]) {
+										package.encoding = 0; // This is not UTF-8, try finding the correct encoding
+										package = [package initWithRange:range source:self];
+									}
+								}
+								else {
 									package = [package initWithRange:range source:self];
 								}
-							}
-							else {
-								package = [package initWithRange:range source:self];
+								if (package) [packages addObject:package];
 							}
 							startIndex += length + 1;
 							length = 0;
-							if (package) [packages addObject:package];
 						}
 						@catch (NSException *ex) {
 							continue;

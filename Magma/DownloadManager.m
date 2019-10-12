@@ -253,8 +253,11 @@ static NSString *workingDirectory;
 		object:self
 		userInfo:@{ @"taskID" : @(downloadTask.taskIdentifier), @"remotePackage" : remotePackage ?: NSNull.null }
 	];
+#if !TARGET_OS_MACCATALYST
 	if ([remotePackage.architecture isEqualToString:@"iphoneos-arm"]) [downloadTask cancel];
-	else [downloadTask resume];
+	else
+#endif
+		[downloadTask resume];
 	return YES;
 }
 

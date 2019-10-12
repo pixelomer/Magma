@@ -170,7 +170,13 @@ static id MagmaCatalystTabBarControllerHook(UIViewController *self, SEL _cmd) {
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-	super.viewControllers = @[_tableViewController, _viewControllers[indexPath.row]];
+	NSArray<__kindof NSObject *> *newArray = @[_tableViewController, _viewControllers[indexPath.row]];
+	if ([newArray isEqual:super.viewControllers]) {
+		if ([newArray[1] isKindOfClass:[UINavigationController class]]) {
+			[(UINavigationController *)newArray[1] popToRootViewControllerAnimated:YES];
+		}
+	}
+	else super.viewControllers = newArray;
 }
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
