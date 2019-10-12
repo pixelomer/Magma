@@ -10,6 +10,7 @@
 	self.title = @"Search";
 }
 
+#if !TARGET_OS_MACCATALYST
 - (UITableView *)setupTableView {
 	self.dataSource = self;
 	self.delegate = self;
@@ -46,6 +47,7 @@
 	}
 	return tableView;
 }
+#endif
 
 - (void)databaseDidLoad:(Database *)database {
 	[super databaseDidLoad:database];
@@ -70,6 +72,7 @@
 	}
 }
 
+#if !TARGET_OS_MACCATALYST
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar {
 	[searchBar resignFirstResponder];
 	[searchBar setShowsCancelButton:NO animated:YES];
@@ -84,6 +87,7 @@
 	[searchBar resignFirstResponder];
 	[searchBar setShowsCancelButton:NO animated:YES];
 }
+#endif
 
 - (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
 	packages = nil;

@@ -104,6 +104,8 @@
 		CEA6555F231AA790004D57EC /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		CEA65561231AA790004D57EC /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9522CDF0250029B788 /* Launch Screen.storyboard */; };
 		CEA65562231AA790004D57EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9322CDF0250029B788 /* Assets.xcassets */; };
+		CEE570432349DB130063C1E4 /* CatalystSplitViewControllerCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570422349DB130063C1E4 /* CatalystSplitViewControllerCell.m */; };
+		CEE570462349DBE90063C1E4 /* CatalystSearchProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570452349DBE90063C1E4 /* CatalystSearchProxy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -206,7 +208,12 @@
 		CE37428D2326AE890079FBBE /* macros.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = macros.pch; sourceTree = "<group>"; };
 		CE577A442336B24E008312F9 /* MagmaMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MagmaMac.entitlements; sourceTree = "<group>"; };
 		CE577A452336B25E008312F9 /* Magma.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Magma.entitlements; sourceTree = "<group>"; };
+		CE67B6AC233AA246007A0706 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		CEA65566231AA790004D57EC /* MagmaAPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MagmaAPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEE570412349DB130063C1E4 /* CatalystSplitViewControllerCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CatalystSplitViewControllerCell.h; sourceTree = "<group>"; };
+		CEE570422349DB130063C1E4 /* CatalystSplitViewControllerCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CatalystSplitViewControllerCell.m; sourceTree = "<group>"; };
+		CEE570442349DBE90063C1E4 /* CatalystSearchProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CatalystSearchProxy.h; sourceTree = "<group>"; };
+		CEE570452349DBE90063C1E4 /* CatalystSearchProxy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CatalystSearchProxy.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -283,6 +290,7 @@
 		444F0ADE22CDF2600029B788 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CE67B6AC233AA246007A0706 /* UIKit.framework */,
 				447E40D622FD8DE800B6BD2D /* CoreServices.framework */,
 				44DA20B822E36EF5009FC7C9 /* WebKit.framework */,
 				44E067CF22D7772E0010D4A1 /* liblzma.tbd */,
@@ -328,6 +336,10 @@
 			children = (
 				CE2314B52337C14E009B069B /* CatalystSplitViewController.h */,
 				CE2314B62337C14E009B069B /* CatalystSplitViewController.m */,
+				CEE570412349DB130063C1E4 /* CatalystSplitViewControllerCell.h */,
+				CEE570422349DB130063C1E4 /* CatalystSplitViewControllerCell.m */,
+				CEE570442349DBE90063C1E4 /* CatalystSearchProxy.h */,
+				CEE570452349DBE90063C1E4 /* CatalystSearchProxy.m */,
 			);
 			path = macOS;
 			sourceTree = "<group>";
@@ -529,6 +541,7 @@
 				444F0AC622CDF0290029B788 /* MGViewController.m in Sources */,
 				444F0AC922CDF0290029B788 /* UIImage+ResizeImage.m in Sources */,
 				44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */,
+				CEE570432349DB130063C1E4 /* CatalystSplitViewControllerCell.m in Sources */,
 				444F0ACE22CDF0290029B788 /* Package.m in Sources */,
 				444F0ACD22CDF0290029B788 /* AppDelegate.m in Sources */,
 				44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */,
@@ -541,6 +554,7 @@
 				4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */,
 				4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */,
 				44A5050322ECC33F0004D712 /* AddSourceViewController.m in Sources */,
+				CEE570462349DBE90063C1E4 /* CatalystSearchProxy.m in Sources */,
 				CE2314B72337C14E009B069B /* CatalystSplitViewController.m in Sources */,
 				44A5050622ECC53D0004D712 /* PickerTableViewController.m in Sources */,
 				44FEECD922D471A500950E24 /* TextViewCell.m in Sources */,

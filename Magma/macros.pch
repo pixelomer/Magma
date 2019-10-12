@@ -9,11 +9,9 @@
 #ifndef macros_pch
 #define macros_pch
 
-#if DEBUG
+#include <TargetConditionals.h>
+
 // The string is not necessary but it makes it necessary to use a string literal so it's good
 #define NSLog(args...) NSLog(@""args)
-#else
-#define NSLog(...)
-#endif
 
 #endif /* macros_pch */

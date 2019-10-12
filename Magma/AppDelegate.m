@@ -1,5 +1,3 @@
-#import <TargetConditionals.h>
-#import <Magma/macOS/CatalystSplitViewController.h>
 #import "AppDelegate.h"
 #import "HomeViewController.h"
 #import "DownloadsController.h"
@@ -7,6 +5,8 @@
 #import "PackageSearchViewController.h"
 #import "MGViewController.h"
 #import "UIImage+ResizeImage.h"
+#import <objc/runtime.h>
+#import <Magma/macOS/CatalystSplitViewController.h>
 
 @implementation AppDelegate
 
@@ -27,24 +27,24 @@ static NSString *workingDirectory;
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
 	[Database.sharedInstance startLoadingDataIfNeeded];
 	_window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	#if TARGET_OS_MACCATALYST
-	#define star [UIImage systemImageNamed:@"star.fill"]
-	#define downloads [UIImage systemImageNamed:@"square.and.arrow.down.fill"]
-	#define search [UIImage systemImageNamed:@"magnifyingglass"]
-	#else
-	#define star @(UITabBarSystemItemFeatured)
-	#define downloads @(UITabBarSystemItemDownloads)
-	#define search @(UITabBarSystemItemSearch)
-	#endif
+#if TARGET_OS_MACCATALYST
+#define star [UIImage systemImageNamed:@"star.fill"]
+#define downloads [UIImage systemImageNamed:@"square.and.arrow.down.fill"]
+#define search [UIImage systemImageNamed:@"magnifyingglass"]
+#else
+#define star @(UITabBarSystemItemFeatured)
+#define downloads @(UITabBarSystemItemDownloads)
+#define search @(UITabBarSystemItemSearch)
+#endif
 	NSArray *tabs = @[
 		@[star, @"Featured", @NO],
 		@[[UIImage imageNamed:@"Storage"], @"Sources", @YES],
 		@[downloads, @"Downloads", @NO],
 		@[search, @"Search", @YES]
 	];
-	#undef star
-	#undef downloads
-	#undef search
+#undef star
+#undef downloads
+#undef search
 	NSMutableArray *viewControllers = @[
 		[HomeViewController new],
 		[SourcesViewController new],
@@ -69,6 +69,7 @@ static NSString *workingDirectory;
 #if TARGET_OS_MACCATALYST
 	_rootViewController = [CatalystSplitViewController new];
 	_rootViewController.viewControllers = viewControllers;
+	_rootViewController.searchTabIndex = @(-1);
 	_window.windowScene.titlebar.titleVisibility = UITitlebarTitleVisibilityHidden;
 	_window.windowScene.titlebar.autoHidesToolbarInFullScreen = YES;
 #else

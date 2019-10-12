@@ -34,7 +34,7 @@ static UIFont *defaultFont;
 			class_addMethod(self, selector, class_getMethodImplementation(self, @selector(showDepends)), "v@:");
 		}
 		selectors = nil;
-		separatorColor = [UIColor colorWithRed:0.918 green:0.918 blue:0.925 alpha:1.0];
+		separatorColor = [UIColor colorNamed:@"SeparatorColor"];
 		headerFont = [UIFont systemFontOfSize:22 weight:UIFontWeightBold];
 		defaultFont = [UIFont systemFontOfSize:17];
 		allCells = @[
@@ -189,7 +189,7 @@ static UIFont *defaultFont;
 		else {
 			cell.accessoryType = cell.editingAccessoryType = UITableViewCellAccessoryNone;
 			cell.selectionStyle = UITableViewCellSelectionStyleNone;
-			cell.textLabel.textColor = [UIColor blackColor];
+			cell.textLabel.textColor = [UIColor colorNamed:@"TextColor"];
 		}
 		return cell;
 	}

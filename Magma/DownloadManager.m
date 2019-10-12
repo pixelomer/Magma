@@ -161,6 +161,7 @@ static NSString *workingDirectory;
 			if (counter == files.count) {
 				NSString *pathToMove = [self.downloadsPath stringByAppendingPathComponent:packageName];
 				NSString *magmaContainer = [finalOutput stringByAppendingPathComponent:@".magma"];
+				// There's a problem here? Good luck debugging it
 				if ((([NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil] || true) && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:finalOutput withTarPath:files[1] error:nil progress:nil] && [NSFileManager.defaultManager createFilesAndDirectoriesAtPath:[finalOutput stringByAppendingPathComponent:@"DEBIAN"] withTarPath:files[0] error:nil progress:nil] && ([NSFileManager.defaultManager removeItemAtPath:magmaContainer error:nil] || true) && [NSFileManager.defaultManager createDirectoryAtPath:magmaContainer withIntermediateDirectories:NO attributes:nil error:nil]) || ([NSFileManager.defaultManager removeItemAtPath:finalOutput error:nil] && false)) {
 					NSString *manpageRoot = [finalOutput stringByAppendingPathComponent:@"usr/share/man"];
 					NSString *magmaManpageRoot = [magmaContainer stringByAppendingPathComponent:@"manpages"];
