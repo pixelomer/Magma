@@ -8,6 +8,7 @@
 @interface Source(Private)
 - (void)setIsRefreshing:(BOOL)isRefreshing;
 - (void)setLastRefresh:(NSDate *)lastRefresh;
+- (void)setRefreshProgress:(NSProgress *)newProgress;
 @end
 
 @interface Package(Private)
@@ -278,24 +279,39 @@ static NSArray *paths;
 	];
 }
 
+#define FETCH_KEY @selector(fetchURL:outputUserInfo:outputFile:)
+
 - (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location {
-	NSString *filePath = objc_getAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:));
+	NSString *filePath = [objc_getAssociatedObject(downloadTask, FETCH_KEY) firstObject];
 	[NSFileManager.defaultManager removeItemAtPath:filePath error:nil];
 	[NSFileManager.defaultManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:filePath] error:nil];
-	objc_setAssociatedObject(downloadTask, @selector(fetchURL:outputUserInfo:outputFile:), nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(downloadTask, FETCH_KEY, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {
-	objc_setAssociatedObject(task, @selector(fetchURL:outputUserInfo:outputFile:), error, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	objc_setAssociatedObject(task, FETCH_KEY, error, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (BOOL)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo outputFile:(NSString *)filePath {
+- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+	NSProgress *progress = [objc_getAssociatedObject(downloadTask, FETCH_KEY) lastObject];
+	if ([progress isKindOfClass:[NSProgress class]]) {
+		if (totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown) {
+			totalBytesExpectedToWrite = 0;
+			totalBytesWritten = 0;
+		}
+		progress.totalUnitCount = totalBytesExpectedToWrite;
+		progress.completedUnitCount = totalBytesWritten;
+	}
+}
+
+- (BOOL)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo outputFile:(NSString *)filePath progress:(NSProgress *)progress {
 	NSURLSession *session = [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration delegate:self delegateQueue:nil];
 	NSURLSessionDownloadTask *task = [session downloadTaskWithURL:url];
-	objc_setAssociatedObject(task, _cmd, filePath, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+	NSArray *taskArray = @[filePath, progress ?: NSNull.null];
+	objc_setAssociatedObject(task, FETCH_KEY, taskArray, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	[task resume];
 	NSError *error;
-	while ((id)(error = objc_getAssociatedObject(task, _cmd)) == filePath) {
+	while ((id)(error = objc_getAssociatedObject(task, FETCH_KEY)) == taskArray) {
 		[NSThread sleepForTimeInterval:0.2];
 	}
 	NSHTTPURLResponse *response = (id)task.response;
@@ -303,7 +319,7 @@ static NSArray *paths;
 		userInfo[@"reason"] = error.description;
 		userInfo[@"errorCode"] = @(error.code);
 		error = nil;
-		objc_setAssociatedObject(task, _cmd, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+		objc_setAssociatedObject(task, FETCH_KEY, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 		return NO;
 	}
 	else if (!response || response.statusCode != 200) {
@@ -315,6 +331,12 @@ static NSArray *paths;
         userInfo[@"errorCode"] = NSNull.null;
         return YES;
     }
+}
+
+#undef FETCH_KEY
+
+- (BOOL)fetchURL:(NSURL *)url outputUserInfo:(NSMutableDictionary *)userInfo outputFile:(NSString *)filePath {
+	return [self fetchURL:url outputUserInfo:userInfo outputFile:filePath progress:nil];
 }
 
 - (void)refreshSource:(Source *)source {
@@ -339,7 +361,8 @@ static NSArray *paths;
 	NSLog(@"Error: %@", error); \
 }
 	NSString *releaseFilePath = [[self.class releaseFilePathForSource:source] stringByAppendingString:@".raw"];
-	if ([self fetchURL:releaseFileURL outputUserInfo:userInfo outputFile:releaseFilePath]) {
+	source.refreshProgress = [NSProgress new];
+	if ([self fetchURL:releaseFileURL outputUserInfo:userInfo outputFile:releaseFilePath progress:source.refreshProgress]) {
 		NSString *encodedFile = [[NSString alloc] initWithContentsOfFile:releaseFilePath encoding:NSUTF8StringEncoding error:nil];
 		source.rawReleaseFile = encodedFile;
 		if (source.rawReleaseFile) {
@@ -397,6 +420,8 @@ static NSArray *paths;
 	sourcesPlist[@(source.databaseID)][@"lastRefresh"] = NSDate.date;
 #undef parseFailure
 	// Notify observers about the completion of the operation
+	source.refreshProgress.totalUnitCount = 1;
+	source.refreshProgress.completedUnitCount = 0;
 	source.isRefreshing = NO;
 	[NSNotificationCenter.defaultCenter
 		postNotificationName:SourceDidStopRefreshing

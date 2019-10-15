@@ -55,7 +55,9 @@
 		44FC335122E7581700F19361 /* HTMLViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335022E7581700F19361 /* HTMLViewController.m */; };
 		44FC335422E76A3F00F19361 /* SpinnerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FC335322E76A3F00F19361 /* SpinnerViewController.m */; };
 		44FEECD922D471A500950E24 /* TextViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 44FEECD822D471A500950E24 /* TextViewCell.m */; };
-		CE2314B72337C14E009B069B /* CatalystSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2314B62337C14E009B069B /* CatalystSplitViewController.m */; };
+		CE0837B4235502B0008C0322 /* CatalystSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CE2314B62337C14E009B069B /* CatalystSplitViewController.m */; };
+		CE0837B5235502B2008C0322 /* CatalystSplitViewControllerCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570422349DB130063C1E4 /* CatalystSplitViewControllerCell.m */; };
+		CE0837B6235502B4008C0322 /* CatalystSearchProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570452349DBE90063C1E4 /* CatalystSearchProxy.m */; };
 		CEA65531231AA790004D57EC /* DownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 44023A0222D4EBE100C155D8 /* DownloadManager.m */; };
 		CEA65532231AA790004D57EC /* MGViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AA622CDF0270029B788 /* MGViewController.m */; };
 		CEA65533231AA790004D57EC /* UIImage+ResizeImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */; };
@@ -104,8 +106,6 @@
 		CEA6555F231AA790004D57EC /* libbz2.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 444F0ADF22CDF2600029B788 /* libbz2.tbd */; };
 		CEA65561231AA790004D57EC /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9522CDF0250029B788 /* Launch Screen.storyboard */; };
 		CEA65562231AA790004D57EC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 444F0A9322CDF0250029B788 /* Assets.xcassets */; };
-		CEE570432349DB130063C1E4 /* CatalystSplitViewControllerCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570422349DB130063C1E4 /* CatalystSplitViewControllerCell.m */; };
-		CEE570462349DBE90063C1E4 /* CatalystSearchProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE570452349DBE90063C1E4 /* CatalystSearchProxy.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -363,6 +363,7 @@
 		CEA6556B231AA7DF004D57EC /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
 				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
 				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
 				44A5050122ECC33F0004D712 /* AddSourceViewController.h */,
@@ -387,7 +388,6 @@
 				444F0A9822CDF0260029B788 /* HomeViewController.m */,
 				44FC334F22E7581700F19361 /* HTMLViewController.h */,
 				44FC335022E7581700F19361 /* HTMLViewController.m */,
-				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
 				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
 				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
 				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
@@ -541,7 +541,7 @@
 				444F0AC622CDF0290029B788 /* MGViewController.m in Sources */,
 				444F0AC922CDF0290029B788 /* UIImage+ResizeImage.m in Sources */,
 				44CC638322E1D2D500215ED8 /* FilesViewController.m in Sources */,
-				CEE570432349DB130063C1E4 /* CatalystSplitViewControllerCell.m in Sources */,
+				CE0837B5235502B2008C0322 /* CatalystSplitViewControllerCell.m in Sources */,
 				444F0ACE22CDF0290029B788 /* Package.m in Sources */,
 				444F0ACD22CDF0290029B788 /* AppDelegate.m in Sources */,
 				44023A0922D4FB8600C155D8 /* RelatedPackagesController.m in Sources */,
@@ -553,9 +553,9 @@
 				444F0AC722CDF0290029B788 /* SectionPackagesController.m in Sources */,
 				4430D18C22CF810E00F21B28 /* PackageDetailsController.m in Sources */,
 				4492710322E0986C000F7E51 /* AssetExtensions.m in Sources */,
+				CE0837B4235502B0008C0322 /* CatalystSplitViewController.m in Sources */,
+				CE0837B6235502B4008C0322 /* CatalystSearchProxy.m in Sources */,
 				44A5050322ECC33F0004D712 /* AddSourceViewController.m in Sources */,
-				CEE570462349DBE90063C1E4 /* CatalystSearchProxy.m in Sources */,
-				CE2314B72337C14E009B069B /* CatalystSplitViewController.m in Sources */,
 				44A5050622ECC53D0004D712 /* PickerTableViewController.m in Sources */,
 				44FEECD922D471A500950E24 /* TextViewCell.m in Sources */,
 				444F0ABF22CDF0290029B788 /* Source.m in Sources */,

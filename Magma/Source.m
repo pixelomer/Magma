@@ -17,8 +17,17 @@
 	_architecture = arch;
 	_distribution = distribution ?: @"./";
 	_components = (components.length > 0) ? [components componentsSeparatedByString:@" "] : nil;
+	_refreshProgress = nil;
 	if (_components.count == 0) _components = nil;
 	return self;
+}
+
+- (void)setRefreshProgress:(NSProgress *)refreshProgress {
+	if (refreshProgress != _refreshProgress) {
+		[self willChangeValueForKey:@"refreshProgress"];
+		_refreshProgress = refreshProgress;
+		[self didChangeValueForKey:@"refreshProgress"];
+	}
 }
 
 - (void)unloadPackagesFile {
@@ -79,6 +88,20 @@
 		if (rangesFileHandle) {
 			char *cinfo = nil;
 			size_t nread = 0;
+			if (_refreshProgress) {
+				{
+					int c = -1;
+					uint64_t totalUnitCount = 0;
+					do {
+						c = getc(rangesFileHandle);
+						if (c == '\n') totalUnitCount++;
+					}
+					while (c != -1);
+					_refreshProgress.completedUnitCount = 0;
+					_refreshProgress.totalUnitCount = totalUnitCount;
+				}
+				fseek(rangesFileHandle, 0, SEEK_SET);
+			}
 			while (getline(&cinfo, &nread, rangesFileHandle) != -1) {
 				@autoreleasepool {
 					NSString *info = [NSString stringWithCString:cinfo encoding:NSASCIIStringEncoding];
@@ -100,10 +123,35 @@
 			NSUInteger length = 0;
 			char *cline = NULL;
 			size_t nread = 0;
+			if (_refreshProgress) {
+				{
+					unsigned char nl_counter = 0;
+					int c = -1;
+					uint64_t totalUnitCount = 1;
+					do {
+						c = getc(_packagesFileHandle);
+						switch (c) {
+							case '\n':
+								if (nl_counter <= 1) nl_counter++;
+							case ' ':
+							case '\t':
+								break;
+							default:
+								if (nl_counter >= 2) totalUnitCount++;
+								nl_counter = 0;
+						}
+					}
+					while (c != -1);
+					_refreshProgress.completedUnitCount = 0;
+					_refreshProgress.totalUnitCount = totalUnitCount;
+				}
+				fseek(_packagesFileHandle, 0, SEEK_SET);
+			}
 			while (getline(&cline, &nread, _packagesFileHandle) != -1) {
 				if (!strcmp(cline, "\n")) {
 					@autoreleasepool {
 						@try {
+							_refreshProgress.completedUnitCount++;
 							if (length) {
 								Package *package = [Package alloc];
 								NSRange range = NSMakeRange(startIndex, length-1);
@@ -157,8 +205,11 @@
 	NSString *tmpPath = [finalPath stringByAppendingString:@".tmp"];
 	FILE *rangesFile = fopen(tmpPath.UTF8String, "w");
 	if (!rangesFile) return;
+	_refreshProgress.completedUnitCount = 0;
+	_refreshProgress.totalUnitCount = _packages.count;
 	for (Package *package in _packages) {
 		@autoreleasepool {
+			_refreshProgress.completedUnitCount++;
 			NSRange range = package.range;
 			NSString *line = [NSString stringWithFormat:@"%@-%lu\n", NSStringFromRange(range), (unsigned long)package.encoding];
 			fwrite(line.UTF8String, 1, strlen(line.UTF8String), rangesFile);

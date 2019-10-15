@@ -4,7 +4,7 @@
 @class CatalystSplitViewController;
 #endif
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,UISceneDelegate>
 @property (nonatomic, strong) UIWindow *window;
 @property (nonatomic, strong)
 #if TARGET_OS_MACCATALYST

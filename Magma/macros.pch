@@ -10,6 +10,7 @@
 #define macros_pch
 
 #include <TargetConditionals.h>
+#define StaticKey(name) static void * const name = (void *)&name
 
 // The string is not necessary but it makes it necessary to use a string literal so it's good
 #define NSLog(args...) NSLog(@""args)

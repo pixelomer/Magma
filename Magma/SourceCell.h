@@ -3,9 +3,7 @@
 @class Source;
 
 @interface SourceCell : UITableViewCell {
-	UIImageView *iconView;
-	UIActivityIndicatorView *activityIndicator;
-	NSArray *labelConstraints;
+	UIProgressView *_progressView;
 }
 @property (nonatomic, weak, setter=setSource:) Source *source;
 - (void)setSource:(Source *)source;

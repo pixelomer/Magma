@@ -24,6 +24,7 @@ typedef NSString* PackagesAlgorithm;
 @property (nonatomic, readonly, assign) BOOL isRefreshing;
 @property (nonatomic, readonly, copy) NSDictionary<NSString *, NSArray<Package *> *> *sections;
 @property (nonatomic, readonly, copy) NSArray<Package *> *packages;
+@property (nonatomic, readonly, strong) NSProgress *refreshProgress;
 + (BOOL)extractPackagesFile:(NSString *)inputFilePath toFile:(NSString *)outputFilePath usingAlgorithm:(PackagesAlgorithm)algorithm;
 - (instancetype)initWithBaseURL:(NSString *)baseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components;
 - (NSString *)sourcesListEntryWithComponents:(BOOL)includeComponents;
