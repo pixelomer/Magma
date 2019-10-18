@@ -7,6 +7,9 @@
 
 @implementation Source
 
+#define RANGES_HEADER_SIZE 4
+static const char *rangesHeader = "MG\x00\x01";
+
 - (instancetype)initWithBaseURL:(NSString *)rawBaseURL architecture:(NSString *)arch distribution:(NSString *)distribution components:(NSString *)components {
 	if (!rawBaseURL) return nil;
 	NSURL *baseURL = [NSURL URLWithString:rawBaseURL];
@@ -83,42 +86,56 @@
 	[self unloadPackagesFile];
 	NSString *packagesFilePath = [Database.class packagesFilePathForSource:self];
 	if ((_packagesFileHandle = fopen(packagesFilePath.UTF8String, "r"))) {
-		NSMutableArray *packages = [NSMutableArray new];
-		FILE *rangesFileHandle = fopen([packagesFilePath stringByAppendingString:@"_ranges"].UTF8String, "r");
+		NSMutableSet *packages = nil;
+		NSString *rangesFilePath = [packagesFilePath stringByAppendingString:@"_ranges"];
+		FILE *rangesFileHandle = fopen(rangesFilePath.UTF8String, "r");
 		if (rangesFileHandle) {
-			char *cinfo = nil;
-			size_t nread = 0;
-			if (_refreshProgress) {
-				{
-					int c = -1;
-					uint64_t totalUnitCount = 0;
-					do {
-						c = getc(rangesFileHandle);
-						if (c == '\n') totalUnitCount++;
-					}
-					while (c != -1);
-					_refreshProgress.completedUnitCount = 0;
-					_refreshProgress.totalUnitCount = totalUnitCount;
-				}
-				fseek(rangesFileHandle, 0, SEEK_SET);
+			uint8_t header[4];
+			header[0] = 0; // Just in case
+			fread(header, 1, sizeof(header), rangesFileHandle);
+			if (memcmp(header, rangesHeader, 4)) {
+				fclose(rangesFileHandle);
+				unlink(rangesFilePath.UTF8String);
+				rangesFileHandle = NULL;
 			}
-			while (getline(&cinfo, &nread, rangesFileHandle) != -1) {
+		}
+		if (rangesFileHandle) {
+			/*--[Reload algorithm]------------------------------*/
+			/* This algorithm makes use of the _ranges file     */
+			/* to parse the package entries at the specified    */
+			/* locations. This algorithm is much faster since   */
+			/* it doesn't need to read the entire file byte by  */
+			/* byte just to find where the entries are.         */
+			/*--------------------------------------------------*/
+			fseek(rangesFileHandle, 0, SEEK_END);
+			_refreshProgress.completedUnitCount = 0;
+			long packageCount = ((ftell(rangesFileHandle)-RANGES_HEADER_SIZE) / (sizeof(uint32_t)*3));
+			packages = [NSMutableSet setWithCapacity:packageCount];
+			_refreshProgress.totalUnitCount = packageCount;
+			fseek(rangesFileHandle, RANGES_HEADER_SIZE, SEEK_SET);
+			while (1) {
 				@autoreleasepool {
-					NSString *info = [NSString stringWithCString:cinfo encoding:NSASCIIStringEncoding];
-					NSArray *parts = [info componentsSeparatedByString:@"-"];
-					if (parts.count >= 2) {
-						NSRange range = NSRangeFromString(parts[0]);
-						NSStringEncoding encoding = (NSStringEncoding)[(NSString *)parts[1] longLongValue];
-						Package *package = [Package alloc];
-						package.encoding = encoding;
-						package = [package initWithRange:range source:self];
-						if (package) [packages addObject:package];
-					}
+					uint32_t buffer[3];
+					if (fread(buffer, sizeof(uint32_t), 3, rangesFileHandle) != 3) break;
+					NSStringEncoding encoding = (NSStringEncoding)buffer[2];
+					Package *package = [Package alloc];
+					package.encoding = encoding;
+					package = [package initWithRange:NSMakeRange(buffer[0], buffer[1]) source:self];
+					if (package) [packages addObject:package];
 				}
 			}
 			fclose(rangesFileHandle);
 		}
 		else {
+			/*--[Discovery algorithm]-------------------------*/
+			/* This algorithm reads the whole Packages file   */
+			/* and creates Package objects. This algorithm    */
+			/* is rather slow. Right after this is complete,  */
+			/* [Source createRangesFile] should be called     */
+			/* to create a _ranges file which is used by the  */
+			/* reload algorithm, which is much faster.        */
+			/*------------------------------------------------*/
+			packages = [NSMutableSet new];
 			NSUInteger startIndex = 0;
 			NSUInteger length = 0;
 			char *cline = NULL;
@@ -179,7 +196,7 @@
 			}
 			if (cline) free(cline);
 		}
-		_packages = packages.copy;
+		_packages = packages.allObjects.copy;
 		packages = nil;
 		NSMutableDictionary<NSString *, NSMutableArray<Package *> *> *sections = [NSMutableDictionary new];
 		for (Package *package in _packages) {
@@ -204,16 +221,14 @@
 	NSString *finalPath = [[Database.class packagesFilePathForSource:self] stringByAppendingString:@"_ranges"];
 	NSString *tmpPath = [finalPath stringByAppendingString:@".tmp"];
 	FILE *rangesFile = fopen(tmpPath.UTF8String, "w");
-	if (!rangesFile) return;
+	if (!rangesFile || !fwrite(rangesHeader, RANGES_HEADER_SIZE, 1, rangesFile)) return;
 	_refreshProgress.completedUnitCount = 0;
 	_refreshProgress.totalUnitCount = _packages.count;
 	for (Package *package in _packages) {
-		@autoreleasepool {
-			_refreshProgress.completedUnitCount++;
-			NSRange range = package.range;
-			NSString *line = [NSString stringWithFormat:@"%@-%lu\n", NSStringFromRange(range), (unsigned long)package.encoding];
-			fwrite(line.UTF8String, 1, strlen(line.UTF8String), rangesFile);
-		}
+		_refreshProgress.completedUnitCount++;
+		NSRange range = package.range;
+		uint32_t buffer[3] = { (uint32_t)range.location, (uint32_t)range.length, (uint32_t)package.encoding };
+		fwrite(buffer, 1, sizeof(buffer), rangesFile);
 	}
 	fclose(rangesFile);
 	[NSFileManager.defaultManager moveItemAtPath:tmpPath toPath:finalPath error:nil];

@@ -76,7 +76,11 @@ static NSString *workingDirectory;
 	_rootViewController = [UITabBarController new];
 	_rootViewController.viewControllers = viewControllers;
 #endif
-	_rootViewController.view.backgroundColor = [UIColor systemGray6Color];
+	if (@available(iOS 13.0, *)) {
+		_rootViewController.view.backgroundColor = [UIColor systemGray6Color];
+	} else {
+		_rootViewController.view.backgroundColor = [UIColor whiteColor];
+	}
 	_window.rootViewController = _rootViewController;
 	[_window makeKeyAndVisible];
 }

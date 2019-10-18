@@ -344,6 +344,29 @@
 			path = macOS;
 			sourceTree = "<group>";
 		};
+		CE781BC123578F3100CBB653 /* Backend */ = {
+			isa = PBXGroup;
+			children = (
+				444F0AB522CDF0280029B788 /* Database.h */,
+				444F0AA422CDF0270029B788 /* Database.m */,
+				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
+				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
+				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
+				444F0A9222CDF0250029B788 /* DPKGParser.m */,
+				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
+				44EB033122F9A3120034DD4C /* MagmaPreferences.m */,
+				444F0AAF22CDF0280029B788 /* Package.h */,
+				444F0AB622CDF0280029B788 /* Package.m */,
+				444F0AAE22CDF0280029B788 /* PackageCell.h */,
+				444F0A9022CDF0250029B788 /* PackageCell.m */,
+				444F0AB222CDF0280029B788 /* Source.h */,
+				444F0A9622CDF0260029B788 /* Source.m */,
+				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
+				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
+			);
+			name = Backend;
+			sourceTree = "<group>";
+		};
 		CEA65569231AA7CD004D57EC /* Jailbroken */ = {
 			isa = PBXGroup;
 			children = (
@@ -363,6 +386,7 @@
 		CEA6556B231AA7DF004D57EC /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				CE781BC123578F3100CBB653 /* Backend */,
 				444F0A9522CDF0250029B788 /* Launch Screen.storyboard */,
 				44B3E13C22EB6FDD003DFF2F /* AddFeaturedSourceButton.h */,
 				44B3E13D22EB6FDD003DFF2F /* AddFeaturedSourceButton.m */,
@@ -372,14 +396,8 @@
 				444F0AB422CDF0280029B788 /* AppDelegate.m */,
 				4492710122E0986C000F7E51 /* AssetExtensions.h */,
 				4492710222E0986C000F7E51 /* AssetExtensions.m */,
-				444F0AB522CDF0280029B788 /* Database.h */,
-				444F0AA422CDF0270029B788 /* Database.m */,
-				44023A0122D4EBE100C155D8 /* DownloadManager.h */,
-				44023A0222D4EBE100C155D8 /* DownloadManager.m */,
 				444F0A9C22CDF0260029B788 /* DownloadsController.h */,
 				444F0A9422CDF0250029B788 /* DownloadsController.m */,
-				444F0A9A22CDF0260029B788 /* DPKGParser.h */,
-				444F0A9222CDF0250029B788 /* DPKGParser.m */,
 				44664E9922EB2AE40042E8E1 /* FeaturedSourceCell.h */,
 				44664E9A22EB2AE40042E8E1 /* FeaturedSourceCell.m */,
 				44CC638122E1D2D500215ED8 /* FilesViewController.h */,
@@ -390,8 +408,6 @@
 				44FC335022E7581700F19361 /* HTMLViewController.m */,
 				4492710422E0BC58000F7E51 /* LocalPackageOverviewController.h */,
 				4492710522E0BC58000F7E51 /* LocalPackageOverviewController.m */,
-				44EB033022F9A3120034DD4C /* MagmaPreferences.h */,
-				44EB033122F9A3120034DD4C /* MagmaPreferences.m */,
 				444F0A9B22CDF0260029B788 /* main.m */,
 				44DA20B522E36DE5009FC7C9 /* ManpageViewController.h */,
 				44DA20B622E36DE5009FC7C9 /* ManpageViewController.m */,
@@ -401,10 +417,6 @@
 				444F0AA622CDF0270029B788 /* MGViewController.m */,
 				44CE730622D8DC6D00DD7767 /* OngoingDownloadCell.h */,
 				44CE730722D8DC6D00DD7767 /* OngoingDownloadCell.m */,
-				444F0AAF22CDF0280029B788 /* Package.h */,
-				444F0AB622CDF0280029B788 /* Package.m */,
-				444F0AAE22CDF0280029B788 /* PackageCell.h */,
-				444F0A9022CDF0250029B788 /* PackageCell.m */,
 				4430D18A22CF810E00F21B28 /* PackageDetailsController.h */,
 				4430D18B22CF810E00F21B28 /* PackageDetailsController.m */,
 				444F0AA722CDF0270029B788 /* PackagesController.h */,
@@ -421,8 +433,6 @@
 				444F0AA822CDF0270029B788 /* SectionPackagesController.m */,
 				444F0AA022CDF0260029B788 /* SectionsController.h */,
 				444F0AA922CDF0270029B788 /* SectionsController.m */,
-				444F0AB222CDF0280029B788 /* Source.h */,
-				444F0A9622CDF0260029B788 /* Source.m */,
 				444F0AA122CDF0270029B788 /* SourceCell.h */,
 				444F0AB322CDF0280029B788 /* SourceCell.m */,
 				444F0AB022CDF0280029B788 /* SourcesViewController.h */,
@@ -431,8 +441,6 @@
 				44FC335322E76A3F00F19361 /* SpinnerViewController.m */,
 				44FEECD722D471A500950E24 /* TextViewCell.h */,
 				44FEECD822D471A500950E24 /* TextViewCell.m */,
-				444F0AAC22CDF0280029B788 /* UIImage+ResizeImage.h */,
-				444F0AAA22CDF0270029B788 /* UIImage+ResizeImage.m */,
 				44CB82A422FB00A800D0E806 /* InstructionsViewController.h */,
 				44CB82A522FB00A800D0E806 /* InstructionsViewController.m */,
 				CE37428D2326AE890079FBBE /* macros.pch */,
