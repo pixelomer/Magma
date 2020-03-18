@@ -1,6 +1,6 @@
 //
 //  man2html.h
-//  Magma
+//  man2html
 //
 //  Created by PixelOmer on 22.07.2019.
 //  Copyright © 2019 PixelOmer. All rights reserved.

@@ -8,7 +8,7 @@
 
 /* BSD mandoc stuff added by Michael Hamilton. */
 
-/* Some new functions were added and some functions were removed by PixelOmer to use this as a library in Magma. */
+/* Some new functions were added and some functions were removed by PixelOmer to use this program as a library. */
 
 /* This program is rather buggy, but in spite of that it often works.
    Improved things a little - April 1997 & January 1998 & Dec 2001 -
